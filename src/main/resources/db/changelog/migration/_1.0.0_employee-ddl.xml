@@ -1,0 +1,54 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="employee">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="employee_pk"/>
+            </column>
+            <column name="first_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gender" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_of_birth" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="manager_uuid" type="${uuid_type}">
+            </column>
+            <column name="is_manager" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="joining_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="leaving_date" type="DATE">
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee" baseColumnNames="manager_uuid"
+                                 constraintName="manager_uuid_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+        <sql>ALTER TABLE employee
+            ADD CONSTRAINT gender_type CHECK (gender = 'MALE' or gender = 'FEMALE' or gender = 'OTHERS' )</sql>
+    </changeSet>
+</databaseChangeLog>

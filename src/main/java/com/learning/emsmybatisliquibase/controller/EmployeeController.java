@@ -1,0 +1,80 @@
+package com.learning.emsmybatisliquibase.controller;
+
+
+import com.learning.emsmybatisliquibase.dto.*;
+import com.learning.emsmybatisliquibase.entity.Employee;
+import com.learning.emsmybatisliquibase.service.EmployeeService;
+import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.List;
+import java.util.UUID;
+
+@RestController("employee")
+@RequiredArgsConstructor
+public class EmployeeController {
+
+    private final EmployeeService employeeService;
+
+    @PostMapping("/add")
+    public ResponseEntity<AddEmployeeResponseDto> addEmployee(@Valid @RequestBody AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
+        return new ResponseEntity<>(employeeService.add(employeeDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Employee> viewEmployee(@PathVariable UUID id) {
+        return new ResponseEntity<>(employeeService.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/viewAll")
+    public ResponseEntity<List<Employee>> viewAllEmployees() {
+        return new ResponseEntity<>(employeeService.viewAll(), HttpStatus.OK);
+    }
+
+    @PostMapping("/updateLeavingDate/{id}")
+    public ResponseEntity<HttpStatus> updateLeavingStatus(@PathVariable UUID id, @RequestBody UpdateLeavingDateDto updateLeavingDate) {
+        employeeService.updateLeavingDate(id, updateLeavingDate);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/managerAccess/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<HttpStatus> managerAccess(@RequestParam(name = "file") MultipartFile file) throws IOException {
+        employeeService.managerAccess(file);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/updateManagerId/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<HttpStatus> updateManagerId(@RequestParam(name = "file") MultipartFile file) throws IOException {
+        employeeService.updateManagerId(file);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getByManagerId/{managerId}")
+    public ResponseEntity<List<Employee>> getByManagerId(@PathVariable UUID managerId) {
+        return new ResponseEntity<>(employeeService.getByManagerUuid(managerId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getFullTeam/{employeeId}")
+    public ResponseEntity<List<EmployeeAndManagerDto>> getFullTeam(@PathVariable UUID employeeId) {
+        return new ResponseEntity<>(employeeService.getFullTeam(employeeId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "getEmployeeFullReportingChain/{employeeId}")
+    public ResponseEntity<EmployeeFullReportingChainDto> getEmployeeFullReportingChain(@PathVariable UUID employeeId) {
+        return new ResponseEntity<>(employeeService.getEmployeeFullReportingChain(employeeId), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "employee-onboard/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SuccessResponseDto> colleagueOnboard(@RequestParam(name = "file") MultipartFile file) throws IOException, ParseException, MessagingException {
+        return new ResponseEntity<>(employeeService.colleagueOnboard(file), HttpStatus.OK);
+    }
+}

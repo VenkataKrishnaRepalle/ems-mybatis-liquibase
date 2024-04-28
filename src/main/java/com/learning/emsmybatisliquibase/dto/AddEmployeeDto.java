@@ -1,0 +1,45 @@
+package com.learning.emsmybatisliquibase.dto;
+
+import com.learning.emsmybatisliquibase.entity.Gender;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.UUID;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class AddEmployeeDto {
+
+    private String firstName;
+
+    private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private LocalDate dateOfBirth;
+
+    private String phoneNumber;
+
+    private String email;
+
+    private LocalDate joiningDate;
+
+    private LocalDate leavingDate;
+
+    private String departmentName;
+
+    private String isManager;
+
+    private UUID managerUuid;
+}

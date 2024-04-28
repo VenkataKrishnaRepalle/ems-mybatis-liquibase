@@ -1,0 +1,56 @@
+package com.learning.emsmybatisliquibase.controller;
+
+import com.learning.emsmybatisliquibase.dto.AddDepartmentDto;
+import com.learning.emsmybatisliquibase.entity.Department;
+import com.learning.emsmybatisliquibase.service.DepartmentService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+@RestController("department")
+@AllArgsConstructor
+public class DepartmentController {
+
+    private final DepartmentService departmentService;
+
+    @PostMapping("/addDepartment")
+    public ResponseEntity<Department> add(@RequestBody AddDepartmentDto department) {
+        return new ResponseEntity<>(departmentService.add(department), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/updateDepartment/{departmentUuid}")
+    public ResponseEntity<Department> update(@PathVariable UUID departmentUuid, @RequestBody AddDepartmentDto department) {
+        return new ResponseEntity<>(departmentService.update(departmentUuid, department), HttpStatus.ACCEPTED);
+    }
+
+    @DeleteMapping("/deleteDepartment/{departmentUuid}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable UUID departmentUuid) {
+        departmentService.delete(departmentUuid);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping(value = "/departmentPermission/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<HttpStatus> departmentPermission(@RequestParam(name = "file") MultipartFile file) throws IOException {
+        departmentService.departmentPermission(file);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Department>> getAll() {
+        return new ResponseEntity<>(departmentService.getAll(), HttpStatus.OK);
+    }
+
+    @GetMapping("/download-department-report")
+    public ResponseEntity<HttpStatus> downloadDepartmentReport() throws IOException {
+        departmentService.downloadDepartmentReport();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+}
+

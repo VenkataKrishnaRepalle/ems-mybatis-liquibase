@@ -1,0 +1,62 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="department">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="department_pk"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="profile">
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="colleague_uuid_pk"/>
+            </column>
+            <column name="job_title" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="profile_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_uuid" type="${uuid_type}">
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="profile" baseColumnNames="employee_uuid"
+                                 constraintName="colleague_fk" deferrable="false"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+
+        <addForeignKeyConstraint baseTableName="profile" baseColumnNames="department_uuid"
+                                 constraintName="department_fk" deferrable="false"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="department" referencedColumnNames="uuid"/>
+        <sql>
+            ALTER TABLE profile
+                ADD CONSTRAINT job_title_check CHECK ( job_title = 'ENGINEER_TRAINEE' or
+                                                       job_title = 'SOFTWARE_ENGINEER' or
+                                                       job_title = 'SENIOR_SOFTWARE_ENGINEER' or
+                                                       job_title = 'MODULE_LEAD' or
+                                                       job_title = 'TECHNICAL_LEAD' or
+                                                       job_title = 'PROJECT_LEAD' or
+                                                       job_title = 'PROJECT_MANAGER' or
+                                                       job_title = 'SENIOR_PROJECT_MANAGER' or
+                                                       job_title = 'PRINCIPAL_DELIVERY_MANAGER' or
+                                                       job_title = 'ASSOCIATIVE_DIRECTOR' or
+                                                       job_title = 'SENIOR_DIRECTOR' or
+                                                       job_title = 'CHIEF_DELIVERY_OFFICER' or
+                                                       job_title = 'DEPUTY_CEO' or
+                                                       job_title = 'CEO')
+        </sql>
+        <sql>
+            ALTER TABLE profile
+                ADD CONSTRAINT profile_status_check CHECK ( profile_status = 'ACTIVE' or
+                                                            profile_status = 'PENDING' or
+                                                            profile_status = 'INACTIVE')
+        </sql>
+    </changeSet>
+</databaseChangeLog>

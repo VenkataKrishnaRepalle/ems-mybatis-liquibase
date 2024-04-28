@@ -1,0 +1,22 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="employee_role">
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_role" baseColumnNames="employee_uuid"
+                                 constraintName="employee_role_fk" deferrable="false"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+        <sql>
+            ALTER TABLE employee_role
+                ADD CONSTRAINT employee_role_check CHECK ( role = 'ADMIN' or role = 'EMPLOYEE')
+        </sql>
+    </changeSet>
+</databaseChangeLog>
