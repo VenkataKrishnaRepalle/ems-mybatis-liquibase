@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-@RestController("department")
+@CrossOrigin("*")
+@RestController
+@RequestMapping("/api/department")
 @AllArgsConstructor
 public class DepartmentController {
 

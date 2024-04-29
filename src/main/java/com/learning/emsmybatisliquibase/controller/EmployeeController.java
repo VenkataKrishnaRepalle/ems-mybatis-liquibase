@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,12 +20,15 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
-@RestController("employee")
+@CrossOrigin("*")
+@RestController
+@RequestMapping("/api/employee")
 @RequiredArgsConstructor
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<AddEmployeeResponseDto> addEmployee(@Valid @RequestBody AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
         return new ResponseEntity<>(employeeService.add(employeeDto), HttpStatus.CREATED);
@@ -35,6 +39,7 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeService.getById(id), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/viewAll")
     public ResponseEntity<List<Employee>> viewAllEmployees() {
         return new ResponseEntity<>(employeeService.viewAll(), HttpStatus.OK);
