@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,12 +30,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        var employee = employeeDao.getByEmail(email);
+    public UserDetails loadUserByUsername(String uuid) throws UsernameNotFoundException {
+        var employee = employeeDao.get(UUID.fromString(uuid));
         if (employee == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
+            throw new UsernameNotFoundException("User not found with email: " + uuid);
         }
-
         var employeeRoles = employeeRoleDao.getByEmployeeUuid(employee.getUuid());
 
         Set<GrantedAuthority> authorities = employeeRoles.stream().map(role ->
@@ -44,7 +44,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         authorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + EMPLOYEE));
         return new org.springframework.security.core.userdetails.User(
-                email,
+                uuid,
                 employee.getPassword(),
                 authorities
         );

@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.security;
 
+import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -10,19 +11,25 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
 
+    private final EmployeeDao employeeDao;
     @Value("${app.jwt.secret}")
     private String jwtSecretKey;
     @Value("${app.jwt-expiration-milliseconds}")
     private Long jwtExpirationDate;
 
+    public JwtTokenProvider(EmployeeDao employeeDao) {
+        this.employeeDao = employeeDao;
+    }
+
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
-
+        var employee = employeeDao.get(UUID.fromString(username));
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
 
