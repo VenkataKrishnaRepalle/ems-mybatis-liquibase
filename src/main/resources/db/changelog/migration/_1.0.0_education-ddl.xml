@@ -1,0 +1,49 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="education">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="education_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="degree" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="school_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="grade" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="DATE">
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="education" baseColumnNames="employee_uuid"
+                                 constraintName="employee_uuid_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+
+        <sql>
+            ALTER TABLE education
+                ADD CONSTRAINT degree_type_check CHECK ( degree = 'SSC_10TH' or
+                                                         degree = 'INTERMEDIATE' or
+                                                         degree = 'DIPLOMA' or
+                                                         degree = 'BTECH' or
+                                                         degree = 'MTECH' or
+                                                         degree = 'BCA' or
+                                                         degree = 'BSC')
+        </sql>
+    </changeSet>
+</databaseChangeLog>
