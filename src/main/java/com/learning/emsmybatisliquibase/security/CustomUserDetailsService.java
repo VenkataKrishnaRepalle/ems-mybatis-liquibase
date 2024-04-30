@@ -25,6 +25,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private static final String MANAGER = "MANAGER";
 
+    private static final String EMPLOYEE = "EMPLOYEE";
+
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -40,8 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (employee.getIsManager().equals(Boolean.TRUE)) {
             authorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + MANAGER));
         }
-        System.out.println(authorities);
-
+        authorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + EMPLOYEE));
         return new org.springframework.security.core.userdetails.User(
                 email,
                 employee.getPassword(),

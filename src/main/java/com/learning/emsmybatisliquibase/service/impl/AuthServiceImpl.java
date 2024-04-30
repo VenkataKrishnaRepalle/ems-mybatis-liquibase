@@ -12,7 +12,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,9 +28,6 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtTokenProvider jwtTokenProvider;
-
-    private final PasswordEncoder passwordEncoder;
-
     @Override
     public JwtAuthResponseDto login(LoginDto loginDto) {
 
@@ -57,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
         if (employee.getIsManager().equals(Boolean.TRUE)) {
             roles.add("MANAGER");
         }
+        roles.add("EMPLOYEE");
         return JwtAuthResponseDto.builder()
                 .accessToken(token)
                 .tokenType("Bearer")
