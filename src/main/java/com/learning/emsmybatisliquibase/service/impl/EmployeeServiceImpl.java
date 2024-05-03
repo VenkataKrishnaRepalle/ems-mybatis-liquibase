@@ -3,9 +3,19 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.DepartmentDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.dto.*;
-import com.learning.emsmybatisliquibase.entity.*;
-import com.learning.emsmybatisliquibase.exception.AlreadyFoundException;
+import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
+import com.learning.emsmybatisliquibase.dto.AddEmployeeResponseDto;
+import com.learning.emsmybatisliquibase.dto.EmployeeAndManagerDto;
+import com.learning.emsmybatisliquibase.dto.EmployeeFullReportingChainDto;
+import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.dto.UpdateLeavingDateDto;
+import com.learning.emsmybatisliquibase.entity.Employee;
+import com.learning.emsmybatisliquibase.entity.Gender;
+import com.learning.emsmybatisliquibase.entity.JobTitleType;
+import com.learning.emsmybatisliquibase.entity.Profile;
+import com.learning.emsmybatisliquibase.entity.ProfileStatus;
+import com.learning.emsmybatisliquibase.entity.Department;
+import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
@@ -28,13 +38,29 @@ import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.DEPARTMENT_NOT_CREATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_ALREADY_EXISTS;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_NOT_CREATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_INTEGRATE_VIOLATION;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.INVALID_INPUT_EXCEPTION;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.MANAGER_ACCESS_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.INVALID_MANAGER_PROVIDED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.INVALID_COLUMN_HEADINGS;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.SHEET_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ProfileErrorCodes.PROFILE_NOT_CREATED;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Date;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -81,7 +107,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         var isEmployeeExistsByEmail = employeeDao.getByEmail(employeeDto.getEmail().trim());
 
         if (isEmployeeExistsByEmail != null) {
-            throw new AlreadyFoundException("Email already exists: " + employeeDto.getEmail());
+            throw new FoundException(EMPLOYEE_ALREADY_EXISTS.code(), "Email already exists: " + employeeDto.getEmail());
         }
         var isManager = employeeDto.getIsManager().trim().equalsIgnoreCase("T".trim()) ? Boolean.TRUE : Boolean.FALSE;
         var employee = employeeMapper.addEmployeeDtoToEmployee(employeeDto);
@@ -101,13 +127,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .name(employeeDto.getDepartmentName())
                         .build();
                 if (0 == departmentDao.insert(department)) {
-                    throw new NotFoundException("Failed in saving department");
+                    throw new NotFoundException(DEPARTMENT_NOT_CREATED.code(), "Failed in saving department");
                 }
             }
         }
 
         if (0 == employeeDao.insert(employee)) {
-            throw new NotFoundException("Failed in saving employee");
+            throw new NotFoundException(EMPLOYEE_NOT_CREATED.code(), "Failed in saving employee");
         }
 
         sendSuccessfulEmployeeOnBoard(employee.getUuid());
@@ -121,7 +147,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .updatedTime(Instant.now())
                 .build();
         if (0 == profileDao.insert(profile)) {
-            throw new NotFoundException("Failed in saving profile");
+            throw new NotFoundException(PROFILE_NOT_CREATED.code(), "Failed in saving profile");
         }
 //        employeeCycleService.cycleAssignment(uuid);
 
@@ -137,7 +163,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee getById(UUID id) {
         var employee = employeeDao.get(id);
         if (employee == null) {
-            throw new NotFoundException("employee not found with id: " + id);
+            throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "employee not found with id: " + id);
         }
         return employee;
     }
@@ -147,7 +173,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void updateLeavingDate(UUID id, UpdateLeavingDateDto updateLeavingDate) {
         getById(id);
         if (0 == employeeDao.updateLeavingDate(updateLeavingDate.getLeavingDate(), id)) {
-            throw new InvalidInputException("Problem in updating LeavingDate");
+            throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Problem in updating LeavingDate");
         }
 
         var profile = profileDao.get(id);
@@ -184,7 +210,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 } else if (REMOVE.equalsIgnoreCase(action)) {
                     var colleaguesByManager = getByManagerUuid(employee.getUuid());
                     if (!colleaguesByManager.isEmpty()) {
-                        throw new InvalidInputException("Colleagues exists under this manager, Please update their manager details to proceed");
+                        throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Colleagues exists under this manager, Please update their manager details to proceed");
                     }
                     employee.setIsManager(Boolean.FALSE);
                 }
@@ -220,7 +246,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee getByEmail(String email) {
         var employee = employeeDao.getByEmail(email.trim());
         if (employee == null) {
-            throw new NotFoundException("Employee not found with email " + email);
+            throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email " + email);
         }
         return employee;
     }
@@ -240,7 +266,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 removeManager(employee, manager);
                 break;
             default:
-                throw new InvalidInputException("Invalid action provided: " + action);
+                throw new InvalidInputException(INVALID_INPUT_EXCEPTION.code(), "Invalid action provided: " + action);
         }
     }
 
@@ -255,13 +281,13 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setManagerUuid(null);
             employeeDao.update(employee);
         } else {
-            throw new InvalidInputException("Invalid Manager details provided");
+            throw new InvalidInputException(INVALID_MANAGER_PROVIDED.code(), "Invalid Manager details provided");
         }
     }
 
     private void validateManagerAccess(Employee manager) {
         if (Boolean.FALSE.equals(manager.getIsManager())) {
-            throw new InvalidInputException("Manager access not granted for email: " + manager.getEmail());
+            throw new InvalidInputException(MANAGER_ACCESS_NOT_FOUND.code(), "Manager access not granted for email: " + manager.getEmail());
         }
     }
 
@@ -271,7 +297,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employee.getIsManager().equals(Boolean.TRUE)) {
             return getAllByManagerUuid(managerId);
         } else {
-            throw new NotFoundException("User don't have manager access");
+            throw new NotFoundException(MANAGER_ACCESS_NOT_FOUND.code(), "User don't have manager access");
         }
     }
 
@@ -282,7 +308,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void isManager(UUID uuid) {
         var manager = getById(uuid);
         if (manager.getIsManager().equals(Boolean.FALSE)) {
-            throw new NotFoundException("User is not a Manager");
+            throw new NotFoundException(MANAGER_ACCESS_NOT_FOUND.code(), "User is not a Manager");
         }
     }
 
@@ -368,7 +394,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         try (XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream())) {
             XSSFSheet sheet = workbook.getSheetAt(0);
             if (sheet == null) {
-                throw new InvalidInputException("Sheet Not Found");
+                throw new InvalidInputException(SHEET_NOT_FOUND.code(), "Sheet Not Found");
             }
 
             List<List<String>> rowValues = new ArrayList<>();
@@ -379,7 +405,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 var cell = headerRow.getCell(i);
                 if (cell == null) {
-                    throw new InvalidInputException("Invalid Column Headings");
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), "Invalid Column Headings");
                 }
                 columnHeadings.add(cell.toString());
             }

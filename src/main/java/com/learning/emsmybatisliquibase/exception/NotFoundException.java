@@ -1,27 +1,17 @@
 package com.learning.emsmybatisliquibase.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import lombok.Getter;
 
-@ResponseStatus(value = HttpStatus.FOUND, reason = "Value not found!")
+@Getter
 public class NotFoundException extends RuntimeException {
 
-    public NotFoundException() {
-    }
+    private final String errorCode;
+    private final String dynamicValue;
 
-    public NotFoundException(String message) {
-        super(message);
-    }
+    public NotFoundException(String errorCode, String dynamicValue) {
+        super(String.format("%s : %s", errorCode, dynamicValue));
 
-    public NotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NotFoundException(Throwable cause) {
-        super(cause);
-    }
-
-    public NotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+        this.errorCode = errorCode;
+        this.dynamicValue = dynamicValue;
     }
 }

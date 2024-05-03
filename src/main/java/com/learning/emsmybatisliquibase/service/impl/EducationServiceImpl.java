@@ -3,12 +3,15 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.EducationDao;
 import com.learning.emsmybatisliquibase.entity.Education;
 import com.learning.emsmybatisliquibase.entity.EducationDegree;
-import com.learning.emsmybatisliquibase.exception.AlreadyFoundException;
+import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.EducationService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EducationErrorCodes.EDUCATION_DEGREE_ALREADY_EXISTS;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EducationErrorCodes.EDUCATION_DETAILS_NOT_FOUND;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,13 +34,13 @@ public class EducationServiceImpl implements EducationService {
 
         if (educations == null) {
             if (degree != EducationDegree.SSC_10TH) {
-                throw new NotFoundException("Education Details of " + EducationDegree.SSC_10TH + " not found");
+                throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(), "Education Details of " + EducationDegree.SSC_10TH + " not found");
             }
         } else {
             var isDegreePresent = educations.stream()
                     .filter(education -> education.getDegree().equals(educationDto.getDegree())).findFirst();
             if (isDegreePresent.isPresent()) {
-                throw new AlreadyFoundException("Degree already exists: " + degree);
+                throw new FoundException(EDUCATION_DEGREE_ALREADY_EXISTS.code(), "Degree already exists: " + degree);
             }
         }
         educationDto.setUuid(UUID.randomUUID());
@@ -66,7 +69,7 @@ public class EducationServiceImpl implements EducationService {
     public Education getById(UUID id) {
         var education = educationDao.get(id);
         if (education == null) {
-            throw new NotFoundException("Education details not found with id: " + id);
+            throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(), "Education details not found with id: " + id);
         }
         return education;
     }
@@ -75,7 +78,7 @@ public class EducationServiceImpl implements EducationService {
     public List<Education> getAll(UUID employeeId) {
         List<Education> educations = educationDao.getAllByEmployeeUuid(employeeId);
         if (educations == null) {
-            throw new NotFoundException("Education details not found");
+            throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(), "Education details not found");
         }
         return educations;
     }

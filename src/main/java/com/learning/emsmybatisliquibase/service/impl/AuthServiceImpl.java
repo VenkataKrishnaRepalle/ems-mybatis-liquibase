@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.PASSWORD_NOT_MATCHED;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,11 +42,11 @@ public class AuthServiceImpl implements AuthService {
         var employee = employeeDao.getByEmail(loginDto.getEmail());
 
         if (employee == null) {
-            throw new NotFoundException("Employee not found with email" + loginDto.getEmail());
+            throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email" + loginDto.getEmail());
         }
 
-        if(!passwordEncoder.matches(loginDto.getPassword(), employee.getPassword())) {
-            throw new InvalidInputException("Entered Password in Incorrect");
+        if (!passwordEncoder.matches(loginDto.getPassword(), employee.getPassword())) {
+            throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(

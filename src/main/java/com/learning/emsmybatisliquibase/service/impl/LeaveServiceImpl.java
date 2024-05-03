@@ -10,7 +10,7 @@ import com.learning.emsmybatisliquibase.dto.ViewEmployeeLeavesDto;
 import com.learning.emsmybatisliquibase.entity.Leave;
 import com.learning.emsmybatisliquibase.entity.LeaveStatus;
 import com.learning.emsmybatisliquibase.entity.LeaveType;
-import com.learning.emsmybatisliquibase.exception.AlreadyFoundException;
+import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.LeaveMapper;
@@ -19,10 +19,21 @@ import com.learning.emsmybatisliquibase.service.LeaveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.INVALID_MANGER_ACCESS;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.LeaveErrorCodes.LEAVE_ALREADY_EXIST;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.LeaveErrorCodes.LEAVE_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.MANAGER_ACCESS_NOT_FOUND;
+
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.EnumMap;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +82,7 @@ public class LeaveServiceImpl implements LeaveService {
                             .map(Leave::getDate)
                             .map(Object::toString)
                             .anyMatch(formattedDate::equals)) {
-                        throw new AlreadyFoundException("Leave already applied for date " + formattedDate);
+                        throw new FoundException(LEAVE_ALREADY_EXIST.code(), "Leave already applied for date " + formattedDate);
                     }
                 });
 
@@ -87,7 +98,7 @@ public class LeaveServiceImpl implements LeaveService {
 
         leaves.forEach(leave -> {
             if (0 == leaveDao.insert(leave)) {
-                throw new InvalidInputException("Leave not saved");
+                throw new InvalidInputException(LEAVE_NOT_FOUND.code(), "Leave not saved");
             }
         });
 
@@ -160,7 +171,7 @@ public class LeaveServiceImpl implements LeaveService {
     private Leave getLeaveById(UUID leaveUuid) {
         var leave = leaveDao.getById(leaveUuid);
         if (leave == null) {
-            throw new NotFoundException("leave not found with id : " + leaveUuid);
+            throw new NotFoundException(LEAVE_NOT_FOUND.code(), "leave not found with id : " + leaveUuid);
         }
         return leave;
     }
@@ -169,9 +180,9 @@ public class LeaveServiceImpl implements LeaveService {
         var leave = getLeaveById(leaveUuid);
         var employee = employeeService.getById(leave.getEmployeeUuid());
         if (employee.getManagerUuid() == null) {
-            throw new NotFoundException("Manager Not found for this colleague to approve leave");
+            throw new NotFoundException(MANAGER_ACCESS_NOT_FOUND.code(), "Manager Not found for this colleague to approve leave");
         } else if (Boolean.FALSE.equals(employee.getManagerUuid().equals(managerUuid))) {
-            throw new NotFoundException("Invalid manager trying to approve the request");
+            throw new NotFoundException(INVALID_MANGER_ACCESS.code(), "Invalid manager trying to approve the request");
         }
         return Boolean.TRUE;
     }

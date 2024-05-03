@@ -2,9 +2,6 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
     <property name="uuid_type" value="uuid" dbms="postgresql" global="true"/>
-    <include file="migration/1.0.0/employee-ddl.xml" relativeToChangelogFile="true"/>
-    <include file="migration/1.0.0/profile-ddl.xml" relativeToChangelogFile="true"/>
-    <include file="migration/1.0.0/employee-role.xml" relativeToChangelogFile="true"/>
-    <include file="migration/1.0.0/education-ddl.xml" relativeToChangelogFile="true"/>
-    <include file="migration/1.0.0/leave-ddl.xml" relativeToChangelogFile="true"/>
+    <include file="employee-ddl.xml" relativeToChangelogFile="true"/>
+    <includeAll path="migration" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -5,7 +5,7 @@ import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.AddDepartmentDto;
 import com.learning.emsmybatisliquibase.entity.Department;
-import com.learning.emsmybatisliquibase.exception.AlreadyFoundException;
+import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.DepartmentService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
@@ -17,6 +17,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.DEPARTMENT_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.SHEET_NOT_FOUND;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,7 +55,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department add(AddDepartmentDto departmentDto) {
         var isDepartmentExists = departmentDao.getByName(departmentDto.getName());
         if (isDepartmentExists != null) {
-            throw new AlreadyFoundException("Department already exists with name " + departmentDto.getName());
+            throw new FoundException(DEPARTMENT_NOT_FOUND.code(), "Department already exists with name " + departmentDto.getName());
         }
         var department = Department.builder()
                 .uuid(UUID.randomUUID())
@@ -67,7 +70,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Sheet sheet = workbook.getSheetAt(0);
         if (sheet == null) {
-            throw new NotFoundException("Sheet Not Found");
+            throw new NotFoundException(SHEET_NOT_FOUND.code(), "Sheet Not Found");
         }
         var rowValues = employeeService.fileProcess(file);
 
@@ -151,7 +154,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private Department isDepartmentExists(UUID departmentUuid) {
         var department = departmentDao.get(departmentUuid);
         if (department == null) {
-            throw new NotFoundException("Department not exists with Id: " + departmentUuid);
+            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(), "Department not exists with Id: " + departmentUuid);
         }
         return department;
     }
