@@ -1,0 +1,51 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="leave">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="leave_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comments" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="leave" baseColumnNames="employee_uuid"
+                                 constraintName="employee_uuid_fk" initiallyDeferred="false"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+        <sql>
+            ALTER TABLE leave
+                ADD CONSTRAINT type_check CHECK ( type = 'FULL_DAY' or type = 'HALF_DAY' )
+        </sql>
+        <sql>
+            ALTER TABLE leave
+                ADD CONSTRAINT status_check CHECK ( status = 'WAITING_FOR_APPROVAL' or
+                                                    status = 'CANCELLED' or
+                                                    status = 'DECLINED' or
+                                                    status = 'APPROVED')
+        </sql>
+    </changeSet>
+</databaseChangeLog>

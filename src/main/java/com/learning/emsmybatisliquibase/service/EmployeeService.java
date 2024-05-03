@@ -36,4 +36,6 @@ public interface EmployeeService {
     SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, ParseException, MessagingException;
 
     EmployeeFullReportingChainDto getEmployeeFullReportingChain(UUID employeeId);
+
+    Employee getMe();
 }

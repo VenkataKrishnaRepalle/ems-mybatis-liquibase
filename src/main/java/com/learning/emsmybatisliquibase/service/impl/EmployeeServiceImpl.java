@@ -317,6 +317,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    public Employee getMe() {
+        var employeeUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+        return getById(employeeUuid);
+    }
+
+    @Override
     public SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, MessagingException {
         var rowDatas = fileProcess(file);
         List<UUID> employeeUuids = new ArrayList<>();

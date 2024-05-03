@@ -32,7 +32,7 @@
         </createTable>
         <addForeignKeyConstraint baseTableName="education" baseColumnNames="employee_uuid"
                                  constraintName="employee_uuid_fk" deferrable="false"
-                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="CASCADE"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
 
         <sql>
