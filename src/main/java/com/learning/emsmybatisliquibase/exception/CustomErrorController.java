@@ -58,4 +58,10 @@ public class CustomErrorController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorMessage.errorResponse(exception.getErrorCode(), exception.getDynamicValue()));
     }
+
+    @ExceptionHandler(IntegrityException.class)
+    public ResponseEntity<ErrorResponse> handleIntegrityExceptionError(IntegrityException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorMessage.errorResponse(exception.getErrorCode(), exception.getDynamicValue()));
+    }
 }

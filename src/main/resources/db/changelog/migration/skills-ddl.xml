@@ -1,0 +1,36 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="skills">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="skills_uuid_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="number">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="skills" baseColumnNames="employee_uuid"
+                                 constraintName="employee_uuid_fk" initiallyDeferred="false"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+
+        <sql>
+            ALTER TABLE skills
+                ADD CONSTRAINT rating_check CHECK ( rating BETWEEN 1 AND 10)
+        </sql>
+    </changeSet>
+</databaseChangeLog>
