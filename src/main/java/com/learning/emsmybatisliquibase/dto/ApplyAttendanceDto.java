@@ -1,24 +1,21 @@
-package com.learning.emsmybatisliquibase.entity;
+package com.learning.emsmybatisliquibase.dto;
+
+import com.learning.emsmybatisliquibase.entity.AttendanceStatus;
+import com.learning.emsmybatisliquibase.entity.AttendanceType;
+import com.learning.emsmybatisliquibase.entity.WorkMode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Attendance implements Serializable {
-
-    private UUID uuid;
-
-    private UUID employeeUuid;
+public class ApplyAttendanceDto {
 
     private WorkMode workMode;
 
@@ -27,8 +24,4 @@ public class Attendance implements Serializable {
     private AttendanceStatus status;
 
     private Date date;
-
-    private Instant createdTime;
-
-    private Instant updatedTime;
 }

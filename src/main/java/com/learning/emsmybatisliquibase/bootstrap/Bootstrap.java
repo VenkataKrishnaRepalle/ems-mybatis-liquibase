@@ -2,7 +2,11 @@ package com.learning.emsmybatisliquibase.bootstrap;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.entity.Employee;
+import com.learning.emsmybatisliquibase.entity.Gender;
+import com.learning.emsmybatisliquibase.entity.Profile;
+import com.learning.emsmybatisliquibase.entity.JobTitleType;
+import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,7 +27,7 @@ public class Bootstrap implements CommandLineRunner {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (employeeDao.count() < 3) {
             var employee1 = Employee.builder()
                     .uuid(UUID.randomUUID())
@@ -32,7 +36,7 @@ public class Bootstrap implements CommandLineRunner {
                     .email("rvkrishna13052001@gmail.com")
                     .phoneNumber("9059712824")
                     .dateOfBirth(Date.valueOf("2001-05-13").toLocalDate())
-                    .joiningDate(Date.valueOf("2022-07-04").toLocalDate())
+                    .joiningDate(Date.valueOf("2018-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.TRUE)
                     .password(passwordEncoder.encode("venky123"))
@@ -57,7 +61,7 @@ public class Bootstrap implements CommandLineRunner {
                     .email("chandu.raya@gmail.com")
                     .phoneNumber("6305177093")
                     .dateOfBirth(Date.valueOf("2000-11-01").toLocalDate())
-                    .joiningDate(Date.valueOf("2022-07-04").toLocalDate())
+                    .joiningDate(Date.valueOf("2019-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.FALSE)
                     .password(passwordEncoder.encode("chandu123"))
@@ -83,7 +87,7 @@ public class Bootstrap implements CommandLineRunner {
                     .email("sujith.bikki@gmail.com")
                     .phoneNumber("1234567890")
                     .dateOfBirth(Date.valueOf("2000-05-14").toLocalDate())
-                    .joiningDate(Date.valueOf("2022-07-04").toLocalDate())
+                    .joiningDate(Date.valueOf("2020-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.FALSE)
                     .password(passwordEncoder.encode("sujith123"))
@@ -108,7 +112,7 @@ public class Bootstrap implements CommandLineRunner {
                     .email("veeranji.katari@gmail.com")
                     .phoneNumber("9490903106")
                     .dateOfBirth(Date.valueOf("2000-11-18").toLocalDate())
-                    .joiningDate(Date.valueOf("2022-07-04").toLocalDate())
+                    .joiningDate(Date.valueOf("2021-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .password(passwordEncoder.encode("veeranji123"))
                     .isManager(Boolean.TRUE)

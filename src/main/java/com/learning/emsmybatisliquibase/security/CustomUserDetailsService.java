@@ -33,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String uuid) throws UsernameNotFoundException {
         var employee = employeeDao.get(UUID.fromString(uuid));
         if (employee == null) {
-            throw new UsernameNotFoundException("User not found with email: " + uuid);
+            throw new UsernameNotFoundException("User not found with uuid: " + uuid);
         }
         var employeeRoles = employeeRoleDao.getByEmployeeUuid(employee.getUuid());
 

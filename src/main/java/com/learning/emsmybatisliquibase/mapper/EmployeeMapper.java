@@ -1,6 +1,9 @@
 package com.learning.emsmybatisliquibase.mapper;
 
-import com.learning.emsmybatisliquibase.dto.*;
+import com.learning.emsmybatisliquibase.dto.EmployeeAndManagerDto;
+import com.learning.emsmybatisliquibase.dto.EmployeeFullReportingChainDto;
+import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
+import com.learning.emsmybatisliquibase.dto.AddEmployeeResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import org.mapstruct.Mapper;
 
@@ -15,6 +18,4 @@ public interface EmployeeMapper {
 
     EmployeeFullReportingChainDto employeeResponseDtoToEmployeeFullReportingChainDto(Employee employeeResponse);
 
-
-    EmployeeResponseDto employeeToEmployeeResponseDto(Employee employee);
 }

@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.entity;
 
 public enum AttendanceType {
-    HALF_DAY,
-    FULL_DAY;
+    FULL_DAY,
+    HALF_DAY
 }

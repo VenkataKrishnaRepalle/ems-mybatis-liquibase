@@ -45,7 +45,7 @@ public class LeaveServiceImpl implements LeaveService {
 
     private final LeaveMapper leaveMapper;
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_FORMAT = "MM-dd-yyyy";
 
     @Override
     public List<ParseLeaveResponseDto> parseLeave(ParseLeaveRequestDto parseLeaveDto) {
@@ -70,23 +70,20 @@ public class LeaveServiceImpl implements LeaveService {
     }
 
     @Override
-    public List<Leave> applyLeave(UUID employeeId, List<ApplyLeaveDto> applyLeaveDto) {
+    public List<Leave> applyLeave(UUID employeeId, List<ApplyLeaveDto> applyLeaveDtos) {
         employeeService.getById(employeeId);
         var appliedLeaves = leaveDao.getLeavesByEmployee(employeeId);
 
-        applyLeaveDto.stream()
-                .map(ApplyLeaveDto::getDate)
-                .map(date -> new SimpleDateFormat(DATE_FORMAT).format(date))
-                .forEach(formattedDate -> {
-                    if (appliedLeaves.stream()
-                            .map(Leave::getDate)
-                            .map(Object::toString)
-                            .anyMatch(formattedDate::equals)) {
-                        throw new FoundException(LEAVE_ALREADY_EXIST.code(), "Leave already applied for date " + formattedDate);
-                    }
-                });
+        for (var applyLeaveDto : applyLeaveDtos) {
+            var formattedDate = new SimpleDateFormat(DATE_FORMAT).format(applyLeaveDto.getDate());
+            for (var appliedLeave : appliedLeaves) {
+                if (formattedDate.equals(new SimpleDateFormat(DATE_FORMAT).format(appliedLeave.getDate()))) {
+                    throw new FoundException(LEAVE_ALREADY_EXIST.code(), "Leave Found with date " + formattedDate);
+                }
+            }
+        }
 
-        var leaves = leaveMapper.applyLeaveDtoToLeaveDay(applyLeaveDto);
+        var leaves = leaveMapper.applyLeaveDtoToLeaveDay(applyLeaveDtos);
 
         leaves.forEach(leave -> {
             leave.setUuid(UUID.randomUUID());

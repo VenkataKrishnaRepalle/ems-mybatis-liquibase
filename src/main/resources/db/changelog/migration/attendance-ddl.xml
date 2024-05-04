@@ -1,0 +1,52 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="attendance">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="attendance_uuid_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="work_mode" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="attendance" baseColumnNames="employee_uuid"
+                                 constraintName="employee_uuid_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+        <sql>
+            ALTER TABLE attendance
+                ADD CONSTRAINT work_mode_check CHECK ( work_mode = 'WORK_FROM_HOME' or
+                                                       work_mode = 'WORK_FROM_OFFICE')
+        </sql>
+        <sql>
+            ALTER TABLE attendance
+                ADD CONSTRAINT type_check CHECK ( type = 'HALF_DAY' or
+                                                  type = 'FULL_DAY')
+        </sql>
+        <sql>
+            ALTER TABLE attendance
+                ADD CONSTRAINT status_check CHECK (status = 'SUBMITTED' or
+                                                   status = 'WAITING_FOR_CANCELLATION' or
+                                                   status = 'CANCELLED')
+        </sql>
+    </changeSet>
+</databaseChangeLog>
