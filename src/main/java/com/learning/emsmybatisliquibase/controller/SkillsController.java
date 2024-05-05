@@ -6,6 +6,7 @@ import com.learning.emsmybatisliquibase.service.SkillsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,11 +41,13 @@ public class SkillsController {
         return new ResponseEntity<>(skillsService.getById(skillsUuid), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/get-all-skills-by-employeeUuid/{employeeUuid}")
     public ResponseEntity<List<Skills>> getAllBYColleagueUuid(@PathVariable UUID employeeUuid) {
         return new ResponseEntity<>(skillsService.getAll(employeeUuid), HttpStatus.OK);
     }
 
+    @PreAuthorize("isRememberMe()")
     @DeleteMapping("/delete-skills-by-id/{skillsUuid}/employee/{employeeUuid}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable UUID employeeUuid, @PathVariable UUID skillsUuid) {
         skillsService.deleteById(skillsUuid, employeeUuid);
