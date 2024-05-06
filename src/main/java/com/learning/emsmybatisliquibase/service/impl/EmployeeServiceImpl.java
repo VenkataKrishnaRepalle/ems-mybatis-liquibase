@@ -1,6 +1,7 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.DepartmentDao;
+import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
@@ -15,10 +16,12 @@ import com.learning.emsmybatisliquibase.entity.JobTitleType;
 import com.learning.emsmybatisliquibase.entity.Profile;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import com.learning.emsmybatisliquibase.entity.Department;
+import com.learning.emsmybatisliquibase.entity.CycleStatus;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
+import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -80,7 +83,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final JavaMailSender mailSender;
 
     private final TemplateEngine templateEngine;
+
     private final ProfileDao profileDao;
+
+    private final EmployeeCycleService employeeCycleService;
+
+    private final EmployeeCycleDao employeeCycleDao;
 
     @Value("${default.send.email}")
     private String defaultEmail;
@@ -149,7 +157,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (0 == profileDao.insert(profile)) {
             throw new NotFoundException(PROFILE_NOT_CREATED.code(), "Failed in saving profile");
         }
-//        employeeCycleService.cycleAssignment(uuid);
+        List<UUID> uuid = new ArrayList<>();
+        uuid.add(employee.getUuid());
+
+        employeeCycleService.cycleAssignment(uuid);
+
 
         var response = employeeMapper.employeeToAddEmployeeResponseDto(employee);
         response.setProfile(profile);
@@ -171,21 +183,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void updateLeavingDate(UUID id, UpdateLeavingDateDto updateLeavingDate) {
-        getById(id);
+        var employee = getById(id);
         if (0 == employeeDao.updateLeavingDate(updateLeavingDate.getLeavingDate(), id)) {
             throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Problem in updating LeavingDate");
         }
 
         var profile = profileDao.get(id);
+
         if (updateLeavingDate.getLeavingDate().before(new Date())) {
             profile.setProfileStatus(ProfileStatus.INACTIVE);
             profileDao.update(profile);
-//            var empStartedCycles = employeeCycleRepository.getByEmployeeIdAndStatus(employee.getUuid(), CycleStatus.STARTED);
-//            empStartedCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getId(), CycleStatus.INACTIVE));
+            var empStartedCycles = employeeCycleDao.getByEmployeeIdAndStatus(employee.getUuid(), CycleStatus.STARTED);
+            empStartedCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE));
         }
     }
 
-    //
+
     @Override
     public List<Employee> viewAll() {
         return employeeDao.getAll();

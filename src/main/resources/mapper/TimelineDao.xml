@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.learning.emsmybatisliquibase.dao.TimelineDao">
+    <resultMap id="timelineStructure" type="com.learning.emsmybatisliquibase.entity.Timeline">
+        <id property="uuid" column="uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+            typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="employeeCycleUuid" column="employee_cycle_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+                typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="type" column="type"/>
+        <result property="startTime" column="start_time"/>
+        <result property="overdueTime" column="overdue_time"/>
+        <result property="lockTime" column="lock_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="status" column="status"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <select id="getByEmployeeCycleId" resultMap="timelineStructure">
+        select *
+        from timeline
+        where employee_cycle_uuid = #{employeeCycleUuid}
+    </select>
+
+    <insert id="insert" flushCache="true">
+        INSERT INTO timeline (uuid, employee_cycle_uuid, type, start_time, overdue_time, lock_time, end_time, status,
+                              created_time, updated_time)
+        VALUES (#{timeline.uuid}, #{timeline.employeeCycleUuid}, #{timeline.type}, #{timeline.startTime},
+                #{timeline.overdueTime}, #{timeline.lockTime}, #{timeline.endTime}, #{timeline.status},
+                current_timestamp, current_timestamp)
+    </insert>
+
+    <update id="update" flushCache="true">
+        UPDATE timeline
+        SET employee_cycle_uuid = #{timeline.employeeCycleUuid},
+            type                = #{timeline.type},
+            start_time          = #{timeline.startTime},
+            overdue_time        = #{timeline.overdueTime},
+            lock_time           = #{timeline.lockTime},
+            end_time            = #{timeline.endTime},
+            status              = #{timeline.status},
+            updated_time        = current_timestamp
+        where uuid = #{timeline.uuid}
+    </update>
+
+    <select id="findByStatusAndReviewType" resultMap="timelineStructure">
+        SELECT t.*
+        from employee_cycle ec
+                 left join cycle c on c.uuid = ec.cycle_uuid
+                 left join timeline t on ec.uuid = t.employee_cycle_uuid
+        where ec.status = #{status}
+          and t.type = #{reviewType}
+          and c.status = 'STARTED'
+          and t.status != 'LOCKED'
+    </select>
+</mapper>

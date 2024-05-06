@@ -24,4 +24,8 @@ public interface EmployeeDao {
     List<Employee> getAllByManagerUuid(@Param("managerUuid") UUID managerUuid);
 
     int update(@Param("employee") Employee employee);
+
+    List<Employee> getActiveEmployeesWithPastLeavingDate();
+
+    List<UUID> getAllActiveEmployeeIds();
 }

@@ -19,11 +19,11 @@ public class EmployeeCycle implements Serializable {
 
     private UUID employeeUuid;
 
-    private UUID cycleId;
+    private UUID cycleUuid;
 
     private CycleStatus status;
 
-    private Instant createdOn;
+    private Instant createdTime;
 
-    private Instant lastUpdatedOn;
+    private Instant updatedTime;
 }

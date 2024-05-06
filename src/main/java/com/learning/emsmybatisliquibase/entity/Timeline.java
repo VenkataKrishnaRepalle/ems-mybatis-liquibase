@@ -19,7 +19,7 @@ public class Timeline implements Serializable {
 
     private UUID employeeCycleUuid;
 
-    private ReviewType reviewType;
+    private ReviewType type;
 
     private Instant startTime;
 
@@ -33,5 +33,5 @@ public class Timeline implements Serializable {
 
     private Instant createdTime;
 
-    private Instant lastUpdatedTime;
+    private Instant updatedTime;
 }

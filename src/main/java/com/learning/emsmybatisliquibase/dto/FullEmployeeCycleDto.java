@@ -1,33 +1,31 @@
-package com.learning.emsmybatisliquibase.entity;
+package com.learning.emsmybatisliquibase.dto;
 
+import com.learning.emsmybatisliquibase.entity.CycleStatus;
+import com.learning.emsmybatisliquibase.entity.Timeline;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Cycle implements Serializable {
+public class FullEmployeeCycleDto {
 
     private UUID uuid;
 
-    private String name;
+    private UUID employeeUuid;
 
-    private String description;
-
-    private Instant startTime;
-
-    private Instant endTime;
+    private UUID cycleUuid;
 
     private CycleStatus status;
 
-    private UUID createdBy;
+    private List<Timeline> timelines;
 
     private Instant createdTime;
 

@@ -19,7 +19,7 @@ public class Review implements Serializable {
 
     private UUID timelineUuid;
 
-    private ReviewType reviewType;
+    private ReviewType type;
 
     private String whatWentWell;
 
@@ -37,11 +37,11 @@ public class Review implements Serializable {
 
     private String managerOverallComments;
 
-    private ReviewStatus reviewStatus;
+    private ReviewRating rating;
 
-    private ReviewRating reviewRating;
+    private ReviewStatus status;
 
     private Instant createdTime;
 
-    private Instant lastUpdatedTime;
+    private Instant updatedTime;
 }

@@ -1,0 +1,220 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="cycle">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="cycle_uuid_pk"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <sql>
+            ALTER TABLE cycle
+                ADD CONSTRAINT status_check CHECK ( status = 'DRAFT' or
+                                                    status = 'INACTIVE' or
+                                                    status = 'SCHEDULED' or
+                                                    status = 'STARTED' or
+                                                    status = 'FAILED' or
+                                                    status = 'COMPLETED')
+        </sql>
+    </changeSet>
+
+    <changeSet id="2" author="rvenkata">
+        <createTable tableName="employee_cycle">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="employee_cycle_uuid_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cycle_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>
+            ALTER TABLE employee_cycle
+                ADD CONSTRAINT status_check CHECK ( status = 'DRAFT' or
+                                                    status = 'INACTIVE' or
+                                                    status = 'SCHEDULED' or
+                                                    status = 'STARTED' or
+                                                    status = 'FAILED' or
+                                                    status = 'COMPLETED')
+        </sql>
+
+        <addForeignKeyConstraint baseTableName="employee_cycle" baseColumnNames="employee_uuid"
+                                 constraintName="employee_uuid_fk" deferrable="false"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+
+        <addForeignKeyConstraint baseTableName="employee_cycle" baseColumnNames="cycle_uuid"
+                                 constraintName="cycle_uuid_fk" deferrable="false"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="cycle" referencedColumnNames="uuid"/>
+    </changeSet>
+
+    <changeSet id="3" author="rvenkata">
+        <createTable tableName="timeline">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="timeline_uuid_pk"/>
+            </column>
+            <column name="employee_cycle_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="overdue_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lock_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="timeline" baseColumnNames="employee_cycle_uuid"
+                                 constraintName="employee_cycle_uuid_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
+                                 referencedTableName="employee_cycle" referencedColumnNames="uuid"/>
+
+        <sql>
+            ALTER TABLE timeline
+                ADD CONSTRAINT type_check CHECK ( type = 'Q1' or
+                                                  type = 'Q2' or
+                                                  type = 'Q3' or
+                                                  type = 'Q4')
+        </sql>
+
+        <sql>
+            ALTER TABLE timeline
+                ADD CONSTRAINT status_check CHECK ( status = 'NOT_STARTED' or
+                                                    status = 'SCHEDULED' or
+                                                    status = 'STARTED' or
+                                                    status = 'OVERDUE' or
+                                                    status = 'LOCKED' or
+                                                    status = 'COMPLETED')
+        </sql>
+    </changeSet>
+
+    <changeSet id="4" author="rvenkata">
+        <createTable tableName="review">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="review_uuid_pk"/>
+            </column>
+            <column name="timeline_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="what_went_well" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="what_done_better" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="way_forward" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="overall_comments" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="manager_what_went_well" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="manager_what_done_better" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="manager_way_forward" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="manager_overall_comments" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rating" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="review" baseColumnNames="timeline_uuid"
+                                 constraintName="timeline_uuid_fk" initiallyDeferred="false"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="timeline" referencedColumnNames="uuid"/>
+
+        <sql>
+            ALTER TABLE review
+                ADD CONSTRAINT rating_check CHECK ( rating = 'NEW_TO_BUSINESS' or
+                                                    rating = 'BELOW_EXPECTED' or
+                                                    rating = 'EXPECTED' or
+                                                    rating = 'BROADLY_IN_LINE' or
+                                                    rating = 'GREAT' or
+                                                    rating = 'OUTSTANDING')
+        </sql>
+
+        <sql>
+            ALTER TABLE review
+                ADD CONSTRAINT status_check CHECK ( status = 'DRAFT' or
+                                                    status = 'WAITING_FOR_APPROVAL' or
+                                                    status = 'DECLINED' or
+                                                    status = 'APPROVED' or
+                                                    status = 'REQUESTED_TO_AMEND' or
+                                                    status = 'COMPLETED')
+        </sql>
+    </changeSet>
+</databaseChangeLog>
