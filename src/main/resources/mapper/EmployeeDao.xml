@@ -20,6 +20,8 @@
         <result property="updatedTime" column="updated_time"/>
     </resultMap>
 
+    <resultMap id="uuidResultMap" type="java.util.UUID"/>
+
     <select id="get" resultMap="employeeResult">
         select *
         from employee
@@ -85,7 +87,7 @@
         where e.leaving_date &lt; current_date and p.profile_status != 'INACTIVE'
     </select>
 
-    <select id="getAllActiveEmployeeIds" resultMap="java.util.UUID">
+    <select id="getAllActiveEmployeeIds" resultMap="uuidResultMap">
         select e.uuid
         from employee e
                  left join profile p on e.uuid = p.employee_uuid
