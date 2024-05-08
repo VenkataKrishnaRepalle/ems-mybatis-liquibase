@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.learning.emsmybatisliquibase.dao.ReviewDao">
+    <resultMap id="reviewStructure" type="com.learning.emsmybatisliquibase.entity.Review">
+        <id property="uuid" column="uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+            typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="timelineUuid" column="timeline_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+                typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="type" column="type"/>
+        <result property="whatWentWell" column="what_went_well"/>
+        <result property="whatDoneBetter" column="what_done_better"/>
+        <result property="wayForward" column="way_forward"/>
+        <result property="overallComments" column="overall_comments"/>
+        <result property="managerWhatWentWell" column="manager_what_went_well"/>
+        <result property="managerWhatDoneBetter" column="manager_what_done_better"/>
+        <result property="managerWayForward" column="manager_way_forward"/>
+        <result property="managerOverallComments" column="manager_overall_comments"/>
+        <result property="rating" column="rating"/>
+        <result property="status" column="status"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="updatedTime" column="updated_time"/>
+    </resultMap>
+
+    <insert id="insertByEmployee" flushCache="true">
+        insert into review (uuid, timeline_uuid, type, what_went_well, what_done_better, way_forward, overall_comments,
+                            status, created_time, updated_time)
+        VALUES (#{reviewDto.uuid}, #{reviewDto.timelineUuid}, #{reviewDto.type}, #{reviewDto.whatWentWell},
+                #{reviewDto.whatDoneBetter}, #{reviewDto.wayForward}, #{reviewDto.overallComments}, #{reviewDto.status},
+                current_timestamp, current_timestamp)
+    </insert>
+</mapper>

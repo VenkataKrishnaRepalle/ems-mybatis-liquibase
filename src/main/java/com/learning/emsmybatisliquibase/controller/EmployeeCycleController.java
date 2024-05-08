@@ -3,6 +3,7 @@ package com.learning.emsmybatisliquibase.controller;
 import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.CycleStatus;
+import com.learning.emsmybatisliquibase.entity.EmployeeCycle;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping("employeeCycle")
+@RequestMapping("api/employeeCycle")
 @RestController
 @RequiredArgsConstructor
 public class EmployeeCycleController {
@@ -35,9 +36,14 @@ public class EmployeeCycleController {
         return new ResponseEntity<>(employeeCycleService.updateEmployeeCycleStatus(employeeCycleId, status), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("getEmployeeCycleById/{employeeCycleId}")
-    public ResponseEntity<FullEmployeeCycleDto> getEmployeeCycleById(@PathVariable UUID employeeCycleId) {
+    @GetMapping("getById/{employeeCycleId}")
+    public ResponseEntity<FullEmployeeCycleDto> getById(@PathVariable UUID employeeCycleId) {
         return new ResponseEntity<>(employeeCycleService.getEmployeeCycleById(employeeCycleId), HttpStatus.OK);
+    }
+
+    @GetMapping("getByCycleId/{employeeId}/cycle/{cycleId}")
+    public ResponseEntity<List<EmployeeCycle>> getByCycleId(@PathVariable UUID employeeId, @PathVariable UUID cycleId) {
+        return new ResponseEntity<>(employeeCycleService.getByEmployeeIdAndCycleId(employeeId, cycleId), HttpStatus.OK);
     }
 
 }

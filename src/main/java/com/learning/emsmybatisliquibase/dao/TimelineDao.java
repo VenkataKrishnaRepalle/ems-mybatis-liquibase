@@ -17,4 +17,6 @@ public interface TimelineDao {
     int update(@Param("timeline") Timeline timeline);
 
     List<Timeline> findByStatusAndReviewType(@Param("status") CycleStatus status, @Param("reviewType") ReviewType reviewType);
+
+    Timeline getActiveCycleByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
 }

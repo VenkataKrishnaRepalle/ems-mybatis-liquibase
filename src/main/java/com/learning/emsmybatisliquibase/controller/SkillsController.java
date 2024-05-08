@@ -21,11 +21,12 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("leave")
+@RequestMapping("api/skills")
 public class SkillsController {
 
     private final SkillsService skillsService;
 
+    @PreAuthorize("@authServiceImpl.isCurrentUser(#skillsDto.employeeUuid) or @authServiceImpl.isEmployeeManager(#skillsDto.employeeUuid) or hasRole('ADMIN')")
     @PostMapping("/add-skills")
     public ResponseEntity<Skills> add(@RequestBody SkillsDto skillsDto) {
         return new ResponseEntity<>(skillsService.add(skillsDto), HttpStatus.CREATED);

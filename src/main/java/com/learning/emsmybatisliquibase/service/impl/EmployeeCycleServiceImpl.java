@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -176,6 +177,17 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
         var timelines = timelineDao.getByEmployeeCycleId(employeeCycleId);
         fullEmployeeCycle.setTimelines(timelines);
         return fullEmployeeCycle;
+    }
+
+    @Override
+    public List<EmployeeCycle> getByEmployeeIdAndCycleId(UUID employeeId, UUID cycleId) {
+        var employeeCycles = employeeCycleDao.getByEmployeeIdAndCycleId(employeeId, cycleId);
+
+        var latestEmployeeCycle = employeeCycles.stream()
+                .filter(employeeCycle -> employeeCycle.getUpdatedTime() != null)
+                .max(Comparator.comparing(EmployeeCycle::getUpdatedTime));
+
+        return latestEmployeeCycle.map(List::of).orElseGet(List::of);
     }
 
 

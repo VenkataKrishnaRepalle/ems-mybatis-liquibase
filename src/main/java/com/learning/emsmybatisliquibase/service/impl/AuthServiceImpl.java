@@ -21,6 +21,7 @@ import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErro
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +39,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtAuthResponseDto login(LoginDto loginDto) {
-
         var employee = employeeDao.getByEmail(loginDto.getEmail());
-
         if (employee == null) {
             throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email" + loginDto.getEmail());
         }
-
         if (!passwordEncoder.matches(loginDto.getPassword(), employee.getPassword())) {
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
@@ -55,9 +53,7 @@ public class AuthServiceImpl implements AuthService {
         ));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String token = jwtTokenProvider.generateToken(authentication);
-
         List<String> roles = new ArrayList<>();
         var employeeRoles = employeeRoleDao.getByEmployeeUuid(employee.getUuid());
         employeeRoles.forEach(role -> roles.add(role.getRole().toString()));
@@ -71,5 +67,23 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .roles(roles)
                 .build();
+    }
+
+    public Boolean isCurrentUser(final UUID userId) {
+        if (userId == null) {
+            return false;
+        }
+        var currentUserId = getCurrentUserId();
+        return userId.equals(currentUserId);
+    }
+
+    private UUID getCurrentUserId() {
+        return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
+    public Boolean isEmployeeManager(final UUID userId) {
+        var currentUserId = getCurrentUserId();
+        var employee = employeeDao.get(userId);
+        return employee.getManagerUuid().equals(currentUserId);
     }
 }

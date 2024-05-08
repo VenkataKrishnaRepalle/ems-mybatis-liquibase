@@ -21,6 +21,7 @@ import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
+import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import jakarta.mail.MessagingException;
@@ -87,6 +88,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final ProfileDao profileDao;
 
     private final EmployeeCycleService employeeCycleService;
+
+    private final CycleService cycleService;
 
     private final EmployeeCycleDao employeeCycleDao;
 
@@ -190,12 +193,23 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         var profile = profileDao.get(id);
 
-        if (updateLeavingDate.getLeavingDate().before(new Date())) {
+        if (updateLeavingDate.getLeavingDate() == null && profile.getProfileStatus().equals(ProfileStatus.INACTIVE)) {
+            var currentActiveCycle = cycleService.getCurrentActiveCycle();
+            var employeeCycles = employeeCycleDao.getByEmployeeIdAndCycleId(employee.getUuid(), currentActiveCycle.getUuid());
+            if (employeeCycles == null) {
+                return;
+            } else {
+                for (var employeeCycle : employeeCycles) {
+                    employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.STARTED);
+                }
+            }
+            profile.setProfileStatus(ProfileStatus.ACTIVE);
+        } else if (updateLeavingDate.getLeavingDate() != null && updateLeavingDate.getLeavingDate().before(new Date())) {
             profile.setProfileStatus(ProfileStatus.INACTIVE);
-            profileDao.update(profile);
             var empStartedCycles = employeeCycleDao.getByEmployeeIdAndStatus(employee.getUuid(), CycleStatus.STARTED);
             empStartedCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE));
         }
+        profileDao.update(profile);
     }
 
 

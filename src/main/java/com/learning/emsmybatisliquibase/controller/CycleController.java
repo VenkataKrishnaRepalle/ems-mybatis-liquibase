@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@RequestMapping("cycle")
+@RequestMapping("api/cycle")
 @RestController
 @RequiredArgsConstructor
 public class CycleController {
