@@ -1,6 +1,7 @@
 package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.entity.EmployeeRole;
+import com.learning.emsmybatisliquibase.entity.RoleType;
 import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class EmployeeRoleController {
     }
 
     @GetMapping("/getRoles/{employeeUuid}")
-    public ResponseEntity<List<EmployeeRole>> getRoles(@PathVariable UUID employeeUuid) {
+    public ResponseEntity<List<RoleType>> getRoles(@PathVariable UUID employeeUuid) {
         return new ResponseEntity<>(employeeRoleService.getRolesByEmployeeUuid(employeeUuid), HttpStatus.OK);
     }
 

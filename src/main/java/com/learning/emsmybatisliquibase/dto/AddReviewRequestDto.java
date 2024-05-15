@@ -16,9 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddEmployeeReviewRequestDto {
-    @JdbcTypeCode(SqlTypes.CHAR)
-    private UUID employeeUuid;
+public class AddReviewRequestDto {
 
     @JdbcTypeCode(SqlTypes.CHAR)
     private UUID timelineUuid;

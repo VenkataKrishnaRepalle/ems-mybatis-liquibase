@@ -2,8 +2,10 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
+import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
+import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.security.JwtTokenProvider;
@@ -36,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final PasswordEncoder passwordEncoder;
+    private final ProfileDao profileDao;
 
     @Override
     public JwtAuthResponseDto login(LoginDto loginDto) {
@@ -74,6 +77,10 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
         var currentUserId = getCurrentUserId();
+        var employeeProfile = profileDao.get(userId);
+        if (employeeProfile != null && employeeProfile.getProfileStatus().equals(ProfileStatus.ACTIVE)) {
+            return false;
+        }
         return userId.equals(currentUserId);
     }
 

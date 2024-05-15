@@ -2,12 +2,14 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
 import com.learning.emsmybatisliquibase.entity.EmployeeRole;
+import com.learning.emsmybatisliquibase.entity.RoleType;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,8 +51,16 @@ public class EmployeeRoleServiceImpl implements EmployeeRoleService {
     }
 
     @Override
-    public List<EmployeeRole> getRolesByEmployeeUuid(UUID employeeUuid) {
-        employeeService.getById(employeeUuid);
-        return employeeRoleDao.getByEmployeeUuid(employeeUuid);
+    public List<RoleType> getRolesByEmployeeUuid(UUID employeeUuid) {
+        var employee = employeeService.getById(employeeUuid);
+        List<RoleType> roles = new ArrayList<>();
+        if (employee != null) {
+            roles.add(RoleType.EMPLOYEE);
+            if (Boolean.TRUE.equals(employee.getIsManager())) roles.add(RoleType.MANAGER);
+        }
+
+        var employeeExtraRoles = employeeRoleDao.getByEmployeeUuid(employeeUuid);
+        employeeExtraRoles.forEach(employeeRole -> roles.add(employeeRole.getRole()));
+        return roles;
     }
 }

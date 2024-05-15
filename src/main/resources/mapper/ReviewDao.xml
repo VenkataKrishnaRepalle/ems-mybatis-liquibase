@@ -21,11 +21,47 @@
         <result property="updatedTime" column="updated_time"/>
     </resultMap>
 
-    <insert id="insertByEmployee" flushCache="true">
+    <insert id="insert" flushCache="true">
         insert into review (uuid, timeline_uuid, type, what_went_well, what_done_better, way_forward, overall_comments,
                             status, created_time, updated_time)
-        VALUES (#{reviewDto.uuid}, #{reviewDto.timelineUuid}, #{reviewDto.type}, #{reviewDto.whatWentWell},
-                #{reviewDto.whatDoneBetter}, #{reviewDto.wayForward}, #{reviewDto.overallComments}, #{reviewDto.status},
+        VALUES (#{review.uuid}, #{review.timelineUuid}, #{review.type}, #{review.whatWentWell},
+                #{review.whatDoneBetter}, #{review.wayForward}, #{review.overallComments}, #{review.status},
                 current_timestamp, current_timestamp)
     </insert>
+
+    <update id="update" flushCache="true">
+        update review
+        set timeline_uuid            = #{review.timelineUuid},
+            type                     = #{review.type},
+            what_went_well           = #{review.whatWentWell},
+            what_done_better         = #{review.whatDoneBetter},
+            way_forward              = #{review.wayForward},
+            overall_comments         = #{review.overallComments},
+            manager_what_went_well   = #{review.managerWhatWentWell},
+            manager_what_done_better = #{review.managerWhatDoneBetter},
+            manager_way_forward      = #{review.managerWayForward},
+            manager_overall_comments = #{review.managerOverallComments},
+            rating                   = #{review.rating},
+            status                   = #{review.status},
+            updated_time             = current_timestamp
+        where uuid = #{review.uuid}
+    </update>
+
+    <select id="getByTimelineId" resultMap="reviewStructure">
+        select *
+        from review
+        where timeline_uuid = #{timelineId}
+    </select>
+
+    <select id="getById" resultMap="reviewStructure">
+        select *
+        from review
+        where uuid = #{id}
+    </select>
+
+    <delete id="delete" flushCache="true">
+        delete
+        from review
+        where uuid = #{reviewId}
+    </delete>
 </mapper>

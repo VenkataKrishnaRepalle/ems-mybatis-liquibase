@@ -60,4 +60,11 @@
         where status = 'STARTED'
           and employee_uuid = #{employeeUuid}
     </select>
+
+    <select id="getByTimelineIdAndReviewType" resultMap="timelineStructure">
+        select *
+        from timeline
+        where uuid = #{timelineId}
+          and type = #{reviewType}
+    </select>
 </mapper>
