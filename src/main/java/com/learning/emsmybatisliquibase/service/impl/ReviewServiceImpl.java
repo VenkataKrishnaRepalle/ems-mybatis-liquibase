@@ -93,6 +93,14 @@ public class ReviewServiceImpl implements ReviewService {
         return review;
     }
 
+    @Override
+    public void deleteById(UUID reviewUuid) {
+        getById(reviewUuid);
+        if (0 == reviewDao.delete(reviewUuid)) {
+            throw new IntegrityException("REVIEW_NOT_DELETED", "Review not deleted with Id: " + reviewUuid);
+        }
+    }
+
     private void updateReview(Review existingReview, Review updatedReview, UUID employeeUuid) {
         var currentUser = getCurrentUser();
         var employee = employeeService.getById(employeeUuid);

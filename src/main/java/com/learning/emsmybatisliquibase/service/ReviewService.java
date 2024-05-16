@@ -12,4 +12,6 @@ public interface ReviewService {
     Review update(UUID employeeUuid, UUID reviewUuid, Review review);
 
     Review getById(UUID reviewUuid);
+
+    void deleteById(UUID reviewUuid);
 }
