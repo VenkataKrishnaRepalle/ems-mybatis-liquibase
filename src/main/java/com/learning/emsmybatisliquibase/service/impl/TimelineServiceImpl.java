@@ -9,6 +9,8 @@ import com.learning.emsmybatisliquibase.service.TimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_FOUND;
+
 import java.util.UUID;
 
 @Service
@@ -26,7 +28,7 @@ public class TimelineServiceImpl implements TimelineService {
         var timeline = timelineDao.getActiveCycleByEmployeeId(employeeId);
 
         if (timeline == null) {
-            throw new NotFoundException("", "Timeline details not found for employee " + employeeId);
+            throw new NotFoundException(TIMELINE_NOT_FOUND.code(), "Timeline details not found for employee " + employeeId);
         }
 
         var employeeCycle = employeeCycleService.getEmployeeCycleById(timeline.getEmployeeCycleUuid());

@@ -24,7 +24,7 @@ public interface EmployeeService {
 
     void updateLeavingDate(UUID id, UpdateLeavingDateDto updateLeavingDate);
 
-    List<Employee> viewAll();
+    List<Employee> getAll();
 
     void managerAccess(MultipartFile file) throws IOException;
 

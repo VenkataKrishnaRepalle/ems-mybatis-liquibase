@@ -1,9 +1,11 @@
 package com.learning.emsmybatisliquibase.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -49,12 +51,20 @@ public class JwtTokenProvider {
     }
 
 
-    public boolean validateToken(String token) {
-        Jwts.parser()
-                .setSigningKey(key())
-                .build()
-                .parse(token);
-        return true;
+    public boolean validateToken(String token, HttpServletRequest request) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(key())
+                    .build()
+                    .parse(token);
+            return true;
+        } catch (ExpiredJwtException ex) {
+            request.setAttribute("tokenExpired", true);
+            return false;
+        } catch (Exception ex) {
+            request.setAttribute("invalidToken", true);
+            return false;
+        }
     }
 
 }

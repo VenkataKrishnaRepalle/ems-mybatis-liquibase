@@ -214,7 +214,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     @Override
-    public List<Employee> viewAll() {
+    public List<Employee> getAll() {
         return employeeDao.getAll();
     }
 

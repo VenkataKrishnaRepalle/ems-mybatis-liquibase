@@ -41,26 +41,26 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
-    @GetMapping("/me")
+    @GetMapping(value = "/me")
     public ResponseEntity<Employee> getMe() {
         return new ResponseEntity<>(employeeService.getMe(), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/add")
+    @PostMapping(value = "/add")
     public ResponseEntity<AddEmployeeResponseDto> addEmployee(@Valid @RequestBody AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
         return new ResponseEntity<>(employeeService.add(employeeDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/view/{id}")
-    public ResponseEntity<Employee> viewEmployee(@PathVariable UUID id) {
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<Employee> getById(@PathVariable UUID id) {
         return new ResponseEntity<>(employeeService.getById(id), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/viewAll")
+    @GetMapping("/getAll")
     public ResponseEntity<List<Employee>> viewAllEmployees() {
-        return new ResponseEntity<>(employeeService.viewAll(), HttpStatus.OK);
+        return new ResponseEntity<>(employeeService.getAll(), HttpStatus.OK);
     }
 
     @PostMapping("/updateLeavingDate/{id}")
