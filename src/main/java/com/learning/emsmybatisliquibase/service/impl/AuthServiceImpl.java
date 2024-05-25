@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
         }
         var currentUserId = getCurrentUserId();
         var employeeProfile = profileDao.get(userId);
-        if (employeeProfile != null && employeeProfile.getProfileStatus().equals(ProfileStatus.ACTIVE)) {
+        if (employeeProfile == null || !employeeProfile.getProfileStatus().equals(ProfileStatus.ACTIVE)) {
             return false;
         }
         return userId.equals(currentUserId);
