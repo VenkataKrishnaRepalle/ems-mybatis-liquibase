@@ -7,6 +7,7 @@ import com.learning.emsmybatisliquibase.entity.Cycle;
 import com.learning.emsmybatisliquibase.entity.CycleStatus;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
+import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
@@ -33,6 +34,10 @@ public class CycleServiceImpl implements CycleService {
     private final EmployeeCycleDao employeeCycleDao;
 
     private final EmployeeCycleService employeeCycleService;
+
+    private static final UUID ADMIN_UUID = UUID.fromString("018fb996-a741-73ce-ac0d-79916b15ac0f");
+
+    private static final String CYCLE_NOT_UPDATED_MESSAGE = "Cycle not updated for cycleId: ";
 
 
     @Override
@@ -63,7 +68,7 @@ public class CycleServiceImpl implements CycleService {
                 .startTime(startDateTime)
                 .endTime(endDateTime)
                 .status(CycleStatus.SCHEDULED)
-                .createdBy(UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName()))
+                .createdBy(SecurityContextHolder.getContext().getAuthentication() == null ? ADMIN_UUID : UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName()))
                 .createdTime(Instant.now())
                 .updatedTime(Instant.now())
                 .build();
@@ -77,6 +82,9 @@ public class CycleServiceImpl implements CycleService {
     @Override
     public SuccessResponseDto startScheduled(UUID cycleId) {
         var cycle = getById(cycleId);
+        if (!cycle.getStatus().equals(CycleStatus.SCHEDULED)) {
+            throw new InvalidInputException("INVALID_CYCLE_STATUS", "Provided cycle is not in scheduled status");
+        }
         var cycleStartTime = cycle.getStartTime().atZone(ZoneId.systemDefault()).getYear();
         var cycleEndTime = cycle.getEndTime().atZone(ZoneId.systemDefault()).getYear();
 
@@ -87,25 +95,25 @@ public class CycleServiceImpl implements CycleService {
             activeCycle.setStatus(CycleStatus.INACTIVE);
             activeCycle.setUpdatedTime(Instant.now());
             if (0 == cycleDao.update(activeCycle)) {
-                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), "Cycle not updated for cycleId: " + cycleId);
+                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
             }
             updateEmployeesCycleStatus(activeCycle.getUuid());
         } else if (activeCycle != null && activeCycle.getStartTime().atZone(ZoneId.systemDefault()).getYear() < cycleStartTime) {
             activeCycle.setStatus(CycleStatus.COMPLETED);
             activeCycle.setUpdatedTime(Instant.now());
             if (0 == cycleDao.update(activeCycle)) {
-                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), "Cycle not updated for cycleId: " + cycleId);
+                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
             }
         }
 
         cycle.setStatus(CycleStatus.STARTED);
         if (0 == cycleDao.update(cycle)) {
-            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), "Cycle not updated for cycleId: " + cycleId);
+            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
         }
 
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
-                .data(String.valueOf(UUID.randomUUID()))
+                .data(String.valueOf(cycleId))
                 .build();
     }
 
@@ -124,12 +132,12 @@ public class CycleServiceImpl implements CycleService {
         cycle.setStatus(status);
         cycle.setUpdatedTime(Instant.now());
         if (0 == cycleDao.update(cycle)) {
-            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), "Cycle not updated for cycleId: " + cycleId);
+            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
         }
 
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
-                .data(String.valueOf(UUID.randomUUID()))
+                .data(String.valueOf(cycleId))
                 .build();
     }
 

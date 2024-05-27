@@ -1,9 +1,12 @@
 package com.learning.emsmybatisliquibase.bootstrap;
 
+import com.learning.emsmybatisliquibase.dao.CycleDao;
 import com.learning.emsmybatisliquibase.dao.DepartmentDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.service.CycleService;
+import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.time.Year;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -23,7 +28,12 @@ public class Bootstrap implements CommandLineRunner {
 
     private final DepartmentDao departmentDao;
 
+    private final CycleService cycleService;
+
+    private final EmployeeCycleService employeeCycleService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final CycleDao cycleDao;
 
     @Override
     public void run(String... args) {
@@ -170,6 +180,12 @@ public class Bootstrap implements CommandLineRunner {
                     .updatedTime(Instant.now())
                     .build();
             profileDao.insert(profile5);
+
+            var cycle = cycleService.createCycle(Year.now().getValue());
+            cycle.setStatus(CycleStatus.STARTED);
+            cycleDao.update(cycle);
+
+            employeeCycleService.cycleAssignment(List.of(employee1.getUuid(), employee2.getUuid(), employee3.getUuid(), employee4.getUuid(), employee5.getUuid()));
         }
     }
 }
