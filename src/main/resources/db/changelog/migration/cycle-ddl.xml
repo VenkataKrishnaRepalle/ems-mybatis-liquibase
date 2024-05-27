@@ -76,12 +76,12 @@
 
         <addForeignKeyConstraint baseTableName="employee_cycle" baseColumnNames="employee_uuid"
                                  constraintName="employee_uuid_fk" deferrable="false"
-                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
 
         <addForeignKeyConstraint baseTableName="employee_cycle" baseColumnNames="cycle_uuid"
                                  constraintName="cycle_uuid_fk" deferrable="false"
-                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="cycle" referencedColumnNames="uuid"/>
     </changeSet>
 
@@ -121,7 +121,7 @@
 
         <addForeignKeyConstraint baseTableName="timeline" baseColumnNames="employee_cycle_uuid"
                                  constraintName="employee_cycle_uuid_fk" deferrable="false"
-                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
                                  referencedTableName="employee_cycle" referencedColumnNames="uuid"/>
 
         <sql>
@@ -194,7 +194,7 @@
 
         <addForeignKeyConstraint baseTableName="review" baseColumnNames="timeline_uuid"
                                  constraintName="timeline_uuid_fk" initiallyDeferred="false"
-                                 deferrable="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="timeline" referencedColumnNames="uuid"/>
 
         <sql>

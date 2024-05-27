@@ -28,12 +28,12 @@
         </createTable>
         <addForeignKeyConstraint baseTableName="profile" baseColumnNames="employee_uuid"
                                  constraintName="colleague_fk" deferrable="false"
-                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
 
         <addForeignKeyConstraint baseTableName="profile" baseColumnNames="department_uuid"
                                  constraintName="department_fk" deferrable="false"
-                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="department" referencedColumnNames="uuid"/>
         <sql>
             ALTER TABLE profile

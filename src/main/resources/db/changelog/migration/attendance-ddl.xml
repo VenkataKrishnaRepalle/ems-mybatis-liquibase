@@ -30,7 +30,7 @@
         </createTable>
         <addForeignKeyConstraint baseTableName="attendance" baseColumnNames="employee_uuid"
                                  constraintName="employee_uuid_fk" deferrable="false"
-                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
         <sql>
             ALTER TABLE attendance

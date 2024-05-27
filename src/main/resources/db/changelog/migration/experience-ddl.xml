@@ -30,7 +30,7 @@
         </createTable>
         <addForeignKeyConstraint baseTableName="experience" baseColumnNames="employee_uuid"
                                  constraintName="employee_fk" deferrable="false"
-                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
     </changeSet>
 </databaseChangeLog>

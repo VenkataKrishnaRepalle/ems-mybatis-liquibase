@@ -1,12 +1,9 @@
 package com.learning.emsmybatisliquibase.bootstrap;
 
+import com.learning.emsmybatisliquibase.dao.DepartmentDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.Gender;
-import com.learning.emsmybatisliquibase.entity.Profile;
-import com.learning.emsmybatisliquibase.entity.JobTitleType;
-import com.learning.emsmybatisliquibase.entity.ProfileStatus;
+import com.learning.emsmybatisliquibase.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,6 +20,8 @@ public class Bootstrap implements CommandLineRunner {
     private final EmployeeDao employeeDao;
 
     private final ProfileDao profileDao;
+
+    private final DepartmentDao departmentDao;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -45,10 +44,17 @@ public class Bootstrap implements CommandLineRunner {
                     .build();
             employeeDao.insert(employee1);
 
+            var department1 = Department.builder()
+                    .uuid(UUID.randomUUID())
+                    .name("Tesco")
+                    .build();
+            departmentDao.insert(department1);
+
             var profile1 = Profile.builder()
                     .employeeUuid(employee1.getUuid())
                     .jobTitle(JobTitleType.SENIOR_PROJECT_MANAGER)
                     .profileStatus(ProfileStatus.ACTIVE)
+                    .departmentUuid(department1.getUuid())
                     .updatedTime(Instant.now())
                     .build();
 
@@ -75,6 +81,7 @@ public class Bootstrap implements CommandLineRunner {
                     .employeeUuid(employee2.getUuid())
                     .jobTitle(JobTitleType.ENGINEER_TRAINEE)
                     .profileStatus(ProfileStatus.ACTIVE)
+                    .departmentUuid(department1.getUuid())
                     .updatedTime(Instant.now())
                     .build();
 
@@ -101,9 +108,16 @@ public class Bootstrap implements CommandLineRunner {
                     .employeeUuid(employee3.getUuid())
                     .jobTitle(JobTitleType.SOFTWARE_ENGINEER)
                     .profileStatus(ProfileStatus.ACTIVE)
+                    .departmentUuid(department1.getUuid())
                     .updatedTime(Instant.now())
                     .build();
             profileDao.insert(profile3);
+
+            var department2 = Department.builder()
+                    .uuid(UUID.randomUUID())
+                    .name("Capita")
+                    .build();
+            departmentDao.insert(department2);
 
             var employee4 = Employee.builder()
                     .uuid(UUID.randomUUID())
@@ -126,6 +140,7 @@ public class Bootstrap implements CommandLineRunner {
                     .employeeUuid(employee4.getUuid())
                     .jobTitle(JobTitleType.PROJECT_MANAGER)
                     .profileStatus(ProfileStatus.ACTIVE)
+                    .departmentUuid(department2.getUuid())
                     .updatedTime(Instant.now())
                     .build();
             profileDao.insert(profile4);
@@ -151,6 +166,7 @@ public class Bootstrap implements CommandLineRunner {
                     .employeeUuid(employee5.getUuid())
                     .jobTitle(JobTitleType.TECHNICAL_LEAD)
                     .profileStatus(ProfileStatus.ACTIVE)
+                    .departmentUuid(department2.getUuid())
                     .updatedTime(Instant.now())
                     .build();
             profileDao.insert(profile5);

@@ -25,7 +25,7 @@
 
         <addForeignKeyConstraint baseTableName="skills" baseColumnNames="employee_uuid"
                                  constraintName="employee_uuid_fk" initiallyDeferred="false"
-                                 deferrable="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="CASCADE"
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
 
         <sql>
