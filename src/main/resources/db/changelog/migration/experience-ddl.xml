@@ -1,0 +1,36 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="experience">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="experience_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_current_job" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="experience" baseColumnNames="employee_uuid"
+                                 constraintName="employee_fk" deferrable="false"
+                                 initiallyDeferred="false" onUpdate="CASCADE" onDelete="RESTRICT"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+    </changeSet>
+</databaseChangeLog>

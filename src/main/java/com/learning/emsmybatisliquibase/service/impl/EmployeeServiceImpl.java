@@ -94,13 +94,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeCycleDao employeeCycleDao;
 
     @Value("${default.send.email}")
-    private String defaultEmail;
+    String defaultEmail;
 
     @Value("${email.template.name.successful.onboard}")
-    private String emailTemplateNameSuccessfulOnboard;
+    String emailTemplateNameSuccessfulOnboard;
 
     @Value("${email.template.successful.onboard}")
-    private String emailTemplateSuccessfulOnboard;
+    String emailTemplateSuccessfulOnboard;
 
     private static final String ADD = "add";
 
@@ -470,7 +470,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return sb.toString();
     }
 
-    private void sendSuccessfulEmployeeOnBoard(UUID employeeUuid) {
+    public void sendSuccessfulEmployeeOnBoard(UUID employeeUuid) {
         Thread thread = new Thread(() -> {
             try {
                 var employee = getById(employeeUuid);

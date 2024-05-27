@@ -25,6 +25,8 @@ public class Experience implements Serializable {
 
     private String description;
 
+    private Boolean isCurrentJob;
+
     private Date startDate;
 
     private Date endDate;
