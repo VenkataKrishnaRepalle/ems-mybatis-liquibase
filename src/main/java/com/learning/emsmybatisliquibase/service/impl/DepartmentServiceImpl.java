@@ -23,6 +23,8 @@ import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCod
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,14 +43,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     private static final String REMOVE = "remove";
 
     private static final String COLLEAGUE_UUID = "colleague_uuid";
+
     private static final String COLLEAGUE_FULL_NAME = "colleague_full_name";
+
     private static final String EMAIL = "email";
+
     private static final String JOINING_DATE = "joining_date";
+
     private static final String LEAVING_DATE = "leaving_date";
+
     private static final String PROFILE_STATUS = "profile_status";
+
     private static final String MANAGER_FULL_NAME = "manager_full_name";
+
     private static final String DEPARTMENT_NAME = "department_name";
+
     private final ProfileDao profileDao;
+
+    private static final String DATE_PATTERN = "dd/MM/yyyy";
 
 
     @Override
@@ -139,8 +151,8 @@ public class DepartmentServiceImpl implements DepartmentService {
             row.createCell(0).setCellValue(String.valueOf(department.getColleagueUuid()));
             row.createCell(1).setCellValue(department.getColleagueFullName());
             row.createCell(2).setCellValue(department.getEmail());
-            row.createCell(3).setCellValue(department.getJoiningDate() != null ? department.getJoiningDate().toString() : "");
-            row.createCell(4).setCellValue(department.getLeavingDate() != null ? department.getLeavingDate().toString() : "");
+            row.createCell(3).setCellValue(formatDate(department.getJoiningDate()));
+            row.createCell(4).setCellValue(formatDate(department.getLeavingDate()));
             row.createCell(5).setCellValue(department.getProfileStatus().toString());
             row.createCell(6).setCellValue(department.getManagerFullName());
             row.createCell(7).setCellValue(department.getDepartmentName());
@@ -157,6 +169,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(), "Department not exists with Id: " + departmentUuid);
         }
         return department;
+    }
+
+    private String formatDate(Date date) {
+        return date != null ? new SimpleDateFormat(DATE_PATTERN).format(date) : "";
     }
 
 }
