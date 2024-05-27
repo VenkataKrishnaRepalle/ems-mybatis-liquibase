@@ -159,8 +159,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         try (FileOutputStream fileOutputStream = new FileOutputStream("employee_data.xlsx")) {
             workbook.write(fileOutputStream);
+        } finally {
+            workbook.close();
         }
-        workbook.close();
     }
 
     private Department isDepartmentExists(UUID departmentUuid) {
