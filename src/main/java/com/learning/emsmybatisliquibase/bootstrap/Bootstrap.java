@@ -1,9 +1,6 @@
 package com.learning.emsmybatisliquibase.bootstrap;
 
-import com.learning.emsmybatisliquibase.dao.CycleDao;
-import com.learning.emsmybatisliquibase.dao.DepartmentDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeDao;
-import com.learning.emsmybatisliquibase.dao.ProfileDao;
+import com.learning.emsmybatisliquibase.dao.*;
 import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
@@ -32,12 +29,46 @@ public class Bootstrap implements CommandLineRunner {
 
     private final EmployeeCycleService employeeCycleService;
 
+    private final EmployeeRoleDao employeeRoleDao;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     private final CycleDao cycleDao;
+
+    private static final String ADMIN = "admin";
 
     @Override
     public void run(String... args) {
-        if (employeeDao.count() < 3) {
+        if (employeeDao.count() < 6) {
+            var employee = Employee.builder()
+                    .uuid(UUID.randomUUID())
+                    .firstName(ADMIN)
+                    .lastName(ADMIN)
+                    .email("admin@gmail.com")
+                    .phoneNumber("1234567890")
+                    .dateOfBirth(Date.valueOf("2000-01-01").toLocalDate())
+                    .joiningDate(Date.valueOf("2022-01-01").toLocalDate())
+                    .gender(Gender.MALE)
+                    .isManager(Boolean.FALSE)
+                    .password(passwordEncoder.encode(ADMIN))
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            employeeDao.insert(employee);
+
+            var profile = Profile.builder()
+                    .employeeUuid(employee.getUuid())
+                    .profileStatus(ProfileStatus.ACTIVE)
+                    .jobTitle(JobTitleType.CEO)
+                    .updatedTime(Instant.now())
+                    .build();
+            profileDao.insert(profile);
+
+            employeeRoleDao.insert(EmployeeRole.builder()
+                    .employeeUuid(employee.getUuid())
+                    .role(RoleType.ADMIN)
+                    .build());
+
             var employee1 = Employee.builder()
                     .uuid(UUID.randomUUID())
                     .firstName("venky")
