@@ -60,4 +60,11 @@
         from employee_cycle
         where employee_uuid = #{employeeUuid}
     </select>
+
+    <select id="getActiveCycleByEmployeeId" resultMap="employeeCycleStructure">
+        select *
+        from employee_cycle
+        where status = 'STARTED'
+          and employee_uuid = #{employeeUuid}
+    </select>
 </mapper>

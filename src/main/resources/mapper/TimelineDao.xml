@@ -54,13 +54,6 @@
           and t.status != 'LOCKED'
     </select>
 
-    <select id="getActiveCycleByEmployeeId" resultMap="timelineStructure">
-        select *
-        from employee_cycle
-        where status = 'STARTED'
-          and employee_uuid = #{employeeUuid}
-    </select>
-
     <select id="getByTimelineIdAndReviewType" resultMap="timelineStructure">
         select *
         from timeline

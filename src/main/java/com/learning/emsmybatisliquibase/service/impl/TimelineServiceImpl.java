@@ -1,15 +1,12 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
+import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
 import com.learning.emsmybatisliquibase.dao.TimelineDao;
-import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
-import com.learning.emsmybatisliquibase.exception.NotFoundException;
-import com.learning.emsmybatisliquibase.service.CycleService;
-import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
+import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.mapper.EmployeeCycleMapper;
 import com.learning.emsmybatisliquibase.service.TimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_FOUND;
 
 import java.util.UUID;
 
@@ -19,27 +16,16 @@ public class TimelineServiceImpl implements TimelineService {
 
     private final TimelineDao timelineDao;
 
-    private final EmployeeCycleService employeeCycleService;
+    private final EmployeeCycleDao employeeCycleDao;
 
-    private final CycleService cycleService;
+    private final EmployeeCycleMapper employeeCycleMapper;
+
 
     @Override
-    public EmployeeCycleAndTimelineResponseDto getActiveTimelineDetails(UUID employeeId) {
-        var timeline = timelineDao.getActiveCycleByEmployeeId(employeeId);
-
-        if (timeline == null) {
-            throw new NotFoundException(TIMELINE_NOT_FOUND.code(), "Timeline details not found for employee " + employeeId);
-        }
-
-        var employeeCycle = employeeCycleService.getEmployeeCycleById(timeline.getEmployeeCycleUuid());
-        var cycle = cycleService.getById(employeeCycle.getCycleUuid());
-
-        return EmployeeCycleAndTimelineResponseDto.builder()
-                .employeeId(employeeId)
-                .employeeCycleId(employeeCycle.getUuid())
-                .employeeCycleStatus(employeeCycle.getStatus())
-                .cycle(cycle)
-                .timeline(timeline)
-                .build();
+    public FullEmployeeCycleDto getActiveTimelineDetails(UUID employeeId) {
+        var employeeCycle = employeeCycleDao.getActiveCycleByEmployeeId(employeeId);
+        var fullTimeline = employeeCycleMapper.employeeCycleToFullEMployeeCycleDto(employeeCycle);
+        fullTimeline.setTimelines(timelineDao.getByEmployeeCycleId(employeeCycle.getUuid()));
+        return fullTimeline;
     }
 }

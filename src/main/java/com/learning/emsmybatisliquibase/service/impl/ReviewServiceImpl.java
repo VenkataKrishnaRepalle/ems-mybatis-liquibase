@@ -99,6 +99,10 @@ public class ReviewServiceImpl implements ReviewService {
         if (0 == reviewDao.delete(reviewUuid)) {
             throw new IntegrityException("REVIEW_NOT_DELETED", "Review not deleted with Id: " + reviewUuid);
         }
+        var isReviewExists = reviewDao.getById(reviewUuid);
+        if (isReviewExists != null) {
+            throw new FoundException("REVIEW_NOT_DELETED", "Review not deleted with Id: " + reviewUuid);
+        }
     }
 
     private void updateReview(Review existingReview, Review updatedReview, UUID employeeUuid) {

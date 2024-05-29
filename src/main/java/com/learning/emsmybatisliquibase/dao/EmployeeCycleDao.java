@@ -22,4 +22,7 @@ public interface EmployeeCycleDao {
     List<EmployeeCycle> getByEmployeeIdAndStatus(@Param("employeeUuid") UUID employeeUuid, @Param("status") CycleStatus status);
 
     List<EmployeeCycle> getByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
+
+    EmployeeCycle getActiveCycleByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
+
 }

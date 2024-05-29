@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.controller;
 
-import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
+import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
 import com.learning.emsmybatisliquibase.service.TimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,10 +20,7 @@ public class TimelineController {
     private final TimelineService timelineService;
 
     @GetMapping("/getActiveTimelineDetails/{employeeId}")
-    public ResponseEntity<EmployeeCycleAndTimelineResponseDto> getActiveTimelineDetails(@PathVariable UUID employeeId) {
+    public ResponseEntity<FullEmployeeCycleDto> getActiveTimelineDetails(@PathVariable UUID employeeId) {
         return new ResponseEntity<>(timelineService.getActiveTimelineDetails(employeeId), HttpStatus.OK);
     }
-
-//    @GetMapping("/getFullTimelineDetails/{employeeId}")
-//    public ResponseEntity
 }
