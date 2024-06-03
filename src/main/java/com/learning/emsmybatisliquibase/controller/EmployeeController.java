@@ -32,7 +32,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/employee")
 @RequiredArgsConstructor
