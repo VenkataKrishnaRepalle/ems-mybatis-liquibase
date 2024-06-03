@@ -39,13 +39,15 @@ docker volume create postgres_data
 ```
 
 3. Run the Postgres Docker Container
-   * Now we can run the Postgres Docker container using the following command:
+    * Now we can run the Postgres Docker container using the following command:
+
 ```bash
 docker run --name postgres -e POSTGRES_PASSWORD=root -d -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres 
 ```
 
 4. Verify the Container is Running
-  * To verify that the Docker container is running, run the following command:
+
+* To verify that the Docker container is running, run the following command:
 
 ```bash
 docker ps

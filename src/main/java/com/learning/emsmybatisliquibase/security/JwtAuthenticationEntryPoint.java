@@ -33,13 +33,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             errorResponse.put(ERROR_MESSAGE, "Invalid token");
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            errorResponse.put(ERROR_MESSAGE, authException.getMessage());
+            errorResponse.put(ERROR_CODE, "TOKEN_NOT_PROVIDED");
+            errorResponse.put(ERROR_MESSAGE, "missing authorization header");
         }
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(errorResponse);
+
         response.getWriter().write(jsonResponse);
     }
 }

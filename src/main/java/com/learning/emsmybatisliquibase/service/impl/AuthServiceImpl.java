@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final PasswordEncoder passwordEncoder;
+
     private final ProfileDao profileDao;
 
     @Override
@@ -49,7 +50,6 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(loginDto.getPassword(), employee.getPassword())) {
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
-
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 String.valueOf(employee.getUuid()),
                 loginDto.getPassword()
@@ -66,6 +66,7 @@ public class AuthServiceImpl implements AuthService {
         }
         roles.add("EMPLOYEE");
         return JwtAuthResponseDto.builder()
+                .employeeId(employee.getUuid())
                 .accessToken(token)
                 .tokenType("Bearer")
                 .roles(roles)
