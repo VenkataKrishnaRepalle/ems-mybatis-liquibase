@@ -38,4 +38,6 @@ public interface EmployeeService {
     EmployeeFullReportingChainDto getEmployeeFullReportingChain(UUID employeeId);
 
     EmployeeResponseDto getMe();
+
+    PaginatedResponse<Employee> getAllByPagination(int page, int size, String sortBy, String sortOrder);
 }

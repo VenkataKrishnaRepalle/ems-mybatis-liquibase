@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,6 +54,14 @@ public class EmployeeController {
     @GetMapping("/getAll")
     public ResponseEntity<List<Employee>> viewAllEmployees() {
         return new ResponseEntity<>(employeeService.getAll(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAll/pagination")
+    public ResponseEntity<PaginatedResponse<Employee>> viewAllEmployees(@RequestParam(name = "page", defaultValue = "1") int page,
+                                                           @RequestParam(name = "size", defaultValue = "3") int size,
+                                                           @RequestParam(name = "sortBy", defaultValue = "uuid") String sortBy,
+                                                           @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder) {
+        return new ResponseEntity<>(employeeService.getAllByPagination(page, size, sortBy, sortOrder), HttpStatus.OK);
     }
 
     @PostMapping("/updateLeavingDate/{id}")

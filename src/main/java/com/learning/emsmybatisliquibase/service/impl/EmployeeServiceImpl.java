@@ -55,11 +55,7 @@ import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Date;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -368,6 +364,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeResponseDto getMe() {
         var employeeUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
         return employeeDao.getMe(employeeUuid);
+    }
+
+    @Override
+    public PaginatedResponse<Employee> getAllByPagination(int page, int size, String sortBy, String sortOrder) {
+        int offSet = (page - 1) * size;
+        var employees = employeeDao.findAll(size, offSet, sortBy, sortOrder);
+        var totalItems = employeeDao.activeEmployeesCount();
+        return PaginatedResponse.<Employee>builder()
+                .data(employees)
+                .totalItems(totalItems)
+                .totalPages((int) Math.ceil((double) totalItems / size))
+                .currentPage(page)
+                .build();
     }
 
     @Override

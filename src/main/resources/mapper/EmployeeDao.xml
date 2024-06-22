@@ -81,7 +81,7 @@
     </update>
 
     <select id="getActiveEmployeesWithPastLeavingDate" resultMap="employeeResult">
-        select *
+        select e.*
         from employee e
                  left join profile p on e.uuid = p.employee_uuid
         where e.leaving_date &lt; current_date
@@ -134,5 +134,22 @@
                  left join employee m on e.manager_uuid = m.uuid
                  left join profile p on e.uuid = p.employee_uuid
         where e.uuid = #{employeeUuid}
+    </select>
+
+
+    <select id="findAll" resultMap="employeeResult">
+        select e.*
+        from employee e
+                 join profile p on e.uuid = p.employee_uuid
+        where p.profile_status = 'ACTIVE'
+        ORDER BY ${sortBy} ${sortOrder}
+        LIMIT #{size} OFFSET #{offSet}
+    </select>
+
+    <select id="activeEmployeesCount">
+        select count(e.*)
+        from employee e
+                 join profile p on e.uuid = p.employee_uuid
+        where p.profile_status = 'ACTIVE'
     </select>
 </mapper>
