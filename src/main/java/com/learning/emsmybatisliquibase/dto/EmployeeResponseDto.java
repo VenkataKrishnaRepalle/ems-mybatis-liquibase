@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.learning.emsmybatisliquibase.entity.Gender;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class EmployeeResponseDto {
+
     private UUID uuid;
 
     private String firstName;
@@ -23,9 +25,8 @@ public class EmployeeResponseDto {
 
     private Gender gender;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date dateOfBirth;
-
-    private Integer age;
 
     private String phoneNumber;
 
@@ -33,10 +34,16 @@ public class EmployeeResponseDto {
 
     private UUID managerUuid;
 
+    private String managerFirstName;
+
+    private String managerLastName;
+
     private Boolean isManager;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date joiningDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date leavingDate;
 
     private ProfileStatus status;

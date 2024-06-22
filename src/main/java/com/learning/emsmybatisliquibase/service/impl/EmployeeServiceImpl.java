@@ -4,12 +4,7 @@ import com.learning.emsmybatisliquibase.dao.DepartmentDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
-import com.learning.emsmybatisliquibase.dto.AddEmployeeResponseDto;
-import com.learning.emsmybatisliquibase.dto.EmployeeAndManagerDto;
-import com.learning.emsmybatisliquibase.dto.EmployeeFullReportingChainDto;
-import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.dto.UpdateLeavingDateDto;
+import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.Gender;
 import com.learning.emsmybatisliquibase.entity.JobTitleType;
@@ -370,9 +365,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee getMe() {
+    public EmployeeResponseDto getMe() {
         var employeeUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
-        return getById(employeeUuid);
+        return employeeDao.getMe(employeeUuid);
     }
 
     @Override
@@ -487,6 +482,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());
                 context.setVariable("email", employee.getEmail());
                 context.setVariable("phoneNumber", employee.getPhoneNumber());
+                context.setVariable("password", employee.getPassword());
 
                 helper.setText(templateEngine.process(emailTemplateNameSuccessfulOnboard, context), true);
                 mailSender.send(message);

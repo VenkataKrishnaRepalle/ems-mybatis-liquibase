@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     public JwtAuthResponseDto login(LoginDto loginDto) {
         var employee = employeeDao.getByEmail(loginDto.getEmail());
         if (employee == null) {
-            throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email" + loginDto.getEmail());
+            throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email: " + loginDto.getEmail());
         }
         if (!passwordEncoder.matches(loginDto.getPassword(), employee.getPassword())) {
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");

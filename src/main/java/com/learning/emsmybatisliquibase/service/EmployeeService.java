@@ -1,12 +1,7 @@
 package com.learning.emsmybatisliquibase.service;
 
 
-import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
-import com.learning.emsmybatisliquibase.dto.AddEmployeeResponseDto;
-import com.learning.emsmybatisliquibase.dto.EmployeeAndManagerDto;
-import com.learning.emsmybatisliquibase.dto.EmployeeFullReportingChainDto;
-import com.learning.emsmybatisliquibase.dto.UpdateLeavingDateDto;
-import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,5 +37,5 @@ public interface EmployeeService {
 
     EmployeeFullReportingChainDto getEmployeeFullReportingChain(UUID employeeId);
 
-    Employee getMe();
+    EmployeeResponseDto getMe();
 }

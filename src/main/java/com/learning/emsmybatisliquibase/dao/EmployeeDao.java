@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.dao;
 
+import com.learning.emsmybatisliquibase.dto.EmployeeResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +29,6 @@ public interface EmployeeDao {
     List<Employee> getActiveEmployeesWithPastLeavingDate();
 
     List<UUID> getAllActiveEmployeeIds();
+
+    EmployeeResponseDto getMe(@Param("employeeUuid") UUID employeeUuid);
 }

@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.learning.emsmybatisliquibase.entity.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class EmployeeAndManagerDto {
 
     private Gender gender;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date dateOfBirth;
 
     private Integer age;
@@ -36,7 +38,9 @@ public class EmployeeAndManagerDto {
 
     private Boolean isManager;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date joiningDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date leavingDate;
 }

@@ -1,12 +1,7 @@
 package com.learning.emsmybatisliquibase.controller;
 
 
-import com.learning.emsmybatisliquibase.dto.AddEmployeeResponseDto;
-import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
-import com.learning.emsmybatisliquibase.dto.EmployeeAndManagerDto;
-import com.learning.emsmybatisliquibase.dto.EmployeeFullReportingChainDto;
-import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.dto.UpdateLeavingDateDto;
+import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import jakarta.mail.MessagingException;
@@ -41,7 +36,7 @@ public class EmployeeController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping(value = "/me")
-    public ResponseEntity<Employee> getMe() {
+    public ResponseEntity<EmployeeResponseDto> getMe() {
         return new ResponseEntity<>(employeeService.getMe(), HttpStatus.OK);
     }
 
