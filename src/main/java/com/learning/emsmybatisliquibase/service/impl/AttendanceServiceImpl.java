@@ -7,11 +7,13 @@ import com.learning.emsmybatisliquibase.dto.ViewEmployeeAttendanceDto;
 import com.learning.emsmybatisliquibase.entity.Attendance;
 import com.learning.emsmybatisliquibase.entity.AttendanceStatus;
 import com.learning.emsmybatisliquibase.exception.FoundException;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.mapper.AttendanceMapper;
 import com.learning.emsmybatisliquibase.service.AttendanceService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -23,9 +25,7 @@ import java.util.Map;
 import java.util.ArrayList;
 
 
-import static com.learning.emsmybatisliquibase.exception.errorcodes.AttendanceErrorCodes.ATTENDANCE_NOT_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.AttendanceErrorCodes.ATTENDANCE_ALREADY_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.AttendanceErrorCodes.ATTENDANCE_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.AttendanceErrorCodes.*;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +64,15 @@ public class AttendanceServiceImpl implements AttendanceService {
             attendance.setCreatedTime(Instant.now());
             attendance.setUpdatedTime(Instant.now());
         });
-        attendances.forEach(attendanceDao::insert);
+        attendances.forEach(attendance -> {
+            try {
+                if (0 == attendanceDao.insert(attendance)) {
+                    throw new IntegrityException(ATTENDANCE_NOT_CREATED.code(), "Attendance not created");
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException(ATTENDANCE_NOT_CREATED.code(), exception.getCause().getMessage());
+            }
+        });
         return attendances;
     }
 
@@ -76,9 +84,14 @@ public class AttendanceServiceImpl implements AttendanceService {
         attendance.setType(attendanceDto.getType());
         attendance.setStatus(attendanceDto.getStatus());
 
-        if (0 == attendanceDao.update(attendance)) {
-            throw new InvalidInputException(ATTENDANCE_NOT_UPDATED.code(), "Attendance Failed to Update");
+        try {
+            if (0 == attendanceDao.update(attendance)) {
+                throw new InvalidInputException(ATTENDANCE_NOT_UPDATED.code(), "Attendance Failed to Update");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(ATTENDANCE_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
+
         return attendance;
     }
 

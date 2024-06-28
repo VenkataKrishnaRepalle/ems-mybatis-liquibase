@@ -5,7 +5,9 @@ import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.AddDepartmentDto;
 import com.learning.emsmybatisliquibase.entity.Department;
+import com.learning.emsmybatisliquibase.entity.Profile;
 import com.learning.emsmybatisliquibase.exception.FoundException;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.DepartmentService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
@@ -15,10 +17,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.DEPARTMENT_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.*;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.SHEET_NOT_FOUND;
 
 import java.io.FileOutputStream;
@@ -73,6 +76,14 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .uuid(UUID.randomUUID())
                 .name(departmentDto.getName())
                 .build();
+
+        try {
+            if (0 == departmentDao.insert(department)) {
+                throw new IntegrityException(DEPARTMENT_NOT_CREATED.code(), "Department not created");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(DEPARTMENT_NOT_CREATED.code(), exception.getCause().getMessage());
+        }
         departmentDao.insert(department);
         return department;
     }
@@ -99,15 +110,25 @@ public class DepartmentServiceImpl implements DepartmentService {
                 if (action.equalsIgnoreCase(ADD)) {
                     var profile = profileDao.get(employee.getUuid());
                     profile.setDepartmentUuid(department.getUuid());
-                    profileDao.update(profile);
+                    updateProfile(profile);
                 } else if (action.equalsIgnoreCase(REMOVE)) {
                     var profile = profileDao.get(employee.getUuid());
                     if (profile.getDepartmentUuid() != null && department.getUuid().equals(profile.getDepartmentUuid())) {
                         profile.setDepartmentUuid(null);
-                        profileDao.update(profile);
+                        updateProfile(profile);
                     }
                 }
             }
+        }
+    }
+
+    private void updateProfile(Profile profile) {
+        try {
+            if (0 == profileDao.update(profile)) {
+                throw new IntegrityException(PROFILE_NOT_UPDATED.code(), "Profile not updated");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(PROFILE_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
     }
 
@@ -115,14 +136,26 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department update(UUID departmentUuid, AddDepartmentDto departmentDto) {
         var department = isDepartmentExists(departmentUuid);
         department.setName(departmentDto.getName());
-        departmentDao.update(department);
+        try {
+            if (0 == departmentDao.update(department)) {
+                throw new IntegrityException(DEPARTMENT_NOT_UPDATED.code(), "Department not updated");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(DEPARTMENT_NOT_UPDATED.code(), exception.getCause().getMessage());
+        }
         return department;
     }
 
     @Override
     public void delete(UUID departmentUuid) {
         isDepartmentExists(departmentUuid);
-        departmentDao.delete(departmentUuid);
+        try {
+            if (0 == departmentDao.delete(departmentUuid)) {
+                throw new IntegrityException(DEPARTMENT_NOT_DELETED.code(), "Department not deleted");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(DEPARTMENT_NOT_DELETED.code(), exception.getCause().getMessage());
+        }
     }
 
     @Override

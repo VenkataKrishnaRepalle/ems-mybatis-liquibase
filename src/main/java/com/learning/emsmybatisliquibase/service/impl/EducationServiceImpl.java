@@ -4,18 +4,19 @@ import com.learning.emsmybatisliquibase.dao.EducationDao;
 import com.learning.emsmybatisliquibase.entity.Education;
 import com.learning.emsmybatisliquibase.entity.EducationDegree;
 import com.learning.emsmybatisliquibase.exception.FoundException;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.EducationService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EducationErrorCodes.EDUCATION_DEGREE_ALREADY_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EducationErrorCodes.EDUCATION_DETAILS_NOT_FOUND;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EducationErrorCodes.*;
 
 @Service
 @AllArgsConstructor
@@ -46,7 +47,15 @@ public class EducationServiceImpl implements EducationService {
         educationDto.setUuid(UUID.randomUUID());
         educationDto.setCreatedTime(Instant.now());
         educationDto.setUpdatedTime(Instant.now());
-        educationDao.insert(educationDto);
+
+        try {
+            if (0 == educationDao.insert(educationDto)) {
+                throw new IntegrityException(EDUCATION_NOT_CREATED.code(), "Education Details not created");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EDUCATION_NOT_CREATED.code(), exception.getCause().getMessage());
+        }
+
         return educationDto;
     }
 
@@ -60,7 +69,13 @@ public class EducationServiceImpl implements EducationService {
         education.setEndDate(educationDto.getEndDate());
         education.setUpdatedTime(Instant.now());
 
-        educationDao.update(educationDto);
+        try {
+            if (0 == educationDao.update(educationDto)) {
+                throw new IntegrityException(EDUCATION_NOT_UPDATED.code(), "Education Details not updated");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EDUCATION_NOT_UPDATED.code(), exception.getCause().getMessage());
+        }
 
         return education;
     }
@@ -86,6 +101,14 @@ public class EducationServiceImpl implements EducationService {
     @Override
     public void deleteById(UUID id) {
         getById(id);
-        educationDao.delete(id);
+
+        try {
+            if (0 == educationDao.delete(id)) {
+                throw new IntegrityException(EDUCATION_NOT_DELETED.code(), "Education Details not deleted");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EDUCATION_NOT_DELETED.code(), exception.getCause().getMessage());
+        }
+
     }
 }

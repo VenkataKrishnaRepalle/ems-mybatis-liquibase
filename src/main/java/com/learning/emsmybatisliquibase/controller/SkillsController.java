@@ -26,17 +26,19 @@ public class SkillsController {
 
     private final SkillsService skillsService;
 
-    @PreAuthorize("@authServiceImpl.isCurrentUser(#skillsDto.employeeUuid) or @authServiceImpl.isEmployeeManager(#skillsDto.employeeUuid) or hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PostMapping("/add-skills")
     public ResponseEntity<Skills> add(@RequestBody SkillsDto skillsDto) {
         return new ResponseEntity<>(skillsService.add(skillsDto), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PutMapping("/update-skills{skillsUuid}")
     public ResponseEntity<Skills> update(@PathVariable UUID skillsUuid, @RequestBody SkillsDto skillsDto) {
         return new ResponseEntity<>(skillsService.update(skillsUuid, skillsDto), HttpStatus.ACCEPTED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/get-skills-by-id/{skillsUuid}")
     public ResponseEntity<Skills> gteById(@PathVariable UUID skillsUuid) {
         return new ResponseEntity<>(skillsService.getById(skillsUuid), HttpStatus.OK);
@@ -48,7 +50,7 @@ public class SkillsController {
         return new ResponseEntity<>(skillsService.getAll(employeeUuid), HttpStatus.OK);
     }
 
-    @PreAuthorize("isRememberMe()")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @DeleteMapping("/delete-skills-by-id/{skillsUuid}/employee/{employeeUuid}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable UUID employeeUuid, @PathVariable UUID skillsUuid) {
         skillsService.deleteById(skillsUuid, employeeUuid);

@@ -9,6 +9,7 @@ import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.SkillsMapper;
 import com.learning.emsmybatisliquibase.service.SkillsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -42,11 +43,17 @@ public class SkillsServiceImpl implements SkillsService {
         skills.setCreatedTime(Instant.now());
         skills.setUpdatedTime(Instant.now());
 
-        if (0 == skillsDao.insert(skills)) {
-            throw new IntegrityException(SKILLS_NOT_CREATED.code(), "skill not created");
+        try {
+            if (0 == skillsDao.insert(skills)) {
+                throw new IntegrityException(SKILLS_NOT_CREATED.code(), "skill not created");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(SKILLS_NOT_CREATED.code(), exception.getCause().getMessage());
         }
+
         return skills;
     }
+
 
     @Override
     public Skills update(UUID skillsUuid, SkillsDto skillsDto) {
@@ -55,8 +62,12 @@ public class SkillsServiceImpl implements SkillsService {
         skills.setName(skillsDto.getName());
         skills.setRating(skillsDto.getRating());
         skills.setUpdatedTime(Instant.now());
-        if (0 == skillsDao.update(skills)) {
-            throw new IntegrityException(SKILLS_NOT_UPDATED.code(), "Skills not updated for skillsId: " + skillsUuid);
+        try {
+            if (0 == skillsDao.update(skills)) {
+                throw new IntegrityException(SKILLS_NOT_UPDATED.code(), "Skills not updated for skillsId: " + skillsUuid);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(SKILLS_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
 
         return skills;
@@ -79,12 +90,20 @@ public class SkillsServiceImpl implements SkillsService {
     @Override
     public void deleteById(UUID skillsUuid, UUID employeeUuid) {
         getById(skillsUuid);
-        if (0 == skillsDao.delete(skillsUuid)) {
-            throw new IntegrityException(SKILLS_NOT_DELETED.code(), "Skills not deleted for skillsId: " + skillsUuid);
+        try {
+            if (0 == skillsDao.delete(skillsUuid)) {
+                throw new IntegrityException(SKILLS_NOT_DELETED.code(), "Skills not deleted for skillsId: " + skillsUuid);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(SKILLS_NOT_DELETED.code(), exception.getCause().getMessage());
         }
     }
 
+
     private void inputValidation(SkillsDto skillsDto) {
+        if (skillsDto.getName().isEmpty() || skillsDto.getName().isBlank()) {
+            throw new InvalidInputException(INVALID_RATINGS_INPUT.code(), "Name cannot be empty or null");
+        }
         if (skillsDto.getRating() < 1 || skillsDto.getRating() > 10) {
             throw new InvalidInputException(INVALID_RATINGS_INPUT.code(), "Ratings must between 1 and 10");
         }
@@ -93,6 +112,9 @@ public class SkillsServiceImpl implements SkillsService {
     private void isSkillExists(String name, UUID employeeUuid) {
         var skills = skillsDao.getByNameAndEmployeeId(name, employeeUuid);
 
+        if (skills.isEmpty()) {
+            return;
+        }
         for (var skill : skills) {
             if (name.equalsIgnoreCase(skill.getName().toLowerCase())) {
                 throw new InvalidInputException(SKILLS_ALREADY_EXISTS.code(), "Skill already exists");

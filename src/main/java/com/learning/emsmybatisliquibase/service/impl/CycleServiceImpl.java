@@ -12,6 +12,7 @@ import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -73,9 +74,14 @@ public class CycleServiceImpl implements CycleService {
                 .updatedTime(Instant.now())
                 .build();
 
-        if (0 == cycleDao.insert(cycle)) {
+        try {
+            if (0 == cycleDao.insert(cycle)) {
+                throw new IntegrityException(CYCLE_NOT_CREATED.code(), "Cycle not created");
+            }
+        } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(CYCLE_NOT_CREATED.code(), "Cycle not created");
         }
+
         return cycle;
     }
 
@@ -94,27 +100,31 @@ public class CycleServiceImpl implements CycleService {
                 activeCycle.getEndTime().atZone(ZoneId.systemDefault()).getYear() == cycleEndTime) {
             activeCycle.setStatus(CycleStatus.INACTIVE);
             activeCycle.setUpdatedTime(Instant.now());
-            if (0 == cycleDao.update(activeCycle)) {
-                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
-            }
+            update(activeCycle, cycleId);
             updateEmployeesCycleStatus(activeCycle.getUuid());
         } else if (activeCycle != null && activeCycle.getStartTime().atZone(ZoneId.systemDefault()).getYear() < cycleStartTime) {
             activeCycle.setStatus(CycleStatus.COMPLETED);
             activeCycle.setUpdatedTime(Instant.now());
-            if (0 == cycleDao.update(activeCycle)) {
-                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
-            }
+            update(activeCycle, cycleId);
         }
 
         cycle.setStatus(CycleStatus.STARTED);
-        if (0 == cycleDao.update(cycle)) {
-            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
-        }
+        update(cycle, cycleId);
 
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
                 .data(String.valueOf(cycleId))
                 .build();
+    }
+
+    private void update(Cycle cycle, UUID cycleId) {
+        try {
+            if (0 == cycleDao.update(cycle)) {
+                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), exception.getCause().getMessage());
+        }
     }
 
     @Override
@@ -131,9 +141,7 @@ public class CycleServiceImpl implements CycleService {
         var cycle = getById(cycleId);
         cycle.setStatus(status);
         cycle.setUpdatedTime(Instant.now());
-        if (0 == cycleDao.update(cycle)) {
-            throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
-        }
+        update(cycle, cycleId);
 
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
