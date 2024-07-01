@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeCycleErrorCodes.EMPLOYEE_CYCLE_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class TimelineServiceImpl implements TimelineService {
@@ -26,7 +28,7 @@ public class TimelineServiceImpl implements TimelineService {
     public FullEmployeeCycleDto getActiveTimelineDetails(UUID employeeId) {
         var employeeCycle = employeeCycleDao.getActiveCycleByEmployeeId(employeeId);
         if (employeeCycle == null) {
-            throw new NotFoundException("EMPLOYEE_CYCLE_NOT_FOUND", "Active Employee Cycle not found for employeeId: " + employeeId);
+            throw new NotFoundException(EMPLOYEE_CYCLE_NOT_FOUND.code(), "Active Employee Cycle not found for employeeId: " + employeeId);
         }
         var fullTimeline = employeeCycleMapper.employeeCycleToFullEMployeeCycleDto(employeeCycle);
         fullTimeline.setTimelines(timelineDao.getByEmployeeCycleId(employeeCycle.getUuid()));

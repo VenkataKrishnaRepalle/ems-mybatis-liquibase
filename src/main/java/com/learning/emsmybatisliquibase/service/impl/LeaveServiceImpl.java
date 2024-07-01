@@ -11,18 +11,19 @@ import com.learning.emsmybatisliquibase.entity.Leave;
 import com.learning.emsmybatisliquibase.entity.LeaveStatus;
 import com.learning.emsmybatisliquibase.entity.LeaveType;
 import com.learning.emsmybatisliquibase.exception.FoundException;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.LeaveMapper;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import com.learning.emsmybatisliquibase.service.LeaveService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.INVALID_MANGER_ACCESS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.LeaveErrorCodes.LEAVE_ALREADY_EXIST;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.LeaveErrorCodes.LEAVE_NOT_FOUND;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.MANAGER_ACCESS_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.LeaveErrorCodes.*;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -94,8 +95,12 @@ public class LeaveServiceImpl implements LeaveService {
         });
 
         leaves.forEach(leave -> {
-            if (0 == leaveDao.insert(leave)) {
-                throw new InvalidInputException(LEAVE_NOT_FOUND.code(), "Leave not saved");
+            try {
+                if (0 == leaveDao.insert(leave)) {
+                    throw new InvalidInputException(LEAVE_NOT_CREATED.code(), "Leave not saved");
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException(LEAVE_NOT_CREATED.code(), exception.getCause().getMessage());
             }
         });
 

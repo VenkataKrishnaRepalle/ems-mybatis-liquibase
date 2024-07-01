@@ -8,11 +8,14 @@ import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.ExperienceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ExperienceErrorCodes.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     public Experience getById(UUID experienceId) {
         var experience = experienceDao.getById(experienceId);
         if (experience == null) {
-            throw new NotFoundException("EXPERIENCE_NOT_FOUND", "experience not found with id: " + experienceId);
+            throw new NotFoundException(EXPERIENCE_NOT_FOUND.code(), "experience not found with id: " + experienceId);
         }
         return experience;
     }
@@ -37,7 +40,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     @Override
     public List<Experience> add(UUID employeeUuid, List<Experience> experiences) {
         if (experiences == null) {
-            throw new InvalidInputException("EXPERIENCE_INPUT_NULL", "experiences input is null");
+            throw new InvalidInputException(EXPERIENCE_INPUT_NULL.code(), "experiences input is null");
         }
 
         isInputOverlapping(experiences);
@@ -50,8 +53,13 @@ public class ExperienceServiceImpl implements ExperienceService {
             } else if (experience.getEndDate() != null) {
                 experience.setIsCurrentJob(Boolean.FALSE);
             }
-            if (0 == experienceDao.insert(experience)) {
-                throw new IntegrityException("EXPERIENCE_NOT_INSERTED", "insertion failed");
+
+            try {
+                if (0 == experienceDao.insert(experience)) {
+                    throw new IntegrityException(EXPERIENCE_NOT_CREATED.code(), "insertion failed");
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException(EXPERIENCE_NOT_CREATED.code(), exception.getCause().getMessage());
             }
         });
 
@@ -61,7 +69,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     @Override
     public List<Experience> update(UUID employeeUuid, List<Experience> experiences) {
         if (experiences == null) {
-            throw new InvalidInputException("EXPERIENCE_INPUT_NULL", "experiences input is null");
+            throw new InvalidInputException(EXPERIENCE_INPUT_NULL.code(), "experiences input is null");
         }
 
         experiences.forEach(experience -> getById(experience.getUuid()));
@@ -74,8 +82,12 @@ public class ExperienceServiceImpl implements ExperienceService {
             } else if (experience.getEndDate() != null) {
                 experience.setIsCurrentJob(Boolean.FALSE);
             }
-            if (0 == experienceDao.update(experience)) {
-                throw new IntegrityException("EXPERIENCE_NOT_UPDATED", "experience not updated with id: " + experience.getUuid());
+            try {
+                if (0 == experienceDao.update(experience)) {
+                    throw new IntegrityException(EXPERIENCE_NOT_UPDATED.code(), "experience not updated with id: " + experience.getUuid());
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException(EXPERIENCE_NOT_UPDATED.code(), exception.getCause().getMessage());
             }
         });
 
@@ -85,12 +97,16 @@ public class ExperienceServiceImpl implements ExperienceService {
     @Override
     public void deleteById(UUID experienceId) {
         getById(experienceId);
-        if (0 == experienceDao.delete(experienceId)) {
-            throw new IntegrityException("EXPERIENCE_NOT_DELETED", "experience not deleted with id: " + experienceId);
+        try {
+            if (0 == experienceDao.delete(experienceId)) {
+                throw new IntegrityException(EXPERIENCE_NOT_DELETED.code(), "experience not deleted with id: " + experienceId);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EXPERIENCE_NOT_DELETED.code(), exception.getCause().getMessage());
         }
         var isExperienceDeleted = experienceDao.getById(experienceId);
         if (isExperienceDeleted != null) {
-            throw new FoundException("EXPERIENCE_NOT_DELETED", "experience not deleted with id: " + experienceId);
+            throw new FoundException(EXPERIENCE_NOT_DELETED.code(), "experience not deleted with id: " + experienceId);
         }
     }
 
@@ -98,7 +114,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         for (int i = 0; i < experiences.size() - 1; i++) {
             for (int j = i + 1; j < experiences.size(); j++) {
                 if (isOverlapping(experiences.get(i), experiences.get(j))) {
-                    throw new InvalidInputException("EXPERIENCE_INPUT_OVERLAPPING",
+                    throw new InvalidInputException(EXPERIENCE_INPUT_OVERLAPPING.code(),
                             "experience date is overlapping, Please check and update");
                 }
             }
@@ -113,7 +129,7 @@ public class ExperienceServiceImpl implements ExperienceService {
                         isOverlapping(experience, existingExperience)
                 );
                 if (isOverlapping) {
-                    throw new InvalidInputException("EXPERIENCE_OVERLAPPING",
+                    throw new InvalidInputException(EXPERIENCE_OVERLAPPING.code(),
                             "input experience dates are overlapping, please check and Update");
                 }
             }

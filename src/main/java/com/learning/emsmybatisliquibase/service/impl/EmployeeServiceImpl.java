@@ -13,6 +13,7 @@ import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import com.learning.emsmybatisliquibase.entity.Department;
 import com.learning.emsmybatisliquibase.entity.CycleStatus;
 import com.learning.emsmybatisliquibase.exception.FoundException;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
@@ -28,6 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,13 +40,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.DEPARTMENT_NOT_CREATED;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_NOT_FOUND;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_ALREADY_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_NOT_CREATED;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.EMPLOYEE_INTEGRATE_VIOLATION;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.INVALID_INPUT_EXCEPTION;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.MANAGER_ACCESS_NOT_FOUND;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.INVALID_MANAGER_PROVIDED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.INVALID_COLUMN_HEADINGS;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.SHEET_NOT_FOUND;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.ProfileErrorCodes.PROFILE_NOT_CREATED;
@@ -128,14 +124,22 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .uuid(UUID.randomUUID())
                         .name(employeeDto.getDepartmentName())
                         .build();
-                if (0 == departmentDao.insert(department)) {
-                    throw new NotFoundException(DEPARTMENT_NOT_CREATED.code(), "Failed in saving department");
+                try {
+                    if (0 == departmentDao.insert(department)) {
+                        throw new NotFoundException(DEPARTMENT_NOT_CREATED.code(), "Failed in saving department");
+                    }
+                } catch (DataIntegrityViolationException exception) {
+                    throw new IntegrityException(DEPARTMENT_NOT_CREATED.code(), exception.getCause().getMessage());
                 }
             }
         }
 
-        if (0 == employeeDao.insert(employee)) {
-            throw new NotFoundException(EMPLOYEE_NOT_CREATED.code(), "Failed in saving employee");
+        try {
+            if (0 == employeeDao.insert(employee)) {
+                throw new NotFoundException(EMPLOYEE_NOT_CREATED.code(), "Failed in saving employee");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_NOT_CREATED.code(), exception.getCause().getMessage());
         }
 
         sendSuccessfulEmployeeOnBoard(employee.getUuid());
@@ -148,8 +152,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .departmentUuid(department == null ? null : department.getUuid())
                 .updatedTime(Instant.now())
                 .build();
-        if (0 == profileDao.insert(profile)) {
-            throw new NotFoundException(PROFILE_NOT_CREATED.code(), "Failed in saving profile");
+
+        try {
+            if (0 == profileDao.insert(profile)) {
+                throw new NotFoundException(PROFILE_NOT_CREATED.code(), "Failed in saving profile");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(PROFILE_NOT_CREATED.code(), exception.getCause().getMessage());
         }
         List<UUID> uuid = new ArrayList<>();
         uuid.add(employee.getUuid());
@@ -178,8 +187,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void updateLeavingDate(UUID id, UpdateLeavingDateDto updateLeavingDate) {
         var employee = getById(id);
-        if (0 == employeeDao.updateLeavingDate(updateLeavingDate.getLeavingDate(), id)) {
-            throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Problem in updating LeavingDate");
+        try {
+            if (0 == employeeDao.updateLeavingDate(updateLeavingDate.getLeavingDate(), id)) {
+                throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Problem in updating LeavingDate");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_INTEGRATE_VIOLATION.code(), exception.getCause().getMessage());
         }
 
         var profile = profileDao.get(id);
@@ -233,11 +246,21 @@ public class EmployeeServiceImpl implements EmployeeService {
                     employee.setIsManager(Boolean.FALSE);
                 }
 
-                employeeDao.update(employee);
+                update(employee);
             }
         }
     }
 
+
+    private void update(Employee employee) {
+        try {
+            if (0 == employeeDao.update(employee)) {
+                throw new NotFoundException(EMPLOYEE_NOT_UPDATED.code(), "Failed in updating employee manager status");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_NOT_UPDATED.code(), exception.getCause().getMessage());
+        }
+    }
 
     @Override
     public void updateManagerId(MultipartFile file) throws IOException {
@@ -291,13 +314,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     private void addManager(Employee employee, Employee manager) {
         validateManagerAccess(manager);
         employee.setManagerUuid(manager.getUuid());
-        employeeDao.update(employee);
+        update(employee);
     }
 
     private void removeManager(Employee employee, Employee manager) {
         if (manager.getUuid().equals(employee.getManagerUuid())) {
             employee.setManagerUuid(null);
-            employeeDao.update(employee);
+            update(employee);
         } else {
             throw new InvalidInputException(INVALID_MANAGER_PROVIDED.code(), "Invalid Manager details provided");
         }

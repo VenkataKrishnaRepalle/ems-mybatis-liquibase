@@ -3,10 +3,12 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
 import com.learning.emsmybatisliquibase.entity.EmployeeRole;
 import com.learning.emsmybatisliquibase.entity.RoleType;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,9 +38,12 @@ public class EmployeeRoleServiceImpl implements EmployeeRoleService {
                 throw new InvalidInputException(EMPLOYEE_ROLE_ALREADY_EXISTS.code(), "Employee already has this role");
             }
         });
-
-        if (0 == employeeRoleDao.insert(employeeRole)) {
-            throw new InvalidInputException(EMPLOYEE_ROLE_NOT_CREATED.code(), "Insert failed");
+        try {
+            if (0 == employeeRoleDao.insert(employeeRole)) {
+                throw new IntegrityException(EMPLOYEE_ROLE_NOT_CREATED.code(), "Insert failed");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_ROLE_ALREADY_EXISTS.code(), "Employee already has this role");
         }
 
         return employeeRole;
@@ -47,8 +52,12 @@ public class EmployeeRoleServiceImpl implements EmployeeRoleService {
     @Override
     public void delete(EmployeeRole employeeRole) {
         employeeService.getById(employeeRole.getEmployeeUuid());
-        if (0 == employeeRoleDao.delete(employeeRole.getEmployeeUuid(), employeeRole.getRole().toString())) {
-            throw new InvalidInputException(EMPLOYEE_ROLE_NOT_DELETED.code(), "Delete failed");
+        try {
+            if (0 == employeeRoleDao.delete(employeeRole.getEmployeeUuid(), employeeRole.getRole().toString())) {
+                throw new InvalidInputException(EMPLOYEE_ROLE_NOT_DELETED.code(), "Delete failed");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_ROLE_NOT_DELETED.code(), "Employee already has this role");
         }
     }
 

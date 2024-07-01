@@ -13,11 +13,15 @@ import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import com.learning.emsmybatisliquibase.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.UUID;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.*;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +39,19 @@ public class ReviewServiceImpl implements ReviewService {
 
         var reviewTimeline = reviewDao.getByTimelineId(employeeReviewDto.getTimelineUuid());
         if (reviewTimeline != null) {
-            throw new FoundException("REVIEW_ALREADY_EXISTS", "Review already exists");
+            throw new FoundException(REVIEW_ALREADY_EXISTS.code(), "Review already exists");
         }
 
         validateTimeline(employeeUuid, timeline);
 
         var review = buildReview(employeeReviewDto);
 
-        if (0 == reviewDao.insert(review)) {
-            throw new IntegrityException("REVIEW_NOT_CREATED", "Review is not inserted with Id: " + review.getUuid());
+        try {
+            if (0 == reviewDao.insert(review)) {
+                throw new IntegrityException(REVIEW_NOT_CREATED.code(), "Review is not inserted with Id: " + review.getUuid());
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(REVIEW_NOT_CREATED.code(), exception.getCause().getMessage());
         }
 
         return review;
@@ -71,15 +79,19 @@ public class ReviewServiceImpl implements ReviewService {
         var reviewTimeline = reviewDao.getByTimelineId(review.getTimelineUuid());
 
         if (reviewTimeline == null) {
-            throw new NotFoundException("REVIEW_NOT_FOUND", "Review not found with Id: " + reviewUuid);
+            throw new NotFoundException(REVIEW_NOT_EXISTS.code(), "Review not found with Id: " + reviewUuid);
         }
 
         validateTimeline(employeeUuid, timeline);
 
         updateReview(reviewTimeline, review, employeeUuid);
 
-        if (0 == reviewDao.update(reviewTimeline)) {
-            throw new IntegrityException("REVIEW_NOT_UPDATED", "Review not updated for Id: " + reviewUuid);
+        try {
+            if (0 == reviewDao.update(reviewTimeline)) {
+                throw new IntegrityException(REVIEW_NOT_UPDATED.code(), "Review not updated for Id: " + reviewUuid);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(REVIEW_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
         return reviewTimeline;
     }
@@ -88,7 +100,7 @@ public class ReviewServiceImpl implements ReviewService {
     public Review getById(UUID reviewUuid) {
         var review = reviewDao.getById(reviewUuid);
         if (review == null) {
-            throw new NotFoundException("REVIEW_NOT_FOUND", "Review not found with Id: " + reviewUuid);
+            throw new NotFoundException(REVIEW_NOT_EXISTS.code(), "Review not found with Id: " + reviewUuid);
         }
         return review;
     }
@@ -96,12 +108,16 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void deleteById(UUID reviewUuid) {
         getById(reviewUuid);
-        if (0 == reviewDao.delete(reviewUuid)) {
-            throw new IntegrityException("REVIEW_NOT_DELETED", "Review not deleted with Id: " + reviewUuid);
+        try {
+            if (0 == reviewDao.delete(reviewUuid)) {
+                throw new IntegrityException(REVIEW_NOT_DELETED.code(), "Review not deleted with Id: " + reviewUuid);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(REVIEW_NOT_DELETED.code(), exception.getCause().getMessage());
         }
         var isReviewExists = reviewDao.getById(reviewUuid);
         if (isReviewExists != null) {
-            throw new FoundException("REVIEW_NOT_DELETED", "Review not deleted with Id: " + reviewUuid);
+            throw new FoundException(REVIEW_NOT_DELETED.code(), "Review not deleted with Id: " + reviewUuid);
         }
     }
 
@@ -151,11 +167,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         switch (timeline.getStatus()) {
             case COMPLETED:
-                throw new InvalidInputException("TIMELINE_COMPLETED", "Review already completed");
+                throw new InvalidInputException(TIMELINE_COMPLETED.code(), "Review already completed");
             case LOCKED:
-                throw new InvalidInputException("TIMELINE_LOCKED", "Review already locked");
+                throw new InvalidInputException(TIMELINE_LOCKED.code(), "Review already locked");
             case NOT_STARTED:
-                throw new InvalidInputException("TIMELINE_NOT_STARTED", "Review not started");
+                throw new InvalidInputException(TIMELINE_NOT_STARTED.code(), "Review not started");
             default:
                 break;
         }

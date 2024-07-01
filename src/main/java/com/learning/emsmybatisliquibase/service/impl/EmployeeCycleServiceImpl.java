@@ -17,7 +17,12 @@ import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeCycleMapper;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeCycleErrorCodes.EMPLOYEE_CYCLE_NOT_CREATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeCycleErrorCodes.EMPLOYEE_CYCLE_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -82,8 +87,12 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
             var year = cycle.getStartTime().atZone(ZoneId.systemDefault()).getYear();
             var timelines = generateTimelines(employeeCycle, currentMonth, year);
             timelines.forEach(timeline -> {
-                if (0 == timelineDao.insert(timeline)) {
-                    throw new IntegrityException("", "");
+                try {
+                    if (0 == timelineDao.insert(timeline)) {
+                        throw new IntegrityException(TIMELINE_NOT_ASSIGNED.code(), "Timeline not assigned");
+                    }
+                } catch (DataIntegrityViolationException exception) {
+                    throw new IntegrityException(TIMELINE_NOT_ASSIGNED.code(), exception.getCause().getMessage());
                 }
             });
         }
@@ -99,8 +108,12 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
                 .updatedTime(Instant.now())
                 .build();
 
-        if (0 == employeeCycleDao.insert(employeeCycle)) {
-            throw new IntegrityException("", "");
+        try {
+            if (0 == employeeCycleDao.insert(employeeCycle)) {
+                throw new IntegrityException(EMPLOYEE_CYCLE_NOT_CREATED.code(), "Employee Cycle not created");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_CYCLE_NOT_CREATED.code(), exception.getCause().getMessage());
         }
         return employeeCycle;
     }
@@ -145,8 +158,13 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
     public SuccessResponseDto updateEmployeeCycleStatus(UUID employeeCycleId, CycleStatus status) {
         var employeeCycle = getById(employeeCycleId);
         employeeCycle.setStatus(status);
-        if (0 == employeeCycleDao.update(employeeCycle)) {
-            throw new IntegrityException("", "");
+
+        try {
+            if (0 == employeeCycleDao.update(employeeCycle)) {
+                throw new IntegrityException(EMPLOYEE_CYCLE_NOT_UPDATED.code(), "Employee Cycle not updated with id: " + employeeCycle.getUuid());
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(EMPLOYEE_CYCLE_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
 
         var timelines = timelineDao.getByEmployeeCycleId(employeeCycleId);
@@ -160,8 +178,12 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
         timelines.forEach(timeline -> {
             timeline.setStatus(timelineStatus);
             timeline.setUpdatedTime(Instant.now());
-            if (0 == timelineDao.update(timeline)) {
-                throw new IntegrityException("", "");
+            try {
+                if (0 == timelineDao.update(timeline)) {
+                    throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), "Timeline not updated for id: " + timeline.getUuid());
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), exception.getCause().getMessage());
             }
         });
         return SuccessResponseDto.builder()
