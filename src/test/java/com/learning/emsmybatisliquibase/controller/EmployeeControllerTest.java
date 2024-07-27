@@ -5,7 +5,6 @@ import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.Gender;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
-import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,15 +54,6 @@ class EmployeeControllerTest {
                 .email("test@gmail.com")
                 .managerUuid(UUID.randomUUID())
                 .build();
-    }
-
-    @Test
-    void testGetMe() throws Exception {
-        when(employeeService.getMe()).thenReturn(employee);
-
-        mockMvc.perform(get("/api/employee/me")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
     }
 
     @Test

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.learning.emsmybatisliquibase.dao.CertificationDao">
+    <resultMap id="certificationResult" type="com.learning.emsmybatisliquibase.entity.Certification">
+        <id property="uuid" column="uuid" javaType="java.util.UUID" jdbcType="VARCHAR"
+            typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="employeeUuid" column="employee_uuid" javaType="java.util.UUID" jdbcType="VARCHAR"
+                typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="certificationCategoryUuid" column="certification_category_uuid" javaType="java.util.UUID"
+                jdbcType="VARCHAR"
+                typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="name" column="name"/>
+        <result property="skillSets" column="skill_sets"/>
+        <result property="level" column="level"/>
+        <result property="certifiedDate" column="certified_date"/>
+        <result property="expiryDate" column="expiry_date"/>
+        <result property="creationTime" column="created_time"/>
+        <result property="updatedTime" column="last_updated_time"/>
+    </resultMap>
+
+    <select id="getById" resultMap="certificationResult">
+        SELECT *
+        FROM certification
+        WHERE uuid = #{id}
+    </select>
+
+    <select id="getByEmployeeUuid" resultMap="certificationResult">
+        SELECT *
+        FROM certification
+        WHERE employee_uuid = #{employeeUuid}
+    </select>
+
+    <insert id="insert" flushCache="true">
+        INSERT INTO certification(uuid, employee_uuid, certification_category_uuid, name, skill_sets, level,
+                                  certified_date, expiry_date, created_time, last_updated_time)
+        VALUES (#{certification.uuid}, #{certification.employeeUuid}, #{certification.certificationCategoryUuid},
+                #{certification.name},
+                #{certification.skillSets}, #{certification.level}, #{certification.certifiedDate},
+                #{certification.expiryDate},
+                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    </insert>
+
+    <update id="update" flushCache="true">
+        UPDATE certification
+        SET employee_uuid               = #{certification.employeeUuid},
+            certification_category_uuid = #{certification.certificationCategoryUuid},
+            name                        = #{certification.name},
+            skill_sets                  = #{certification.skillSets},
+            level                       = #{certification.level},
+            certified_date              = #{certification.certifiedDate},
+            expiry_date                 = #{certification.expiryDate},
+            last_updated_time           = CURRENT_TIMESTAMP
+        WHERE uuid = #{certification.uuid}
+    </update>
+
+    <delete id="delete" flushCache="true">
+        DELETE
+        FROM certification
+        WHERE uuid = #{id}
+    </delete>
+
+    <select id="getByNameAndEmployeeUuid" resultMap="certificationResult">
+        SELECT *
+        FROM certification
+        WHERE LOWER(name) = LOWER(#{name})
+          AND employee_uuid = #{employeeUuid}
+    </select>
+
+    <select id="getByCertificationCategoryUuid" resultMap="certificationResult">
+        SELECT *
+        FROM certification
+        WHERE certification_category_uuid = #{certificationCategoryUuid}
+    </select>
+</mapper>

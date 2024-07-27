@@ -1,0 +1,64 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="certification_category">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="certification_category_pk"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="certification">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="certification_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certification_category_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_sets" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certified_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiry_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_time" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="certification" baseColumnNames="certification_category_uuid"
+                                 constraintName="certification_category_fk" initiallyDeferred="false"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="CASCADE"
+                                 referencedTableName="certification_category" referencedColumnNames="uuid"/>
+
+        <addForeignKeyConstraint baseTableName="certification" baseColumnNames="employee_uuid"
+                                 constraintName="employee_fk" initiallyDeferred="false"
+                                 deferrable="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+
+        <sql>
+            ALTER TABLE certification
+                ADD CONSTRAINT level_check CHECK ( level = 'BEGINNER' or
+                                                   level = 'INTERMEDIATE' or
+                                                   level = 'EXPERT')
+        </sql>
+    </changeSet>
+</databaseChangeLog>
