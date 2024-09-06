@@ -29,9 +29,6 @@
             <column name="is_manager" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="password" type="VARCHAR">
-                <constraints nullable="false"/>
-            </column>
             <column name="joining_date" type="DATE">
                 <constraints nullable="false"/>
             </column>

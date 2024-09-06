@@ -15,6 +15,7 @@ import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -63,36 +64,38 @@ public class ScheduledTasks {
         }
     }
 
+    @Scheduled(cron = "0 0 0 25 12 *")
+    public void scheduleCycle() {
+        var year = Instant.now().atZone(ZoneId.systemDefault()).getYear() + 1;
+        cycleService.createCycle(year);
+    }
+
     @Scheduled(cron = "0 0 0 1 1 *")
     public void startCycle() {
-        var year = Instant.now().atZone(ZoneId.systemDefault()).getYear();
-
         var oldCycle = cycleDao.getByStatus(CycleStatus.STARTED);
         oldCycle.setStatus(CycleStatus.INACTIVE);
         oldCycle.setUpdatedTime(Instant.now());
 
         var employeeCycles = employeeCycleDao.getByStatusAndCycleId(CycleStatus.STARTED, oldCycle.getUuid());
-        employeeCycles.forEach(employeeCycle -> {
-            employeeCycle.setStatus(CycleStatus.COMPLETED);
-            employeeCycle.setUpdatedTime(Instant.now());
-            employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.COMPLETED);
-        });
+        employeeCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.COMPLETED));
 
+        var cycle = cycleDao.getByStatus(CycleStatus.SCHEDULED);
 
-        var cycle = cycleService.createCycle(year);
-
-        var activeCycle = cycleService.getById(cycle.getUuid());
-        activeCycle.setStatus(CycleStatus.STARTED);
-        activeCycle.setUpdatedTime(Instant.now());
-        if (0 == cycleDao.update(activeCycle)) {
-            throw new IntegrityException("", "");
+        cycle.setStatus(CycleStatus.STARTED);
+        cycle.setUpdatedTime(Instant.now());
+        try {
+            if (0 == cycleDao.update(cycle)) {
+                throw new IntegrityException("CYCLE_NOT_UPDATED", "Cycle not updated");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException("CYCLE_NOT_UPDATED", exception.getCause().getMessage());
         }
 
         employeeCycleService.cycleAssignment(employeeDao.getAllActiveEmployeeIds());
     }
 
-    @Scheduled(cron = "0 0 1 1 4,7,10 *")
-    public void startEmployeeCycle() {
+    @Scheduled(cron = "0 15 0 1 4,7,10 *")
+    public void startTimeline() {
         var calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
@@ -131,5 +134,33 @@ public class ScheduledTasks {
                 throw new IntegrityException("", "");
             }
         });
+    }
+
+    @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
+    public void sendBeforeStartNotification(){
+        // Send notification to employees before starting the cycle
+        var calendar = Calendar.getInstance();
+
+        var month = calendar.get(Calendar.MONTH) + 1;
+        switch(month) {
+            case 3:
+                sendNotificationBeforeStart(ReviewType.Q1);
+                break;
+            case 6:
+                sendNotificationBeforeStart(ReviewType.Q2);
+                break;
+            case 9:
+                sendNotificationBeforeStart(ReviewType.Q3);
+                break;
+            case 12:
+                sendNotificationBeforeStart(ReviewType.Q4);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void sendNotificationBeforeStart(ReviewType reviewType) {
+
     }
 }

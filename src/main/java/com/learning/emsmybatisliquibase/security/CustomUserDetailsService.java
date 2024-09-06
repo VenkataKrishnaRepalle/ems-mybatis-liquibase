@@ -2,6 +2,8 @@ package com.learning.emsmybatisliquibase.security;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
+import com.learning.emsmybatisliquibase.dao.PasswordDao;
+import com.learning.emsmybatisliquibase.entity.PasswordStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +22,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final EmployeeDao employeeDao;
 
+    private final PasswordDao passwordDao;
+
     private final EmployeeRoleDao employeeRoleDao;
 
     private static final String ROLE_PREFIX = "ROLE_";
@@ -35,6 +39,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (employee == null) {
             throw new UsernameNotFoundException("User not found with uuid: " + uuid);
         }
+
+        var password = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(), PasswordStatus.ACTIVE).get(0);
         var employeeRoles = employeeRoleDao.getByEmployeeUuid(employee.getUuid());
 
         Set<GrantedAuthority> authorities = employeeRoles.stream().map(role ->
@@ -45,7 +51,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         authorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + EMPLOYEE));
         return new org.springframework.security.core.userdetails.User(
                 uuid,
-                employee.getPassword(),
+                password.getPassword(),
                 authorities
         );
     }

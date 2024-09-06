@@ -99,7 +99,7 @@ class EmployeeServiceImplTest {
 
     @Test
     void testGetByIdSuccess() {
-        when(employeeDao.get(any(UUID.class))).thenReturn(employee);
+        when(employeeDao.get(any(UUID.class))).thenReturn(any(Employee.class));
 
         Employee result = employeeService.getById(employee.getUuid());
         assertEquals(employee, result);
@@ -114,7 +114,7 @@ class EmployeeServiceImplTest {
                 .uuid(managerUuid)
                 .isManager(Boolean.TRUE)
                 .build();
-        when(employeeDao.get(managerUuid)).thenReturn(manager);
+        when(employeeDao.get(any(UUID.class))).thenReturn(manager);
 
         assertDoesNotThrow(() -> employeeService.isManager(managerUuid));
     }

@@ -36,9 +36,6 @@ public class Employee implements Serializable {
 
     private Boolean isManager;
 
-    @JsonIgnore
-    private String password;
-
     private LocalDate joiningDate;
 
     private LocalDate leavingDate;

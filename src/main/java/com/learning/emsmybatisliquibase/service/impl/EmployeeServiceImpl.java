@@ -1,17 +1,8 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
-import com.learning.emsmybatisliquibase.dao.DepartmentDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeDao;
-import com.learning.emsmybatisliquibase.dao.ProfileDao;
+import com.learning.emsmybatisliquibase.dao.*;
 import com.learning.emsmybatisliquibase.dto.*;
-import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.Gender;
-import com.learning.emsmybatisliquibase.entity.JobTitleType;
-import com.learning.emsmybatisliquibase.entity.Profile;
-import com.learning.emsmybatisliquibase.entity.ProfileStatus;
-import com.learning.emsmybatisliquibase.entity.Department;
-import com.learning.emsmybatisliquibase.entity.CycleStatus;
+import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
@@ -59,6 +50,8 @@ import java.util.*;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeDao employeeDao;
+
+    private final PasswordDao passwordDao;
 
     private final EmployeeMapper employeeMapper;
 
@@ -110,7 +103,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         var isManager = employeeDto.getIsManager().trim().equalsIgnoreCase("T".trim()) ? Boolean.TRUE : Boolean.FALSE;
         var employee = employeeMapper.addEmployeeDtoToEmployee(employeeDto);
         employee.setUuid(UUID.randomUUID());
-        employee.setPassword(passwordEncoder.encode(generateRandomPassword()));
         employee.setIsManager(isManager);
         employee.setManagerUuid(employeeDto.getManagerUuid());
         employee.setCreatedTime(Instant.now());
@@ -142,7 +134,23 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IntegrityException(EMPLOYEE_NOT_CREATED.code(), exception.getCause().getMessage());
         }
 
-        sendSuccessfulEmployeeOnBoard(employee.getUuid());
+        var password = Password.builder()
+                .uuid(UUID.randomUUID())
+                .employeeUuid(employee.getUuid())
+                .password(generateRandomPassword())
+                .createdTime(Instant.now())
+                .updatedTime(Instant.now())
+                .build();
+
+        try {
+            if (0 == passwordDao.insert(password)) {
+                throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
+        }
+
+        sendSuccessfulEmployeeOnBoard(employee.getUuid(), password.getPassword());
 
         var profileStatus = employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isAfter(LocalDate.now()) ? ProfileStatus.PENDING : ProfileStatus.INACTIVE;
         var profile = Profile.builder()
@@ -497,7 +505,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return sb.toString();
     }
 
-    public void sendSuccessfulEmployeeOnBoard(UUID employeeUuid) {
+    public void sendSuccessfulEmployeeOnBoard(UUID employeeUuid, String password) {
         Thread thread = new Thread(() -> {
             try {
                 var employee = getById(employeeUuid);
@@ -514,7 +522,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());
                 context.setVariable("email", employee.getEmail());
                 context.setVariable("phoneNumber", employee.getPhoneNumber());
-                context.setVariable("password", employee.getPassword());
+                context.setVariable("password", password);
 
                 helper.setText(templateEngine.process(emailTemplateNameSuccessfulOnboard, context), true);
                 mailSender.send(message);

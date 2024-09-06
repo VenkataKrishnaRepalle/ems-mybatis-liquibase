@@ -21,6 +21,8 @@ public class Bootstrap implements CommandLineRunner {
 
     private final EmployeeDao employeeDao;
 
+    private final PasswordDao passwordDao;
+
     private final ProfileDao profileDao;
 
     private final DepartmentDao departmentDao;
@@ -50,11 +52,20 @@ public class Bootstrap implements CommandLineRunner {
                     .joiningDate(Date.valueOf("2022-01-01").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.FALSE)
-                    .password(passwordEncoder.encode(ADMIN))
                     .createdTime(Instant.now())
                     .updatedTime(Instant.now())
                     .build();
             employeeDao.insert(employee);
+
+            var password = Password.builder()
+                    .uuid(UUID.randomUUID())
+                    .employeeUuid(employee.getUuid())
+                    .password(passwordEncoder.encode(ADMIN))
+                    .status(PasswordStatus.ACTIVE)
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            passwordDao.insert(password);
 
             var profile = Profile.builder()
                     .employeeUuid(employee.getUuid())
@@ -79,11 +90,20 @@ public class Bootstrap implements CommandLineRunner {
                     .joiningDate(Date.valueOf("2018-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.TRUE)
-                    .password(passwordEncoder.encode("venky123"))
                     .createdTime(Instant.now())
                     .updatedTime(Instant.now())
                     .build();
             employeeDao.insert(employee1);
+
+            var password1 = Password.builder()
+                    .uuid(UUID.randomUUID())
+                    .employeeUuid(employee1.getUuid())
+                    .password(passwordEncoder.encode("venky123"))
+                    .status(PasswordStatus.ACTIVE)
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            passwordDao.insert(password1);
 
             var department1 = Department.builder()
                     .uuid(UUID.randomUUID())
@@ -111,12 +131,21 @@ public class Bootstrap implements CommandLineRunner {
                     .joiningDate(Date.valueOf("2019-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.FALSE)
-                    .password(passwordEncoder.encode("chandu123"))
                     .managerUuid(employee1.getUuid())
                     .createdTime(Instant.now())
                     .updatedTime(Instant.now())
                     .build();
             employeeDao.insert(employee2);
+
+            var password2 = Password.builder()
+                    .uuid(UUID.randomUUID())
+                    .employeeUuid(employee2.getUuid())
+                    .password(passwordEncoder.encode("chandu123"))
+                    .status(PasswordStatus.ACTIVE)
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            passwordDao.insert(password2);
 
             var profile2 = Profile.builder()
                     .employeeUuid(employee2.getUuid())
@@ -138,12 +167,21 @@ public class Bootstrap implements CommandLineRunner {
                     .joiningDate(Date.valueOf("2020-07-04").toLocalDate())
                     .gender(Gender.MALE)
                     .isManager(Boolean.FALSE)
-                    .password(passwordEncoder.encode("sujith123"))
                     .managerUuid(employee1.getUuid())
                     .createdTime(Instant.now())
                     .updatedTime(Instant.now())
                     .build();
             employeeDao.insert(employee3);
+
+            var password3 = Password.builder()
+                    .uuid(UUID.randomUUID())
+                    .employeeUuid(employee3.getUuid())
+                    .password(passwordEncoder.encode("sujith123"))
+                    .status(PasswordStatus.ACTIVE)
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            passwordDao.insert(password3);
 
             var profile3 = Profile.builder()
                     .employeeUuid(employee3.getUuid())
@@ -169,13 +207,22 @@ public class Bootstrap implements CommandLineRunner {
                     .dateOfBirth(Date.valueOf("2000-11-18").toLocalDate())
                     .joiningDate(Date.valueOf("2021-07-04").toLocalDate())
                     .gender(Gender.MALE)
-                    .password(passwordEncoder.encode("veeranji123"))
                     .isManager(Boolean.TRUE)
                     .managerUuid(employee1.getUuid())
                     .createdTime(Instant.now())
                     .updatedTime(Instant.now())
                     .build();
             employeeDao.insert(employee4);
+
+            var password4 = Password.builder()
+                    .uuid(UUID.randomUUID())
+                    .employeeUuid(employee4.getUuid())
+                    .password(passwordEncoder.encode("veeranji123"))
+                    .status(PasswordStatus.ACTIVE)
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            passwordDao.insert(password4);
 
             var profile4 = Profile.builder()
                     .employeeUuid(employee4.getUuid())
@@ -197,11 +244,20 @@ public class Bootstrap implements CommandLineRunner {
                     .gender(Gender.MALE)
                     .isManager(Boolean.FALSE)
                     .managerUuid(employee4.getUuid())
-                    .password(passwordEncoder.encode("lakshman123"))
                     .createdTime(Instant.now())
                     .updatedTime(Instant.now())
                     .build();
             employeeDao.insert(employee5);
+
+            var password5 = Password.builder()
+                    .uuid(UUID.randomUUID())
+                    .employeeUuid(employee5.getUuid())
+                    .password(passwordEncoder.encode("lakshman123"))
+                    .status(PasswordStatus.ACTIVE)
+                    .createdTime(Instant.now())
+                    .updatedTime(Instant.now())
+                    .build();
+            passwordDao.insert(password5);
 
             var profile5 = Profile.builder()
                     .employeeUuid(employee5.getUuid())

@@ -2,15 +2,19 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
+import com.learning.emsmybatisliquibase.dao.PasswordDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
+import com.learning.emsmybatisliquibase.entity.PasswordStatus;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.security.JwtTokenProvider;
 import com.learning.emsmybatisliquibase.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +35,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final EmployeeDao employeeDao;
 
+    private final PasswordDao passwordDao;
+
     private final EmployeeRoleDao employeeRoleDao;
 
     private final AuthenticationManager authenticationManager;
@@ -47,7 +53,37 @@ public class AuthServiceImpl implements AuthService {
         if (employee == null) {
             throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email: " + loginDto.getEmail());
         }
-        if (!passwordEncoder.matches(loginDto.getPassword(), employee.getPassword())) {
+
+        var profile = profileDao.get(employee.getUuid());
+        if (profile.getProfileStatus() == ProfileStatus.PENDING) {
+            throw new InvalidInputException("ACCOUNT_NOT_ACTIVATED", "Account not activated, Please set new password");
+        } else if (profile.getProfileStatus() == ProfileStatus.INACTIVE) {
+            throw new InvalidInputException("NOT_AUTHORIZED_USER", "You're not eligible to access this application");
+        }
+
+        var passwords = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(), PasswordStatus.ACTIVE);
+        if (passwords.size() != 1) {
+            throw new InvalidInputException("INVALID_LOGIN", "Account Locked, Please reset password");
+        }
+
+        var password = passwords.get(0);
+
+        if (!passwordEncoder.matches(loginDto.getPassword(), password.getPassword())) {
+            password.setNoOfIncorrectEntries(password.getNoOfIncorrectEntries() + 1);
+            if (password.getNoOfIncorrectEntries() == 3) {
+                password.setStatus(PasswordStatus.LOCKED);
+            }
+            try {
+                if (0 == passwordDao.update(password)) {
+                    throw new IntegrityException("PASSWORD_UPDATE_FAILED", "Password not updated");
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException("PASSWORD_UPDATE_FAILED", "Password not updated");
+            }
+
+            if (password.getNoOfIncorrectEntries() >= 3) {
+                throw new InvalidInputException("ACCOUNT_LOCKED", "Your account locked, please reset your password");
+            }
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -71,6 +107,15 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .roles(roles)
                 .build();
+    }
+
+    @Override
+    public UUID verifyEmail(String email) {
+        var employee = employeeDao.getByEmail(email.trim());
+        if (employee == null) {
+            throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email: " + email);
+        }
+        return employee.getUuid();
     }
 
     public Boolean isCurrentUser(final UUID userId) {

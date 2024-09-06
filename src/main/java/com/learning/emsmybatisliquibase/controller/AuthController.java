@@ -2,15 +2,14 @@ package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
+import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @CrossOrigin("*")
 @RestController
@@ -23,5 +22,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginDto loginDto) {
         return new ResponseEntity<>(authService.login(loginDto), HttpStatus.OK);
+    }
+
+    @PostMapping("/verifyEmail")
+    public ResponseEntity<UUID> verifyEmail(@RequestParam(name = "email") String email) {
+        return new ResponseEntity<>(authService.verifyEmail(email), HttpStatus.OK);
     }
 }
