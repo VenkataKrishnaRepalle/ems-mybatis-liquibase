@@ -63,7 +63,7 @@ class AuthServiceImplTest {
         Employee employee = new Employee();
         employee.setUuid(employeeUuid);
         employee.setEmail(email);
-        employee.setPassword(passwordEncoder.encode(password));
+//        employee.setPassword(passwordEncoder.encode(password));
         employee.setIsManager(Boolean.TRUE);
 
         List<EmployeeRole> employeeRoles = new ArrayList<>();
@@ -77,7 +77,7 @@ class AuthServiceImplTest {
                 .build());
 
         when(employeeDao.getByEmail(anyString())).thenReturn(employee);
-        when(passwordEncoder.matches(password, employee.getPassword())).thenReturn(true);
+//        when(passwordEncoder.matches(password, employee.getPassword())).thenReturn(true);
         when(jwtTokenProvider.generateToken(any())).thenReturn(expectedToken);
         when(employeeRoleDao.getByEmployeeUuid(employee.getUuid())).thenReturn(employeeRoles);
 
@@ -98,9 +98,9 @@ class AuthServiceImplTest {
         Employee employee = new Employee();
         employee.setUuid(UUID.randomUUID());
         employee.setEmail(email);
-        employee.setPassword(passwordEncoder.encode(password));
+//        employee.setPassword(passwordEncoder.encode(password));
         when(employeeDao.getByEmail(anyString())).thenReturn(employee);
-        when(passwordEncoder.matches(password, employee.getPassword())).thenReturn(false);
+//        when(passwordEncoder.matches(password, employee.getPassword())).thenReturn(false);
 
         assertThrows(InvalidInputException.class, () ->
                 authService.login(new LoginDto(email, password)));

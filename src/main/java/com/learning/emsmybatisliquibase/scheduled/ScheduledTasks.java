@@ -138,7 +138,6 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
     public void sendBeforeStartNotification(){
-        // Send notification to employees before starting the cycle
         var calendar = Calendar.getInstance();
 
         var month = calendar.get(Calendar.MONTH) + 1;
@@ -161,6 +160,6 @@ public class ScheduledTasks {
     }
 
     private void sendNotificationBeforeStart(ReviewType reviewType) {
-
+        
     }
 }

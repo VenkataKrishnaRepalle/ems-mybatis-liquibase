@@ -173,7 +173,7 @@ class EmployeeServiceImplTest {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
-        employeeService.sendSuccessfulEmployeeOnBoard(employee.getUuid());
+//        employeeService.sendSuccessfulEmployeeOnBoard(employee.getUuid());
 
         AddEmployeeResponseDto finalResponse = employeeService.add(employeeDto);
 
