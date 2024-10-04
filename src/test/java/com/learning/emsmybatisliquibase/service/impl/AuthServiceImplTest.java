@@ -2,6 +2,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
+import com.learning.emsmybatisliquibase.dao.PasswordDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
@@ -52,6 +53,9 @@ class AuthServiceImplTest {
     @Mock
     private ProfileDao profileDao;
 
+    @Mock
+    private PasswordDao passwordDao;
+
     @Test
     void testLogin_ValidCredentials_ReturnsTokenAndRoles() {
         UUID employeeUuid = UUID.randomUUID();
@@ -63,8 +67,18 @@ class AuthServiceImplTest {
         Employee employee = new Employee();
         employee.setUuid(employeeUuid);
         employee.setEmail(email);
-//        employee.setPassword(passwordEncoder.encode(password));
         employee.setIsManager(Boolean.TRUE);
+
+        Profile profile = new Profile();
+        profile.setEmployeeUuid(employeeUuid);
+        profile.setProfileStatus(ProfileStatus.ACTIVE);
+
+        List<Password> passwords = new ArrayList<>();
+        passwords.add(Password.builder()
+                .employeeUuid(employeeUuid)
+                .password(passwordEncoder.encode(password))
+                .status(PasswordStatus.ACTIVE)
+                .build());
 
         List<EmployeeRole> employeeRoles = new ArrayList<>();
         employeeRoles.add(EmployeeRole.builder()
@@ -77,30 +91,53 @@ class AuthServiceImplTest {
                 .build());
 
         when(employeeDao.getByEmail(anyString())).thenReturn(employee);
-//        when(passwordEncoder.matches(password, employee.getPassword())).thenReturn(true);
+        when(profileDao.get(employeeUuid)).thenReturn(profile);
+        when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
+        when(passwordEncoder.matches(password, passwords.get(0).getPassword())).thenReturn(true);
         when(jwtTokenProvider.generateToken(any())).thenReturn(expectedToken);
         when(employeeRoleDao.getByEmployeeUuid(employee.getUuid())).thenReturn(employeeRoles);
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(mock(Authentication.class));
 
         JwtAuthResponseDto result = authService.login(new LoginDto(email, password));
 
         assertEquals(expectedToken, result.getAccessToken());
         assertEquals(expectedRole, result.getRoles().get(0));
         assertTrue(result.getRoles().contains("MANAGER"));
+
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(employeeDao, times(1)).getByEmail(email);
+        verify(passwordDao, times(1)).getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE);
+        verify(jwtTokenProvider, times(1)).generateToken(any());
+        verify(employeeRoleDao, times(1)).getByEmployeeUuid(employee.getUuid());
     }
 
     @Test
     void testLogin_InvalidCredentials_ThrowsInvalidInputException() {
+        UUID employeeUuid = UUID.randomUUID();
         String email = "test@example.com";
         String password = "wrongPassword";
 
         Employee employee = new Employee();
-        employee.setUuid(UUID.randomUUID());
+        employee.setUuid(employeeUuid);
         employee.setEmail(email);
-//        employee.setPassword(passwordEncoder.encode(password));
+
+        Profile profile = new Profile();
+        profile.setEmployeeUuid(employeeUuid);
+        profile.setProfileStatus(ProfileStatus.ACTIVE);
+
+        List<Password> passwords = new ArrayList<>();
+        passwords.add(Password.builder()
+                .employeeUuid(employeeUuid)
+                .password(passwordEncoder.encode(password))
+                .status(PasswordStatus.ACTIVE)
+                .build());
         when(employeeDao.getByEmail(anyString())).thenReturn(employee);
-//        when(passwordEncoder.matches(password, employee.getPassword())).thenReturn(false);
+        when(profileDao.get(employeeUuid)).thenReturn(profile);
+        when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
+        when(passwordEncoder.matches(password, passwords.get(0).getPassword())).thenReturn(false);
+        when(passwordDao.update(passwords.get(0))).thenReturn(1);
 
         assertThrows(InvalidInputException.class, () ->
                 authService.login(new LoginDto(email, password)));

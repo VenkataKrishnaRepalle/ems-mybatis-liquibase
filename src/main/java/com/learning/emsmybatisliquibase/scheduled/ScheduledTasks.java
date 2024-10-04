@@ -135,31 +135,4 @@ public class ScheduledTasks {
             }
         });
     }
-
-    @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
-    public void sendBeforeStartNotification(){
-        var calendar = Calendar.getInstance();
-
-        var month = calendar.get(Calendar.MONTH) + 1;
-        switch(month) {
-            case 3:
-                sendNotificationBeforeStart(ReviewType.Q1);
-                break;
-            case 6:
-                sendNotificationBeforeStart(ReviewType.Q2);
-                break;
-            case 9:
-                sendNotificationBeforeStart(ReviewType.Q3);
-                break;
-            case 12:
-                sendNotificationBeforeStart(ReviewType.Q4);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void sendNotificationBeforeStart(ReviewType reviewType) {
-        
-    }
 }

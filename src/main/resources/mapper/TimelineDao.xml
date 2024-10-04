@@ -54,10 +54,45 @@
           and t.status != 'LOCKED'
     </select>
 
-    <select id="getByTimelineIdAndReviewType" resultMap="timelineStructure">
+    <select id="getById" resultMap="timelineStructure">
         select *
         from timeline
-        where uuid = #{timelineId}
-          and type = #{reviewType}
+        where uuid = #{uuid}
+    </select>
+
+    <select id="getByEmployeeUuidsAndReviewType" resultMap="timelineStructure">
+        select t.*
+        from employee e
+        join profile p on e.uuid = p.employee_uuid and profile_status = 'ACTIVE'
+        join employee_cycle ec on e.uuid = ec.employee_uuid and ec.status = 'STARTED'
+        join timeline t on ec.uuid = t.employee_cycle_uuid and t.type = #{reviewType}
+        where e.uuid in
+        <foreach item="employeeUuid" collection="employeeUuids" open="(" separator="," close=")">
+            #{employeeUuid, jdbcType=VARCHAR, typeHandler=com.learning.emsmybatisliquibase.handler.UuidTypeHandler}
+        </foreach>
+    </select>
+
+    <resultMap id="notificationInfo" type="com.learning.emsmybatisliquibase.dto.NotificationDto">
+        <id property="uuid" column="uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+            typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="firstName" column="first_name"/>
+        <result property="lastName" column="last_name"/>
+        <result property="email" column="email"/>
+        <result property="timelineUuid" column="timelineUuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+                typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="startTime" column="start_time"/>
+    </resultMap>
+
+    <select id="getTimelineIdsByReviewType" resultMap="notificationInfo">
+        select e.uuid       as "uuid",
+               e.first_name as "first_name",
+               e.last_name  as "last_name",
+               e.email      as "email",
+               t.uuid       as "timelineUuid",
+               t.start_time as "start_time"
+        from employee e
+                 join profile p on e.uuid = p.employee_uuid and p.profile_status = 'ACTIVE'
+                 join employee_cycle ec on e.uuid = ec.employee_uuid and ec.status = 'STARTED'
+                 join timeline t on ec.uuid = t.employee_cycle_uuid and t.type = #{reviewType};
     </select>
 </mapper>

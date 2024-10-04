@@ -35,7 +35,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review add(UUID employeeUuid, AddReviewRequestDto employeeReviewDto) {
-        var timeline = timelineDao.getByTimelineIdAndReviewType(employeeReviewDto.getTimelineUuid(), employeeReviewDto.getType());
+        var timeline = timelineDao.getById(employeeReviewDto.getTimelineUuid());
 
         var reviewTimeline = reviewDao.getByTimelineId(employeeReviewDto.getTimelineUuid());
         if (reviewTimeline != null) {
@@ -74,7 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review update(UUID employeeUuid, UUID reviewUuid, Review review) {
-        var timeline = timelineDao.getByTimelineIdAndReviewType(review.getTimelineUuid(), review.getType());
+        var timeline = timelineDao.getById(review.getTimelineUuid());
 
         var reviewTimeline = reviewDao.getByTimelineId(review.getTimelineUuid());
 

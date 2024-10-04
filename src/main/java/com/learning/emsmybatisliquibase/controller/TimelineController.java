@@ -1,15 +1,16 @@
 package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.TimelineStatus;
 import com.learning.emsmybatisliquibase.service.TimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,5 +23,13 @@ public class TimelineController {
     @GetMapping("/getActiveTimelineDetails/{employeeId}")
     public ResponseEntity<FullEmployeeCycleDto> getActiveTimelineDetails(@PathVariable UUID employeeId) {
         return new ResponseEntity<>(timelineService.getActiveTimelineDetails(employeeId), HttpStatus.OK);
+    }
+
+    @PutMapping("/updateTimelineStatus")
+    public ResponseEntity<SuccessResponseDto> updateTimelineStatus(@RequestBody List<UUID> employeeUuids,
+                                                                   @RequestBody ReviewType reviewType,
+                                                                   @RequestBody TimelineStatus timelineStatus) {
+        timelineService.updateTimelineStatus(employeeUuids, reviewType, timelineStatus);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
