@@ -14,6 +14,7 @@ import com.learning.emsmybatisliquibase.entity.TimelineStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
+import com.learning.emsmybatisliquibase.service.NotificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,6 +43,8 @@ public class ScheduledTasks {
     private final EmployeeCycleService employeeCycleService;
 
     private final CycleService cycleService;
+
+    private final NotificationService notificationService;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void updateProfileStatusLeavingDate() {
@@ -134,5 +137,33 @@ public class ScheduledTasks {
                 throw new IntegrityException("", "");
             }
         });
+    }
+
+    @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
+    public void sendBeforeStartNotification() {
+        var calendar = Calendar.getInstance();
+        var month = calendar.get(Calendar.MONTH);
+
+        ReviewType reviewType = null;
+        switch (month) {
+            case Calendar.MARCH:
+                reviewType = ReviewType.Q1;
+                break;
+            case Calendar.JUNE:
+                reviewType = ReviewType.Q2;
+                break;
+            case Calendar.SEPTEMBER:
+                reviewType = ReviewType.Q3;
+                break;
+            case Calendar.DECEMBER:
+                reviewType = ReviewType.Q4;
+                break;
+            default:
+                break;
+        }
+
+        if (reviewType != null) {
+            notificationService.sendNotificationBeforeStart(reviewType);
+        }
     }
 }

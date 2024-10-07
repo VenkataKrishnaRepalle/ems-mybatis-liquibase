@@ -11,24 +11,19 @@ import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
+import com.learning.emsmybatisliquibase.service.NotificationService;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.DEPARTMENT_NOT_CREATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
@@ -61,10 +56,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final Random random = new Random();
 
-    private final JavaMailSender mailSender;
-
-    private final TemplateEngine templateEngine;
-
     private final ProfileDao profileDao;
 
     private final EmployeeCycleService employeeCycleService;
@@ -73,14 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeCycleDao employeeCycleDao;
 
-    @Value("${default.send.email}")
-    String defaultEmail;
-
-    @Value("${email.template.name.successful.onboard}")
-    String emailTemplateNameSuccessfulOnboard;
-
-    @Value("${email.template.successful.onboard}")
-    String emailTemplateSuccessfulOnboard;
+    private final NotificationService notificationService;
 
     private static final String ADD = "add";
 
@@ -137,7 +121,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         var password = Password.builder()
                 .uuid(UUID.randomUUID())
                 .employeeUuid(employee.getUuid())
-                .password(generateRandomPassword())
+                .password(passwordEncoder.encode(generateRandomPassword()))
                 .createdTime(Instant.now())
                 .updatedTime(Instant.now())
                 .build();
@@ -150,7 +134,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
         }
 
-        sendSuccessfulEmployeeOnBoard(employee.getUuid(), password.getPassword());
+        notificationService.sendSuccessfulEmployeeOnBoard(employee.getUuid(), password.getPassword());
 
         var profileStatus = employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isAfter(LocalDate.now()) ? ProfileStatus.PENDING : ProfileStatus.INACTIVE;
         var profile = Profile.builder()
@@ -503,33 +487,5 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         return sb.toString();
-    }
-
-    public void sendSuccessfulEmployeeOnBoard(UUID employeeUuid, String password) {
-        Thread thread = new Thread(() -> {
-            try {
-                var employee = getById(employeeUuid);
-
-                MimeMessage message = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message);
-
-                helper.setFrom(defaultEmail, emailTemplateSuccessfulOnboard);
-                helper.setTo(employee.getEmail());
-
-                helper.setSubject(emailTemplateSuccessfulOnboard);
-
-                Context context = new Context();
-                context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());
-                context.setVariable("email", employee.getEmail());
-                context.setVariable("phoneNumber", employee.getPhoneNumber());
-                context.setVariable("password", password);
-
-                helper.setText(templateEngine.process(emailTemplateNameSuccessfulOnboard, context), true);
-                mailSender.send(message);
-            } catch (MessagingException | UnsupportedEncodingException e) {
-                log.error("Error sending successful onboarding email for employee with UUID: {}", employeeUuid, e);
-            }
-        });
-        thread.start();
     }
 }
