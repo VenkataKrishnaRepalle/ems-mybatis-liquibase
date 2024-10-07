@@ -55,7 +55,7 @@ public class NotificationTasks {
             case 6:
                 sendNotificationBeforeStart(ReviewType.Q2);
                 break;
-            case 10:
+            case 9:
                 sendNotificationBeforeStart(ReviewType.Q3);
                 break;
             case 12:
