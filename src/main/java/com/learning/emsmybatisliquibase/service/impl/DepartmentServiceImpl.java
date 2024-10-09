@@ -85,15 +85,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public Department getByName(String name) {
-        var department = departmentDao.getByName(name.trim());
-        if (department == null) {
-            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(), "Department not found with name " + name);
-        }
-        return department;
-    }
-
-    @Override
     public void delete(UUID departmentUuid) {
         isDepartmentExists(departmentUuid);
         try {
