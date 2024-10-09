@@ -13,4 +13,6 @@ public interface TimelineService {
     FullEmployeeCycleDto getActiveTimelineDetails(UUID employeeId);
 
     SuccessResponseDto updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType, TimelineStatus timelineStatus);
+
+    SuccessResponseDto startTimelinesForQuarter(ReviewType completedReviewType, ReviewType startedReviewType);
 }

@@ -4,17 +4,15 @@ import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dao.CycleDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
-import com.learning.emsmybatisliquibase.dao.TimelineDao;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import com.learning.emsmybatisliquibase.entity.CycleStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
-import com.learning.emsmybatisliquibase.entity.Timeline;
-import com.learning.emsmybatisliquibase.entity.TimelineStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import com.learning.emsmybatisliquibase.service.NotificationService;
+import com.learning.emsmybatisliquibase.service.TimelineService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -36,7 +33,7 @@ public class ScheduledTasks {
 
     private final CycleDao cycleDao;
 
-    private final TimelineDao timelineDao;
+    private final TimelineService timelineService;
 
     private final EmployeeCycleDao employeeCycleDao;
 
@@ -100,44 +97,33 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 15 0 1 4,7,10 *")
     public void startTimeline() {
         var calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
+        var month = calendar.get(Calendar.MONTH);
 
-        int month = calendar.get(Calendar.MONTH) + 1;
+        ReviewType completedReviewType = null;
+        ReviewType startedReviewType = null;
 
         switch (month) {
-            case 4:
-                startTimelinesForQuarter(ReviewType.Q1, ReviewType.Q2);
+            case Calendar.APRIL:
+                completedReviewType = ReviewType.Q1;
+                startedReviewType = ReviewType.Q2;
                 break;
-            case 7:
-                startTimelinesForQuarter(ReviewType.Q2, ReviewType.Q3);
+            case Calendar.JULY:
+                completedReviewType = ReviewType.Q2;
+                startedReviewType = ReviewType.Q3;
                 break;
-            case 10:
-                startTimelinesForQuarter(ReviewType.Q3, ReviewType.Q4);
+            case Calendar.OCTOBER:
+                completedReviewType = ReviewType.Q3;
+                startedReviewType = ReviewType.Q4;
                 break;
             default:
                 break;
         }
+        if (completedReviewType != null) {
+            timelineService.startTimelinesForQuarter(completedReviewType, startedReviewType);
+        }
     }
 
-    private void startTimelinesForQuarter(ReviewType completedReviewType, ReviewType startedReviewType) {
-        List<Timeline> completedTimelines = timelineDao.findByStatusAndReviewType(CycleStatus.STARTED, completedReviewType);
-        completedTimelines.forEach(timeline -> {
-            timeline.setStatus(TimelineStatus.COMPLETED);
-            timeline.setUpdatedTime(Instant.now());
-            if (0 == timelineDao.update(timeline)) {
-                throw new IntegrityException("", "");
-            }
-        });
 
-        List<Timeline> startedTimelines = timelineDao.findByStatusAndReviewType(CycleStatus.SCHEDULED, startedReviewType);
-        startedTimelines.forEach(timeline -> {
-            timeline.setStatus(TimelineStatus.STARTED);
-            timeline.setUpdatedTime(Instant.now());
-            if (0 == timelineDao.update(timeline)) {
-                throw new IntegrityException("", "");
-            }
-        });
-    }
 
     @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
     public void sendBeforeStartNotification() {

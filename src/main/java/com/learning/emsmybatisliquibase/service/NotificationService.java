@@ -1,12 +1,11 @@
 package com.learning.emsmybatisliquibase.service;
 
+import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
-
-import java.util.UUID;
 
 public interface NotificationService {
 
-    void sendSuccessfulEmployeeOnBoard(UUID employeeUuid, String password);
+    void sendSuccessfulEmployeeOnBoard(Employee employee, String password);
 
     void sendNotificationBeforeStart(ReviewType reviewType);
 }

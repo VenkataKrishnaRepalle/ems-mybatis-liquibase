@@ -2,9 +2,9 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.TimelineDao;
 import com.learning.emsmybatisliquibase.dto.NotificationDto;
+import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.entity.TimelineStatus;
-import com.learning.emsmybatisliquibase.service.EmployeeService;
 import com.learning.emsmybatisliquibase.service.NotificationService;
 import com.learning.emsmybatisliquibase.service.TimelineService;
 import jakarta.mail.MessagingException;
@@ -18,14 +18,11 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    private final EmployeeService employeeService;
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
     private final TimelineDao timelineDao;
@@ -47,11 +44,9 @@ public class NotificationServiceImpl implements NotificationService {
     String beforeReviewStartSubject;
 
     @Override
-    public void sendSuccessfulEmployeeOnBoard(UUID employeeUuid, String password) {
+    public void sendSuccessfulEmployeeOnBoard(Employee employee, String password) {
         Thread thread = new Thread(() -> {
             try {
-                var employee = employeeService.getById(employeeUuid);
-
                 MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(), emailTemplateSuccessfulOnboard);
 
                 Context context = new Context();
@@ -63,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
                 helper.setText(templateEngine.process(emailTemplateNameSuccessfulOnboard, context), true);
                 mailSender.send(helper.getMimeMessage());
             } catch (MessagingException e) {
-                log.error("Error sending successful onboarding email for employee with UUID: {}", employeeUuid, e);
+                log.error("Error sending successful onboarding email for employee with UUID: {}", employee.getUuid(), e);
             }
         });
         thread.start();

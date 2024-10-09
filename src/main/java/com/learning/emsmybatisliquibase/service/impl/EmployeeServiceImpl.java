@@ -134,7 +134,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
         }
 
-        notificationService.sendSuccessfulEmployeeOnBoard(employee.getUuid(), password.getPassword());
+        notificationService.sendSuccessfulEmployeeOnBoard(employee, password.getPassword());
 
         var profileStatus = employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isAfter(LocalDate.now()) ? ProfileStatus.PENDING : ProfileStatus.INACTIVE;
         var profile = Profile.builder()

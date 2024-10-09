@@ -30,6 +30,13 @@ public class TimelineController {
                                                                    @RequestBody ReviewType reviewType,
                                                                    @RequestBody TimelineStatus timelineStatus) {
         timelineService.updateTimelineStatus(employeeUuids, reviewType, timelineStatus);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/startTimeline")
+    public ResponseEntity<SuccessResponseDto> updateTimelineForQuarter(@RequestBody ReviewType completedReviewType,
+                                                                       @RequestBody ReviewType startReviewType) {
+        return new ResponseEntity<>(timelineService.startTimelinesForQuarter(completedReviewType, startReviewType),
+                HttpStatus.ACCEPTED);
     }
 }

@@ -4,6 +4,7 @@ import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
 import com.learning.emsmybatisliquibase.dao.TimelineDao;
 import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.entity.CycleStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.entity.Timeline;
 import com.learning.emsmybatisliquibase.entity.TimelineStatus;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +54,31 @@ public class TimelineServiceImpl implements TimelineService {
             update(timeline);
         });
 
+        return SuccessResponseDto.builder()
+                .data(UUID.randomUUID().toString())
+                .success(Boolean.TRUE)
+                .build();
+    }
+
+    @Override
+    public SuccessResponseDto startTimelinesForQuarter(ReviewType completedReviewType, ReviewType startedReviewType) {
+        List<Timeline> completedTimelines = timelineDao.findByStatusAndReviewType(CycleStatus.STARTED, completedReviewType);
+        completedTimelines.forEach(timeline -> {
+            timeline.setStatus(TimelineStatus.COMPLETED);
+            timeline.setUpdatedTime(Instant.now());
+            if (0 == timelineDao.update(timeline)) {
+                throw new IntegrityException("", "");
+            }
+        });
+
+        List<Timeline> startedTimelines = timelineDao.findByStatusAndReviewType(CycleStatus.SCHEDULED, startedReviewType);
+        startedTimelines.forEach(timeline -> {
+            timeline.setStatus(TimelineStatus.STARTED);
+            timeline.setUpdatedTime(Instant.now());
+            if (0 == timelineDao.update(timeline)) {
+                throw new IntegrityException("", "");
+            }
+        });
         return SuccessResponseDto.builder()
                 .data(UUID.randomUUID().toString())
                 .success(Boolean.TRUE)
