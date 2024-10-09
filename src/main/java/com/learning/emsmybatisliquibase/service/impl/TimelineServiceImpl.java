@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeCycleErrorCodes.EMPLOYEE_CYCLE_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_FOUND;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_UPDATED;
 
 @Service
@@ -33,6 +34,13 @@ public class TimelineServiceImpl implements TimelineService {
 
     private final EmployeeCycleMapper employeeCycleMapper;
 
+    public Timeline getById(UUID uuid) {
+        var timeline = timelineDao.getById(uuid);
+        if(timeline == null) {
+            throw new NotFoundException(TIMELINE_NOT_FOUND.code(), "Timeline not found with id: " + uuid);
+        }
+        return timeline;
+    }
 
     @Override
     public FullEmployeeCycleDto getActiveTimelineDetails(UUID employeeId) {
@@ -46,7 +54,7 @@ public class TimelineServiceImpl implements TimelineService {
     }
 
     @Override
-    public SuccessResponseDto updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType, TimelineStatus timelineStatus) {
+    public void updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType, TimelineStatus timelineStatus) {
         var timelines = timelineDao.getByEmployeeUuidsAndReviewType(employeeUuids, reviewType);
 
         timelines.forEach(timeline -> {
@@ -54,7 +62,7 @@ public class TimelineServiceImpl implements TimelineService {
             update(timeline);
         });
 
-        return SuccessResponseDto.builder()
+        SuccessResponseDto.builder()
                 .data(UUID.randomUUID().toString())
                 .success(Boolean.TRUE)
                 .build();

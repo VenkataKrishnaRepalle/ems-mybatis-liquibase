@@ -37,18 +37,6 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
     }
 
     @Override
-    public void delete(UUID id) {
-        getById(id);
-        try {
-            if (0 == certificationCategoryDao.delete(id)) {
-                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(), "Certification Category not deleted with id: " + id);
-            }
-        } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(), exception.getCause().getMessage());
-        }
-    }
-
-    @Override
     public CertificationCategory add(CertificationCategoryDto certificationCategoryDto) {
         var certificationCategoryByName = certificationCategoryDao.getByName(certificationCategoryDto.getName().trim());
 
@@ -85,6 +73,18 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
         }
 
         return certificationCategory;
+    }
+
+    @Override
+    public void delete(UUID id) {
+        getById(id);
+        try {
+            if (0 == certificationCategoryDao.delete(id)) {
+                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(), "Certification Category not deleted with id: " + id);
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(), exception.getCause().getMessage());
+        }
     }
 
 }

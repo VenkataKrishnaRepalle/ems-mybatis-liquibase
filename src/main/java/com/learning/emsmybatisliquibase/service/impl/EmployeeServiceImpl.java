@@ -8,35 +8,19 @@ import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
-import com.learning.emsmybatisliquibase.service.CycleService;
-import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
-import com.learning.emsmybatisliquibase.service.EmployeeService;
-import com.learning.emsmybatisliquibase.service.NotificationService;
+import com.learning.emsmybatisliquibase.service.*;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.DEPARTMENT_NOT_CREATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.INVALID_COLUMN_HEADINGS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.SHEET_NOT_FOUND;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.ProfileErrorCodes.PROFILE_NOT_CREATED;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -46,17 +30,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeDao employeeDao;
 
-    private final PasswordDao passwordDao;
+    private final PasswordService passwordService;
 
     private final EmployeeMapper employeeMapper;
 
-    private final DepartmentDao departmentDao;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final DepartmentService departmentService;
 
     private final Random random = new Random();
 
-    private final ProfileDao profileDao;
+    private final ProfileService profileService;
 
     private final EmployeeCycleService employeeCycleService;
 
@@ -66,16 +48,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final NotificationService notificationService;
 
-    private static final String ADD = "add";
-
-    private static final String REMOVE = "remove";
-
-    private static final String PARSE_DATE = "dd/MM/yyyy";
-
     @Override
     public AddEmployeeResponseDto add(AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
         if (employeeDto.getManagerUuid() != null) {
-            getById(employeeDto.getManagerUuid());
             isManager(employeeDto.getManagerUuid());
         }
 
@@ -94,20 +69,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Department department = null;
         if (employeeDto.getDepartmentName() != null) {
-            department = departmentDao.getByName(employeeDto.getDepartmentName().trim());
-            if (department == null) {
-                department = Department.builder()
-                        .uuid(UUID.randomUUID())
-                        .name(employeeDto.getDepartmentName())
-                        .build();
-                try {
-                    if (0 == departmentDao.insert(department)) {
-                        throw new NotFoundException(DEPARTMENT_NOT_CREATED.code(), "Failed in saving department");
-                    }
-                } catch (DataIntegrityViolationException exception) {
-                    throw new IntegrityException(DEPARTMENT_NOT_CREATED.code(), exception.getCause().getMessage());
-                }
-            }
+            department = departmentService.add(new AddDepartmentDto(employeeDto.getDepartmentName().trim()));
         }
 
         try {
@@ -118,21 +80,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IntegrityException(EMPLOYEE_NOT_CREATED.code(), exception.getCause().getMessage());
         }
 
-        var password = Password.builder()
-                .uuid(UUID.randomUUID())
-                .employeeUuid(employee.getUuid())
-                .password(passwordEncoder.encode(generateRandomPassword()))
-                .createdTime(Instant.now())
-                .updatedTime(Instant.now())
-                .build();
-
-        try {
-            if (0 == passwordDao.insert(password)) {
-                throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
-            }
-        } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
-        }
+        var password = passwordService.create(employee.getUuid(), generateRandomPassword());
 
         notificationService.sendSuccessfulEmployeeOnBoard(employee, password.getPassword());
 
@@ -144,19 +92,12 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .departmentUuid(department == null ? null : department.getUuid())
                 .updatedTime(Instant.now())
                 .build();
+        profileService.insert(profile);
 
-        try {
-            if (0 == profileDao.insert(profile)) {
-                throw new NotFoundException(PROFILE_NOT_CREATED.code(), "Failed in saving profile");
-            }
-        } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(PROFILE_NOT_CREATED.code(), exception.getCause().getMessage());
-        }
         List<UUID> uuid = new ArrayList<>();
         uuid.add(employee.getUuid());
 
         employeeCycleService.cycleAssignment(uuid);
-
 
         var response = employeeMapper.employeeToAddEmployeeResponseDto(employee);
         response.setProfile(profile);
@@ -187,7 +128,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IntegrityException(EMPLOYEE_INTEGRATE_VIOLATION.code(), exception.getCause().getMessage());
         }
 
-        var profile = profileDao.get(id);
+        var profile = profileService.getByEmployeeUuid(id);
 
         if (updateLeavingDate.getLeavingDate() == null && profile.getProfileStatus().equals(ProfileStatus.INACTIVE)) {
             var currentActiveCycle = cycleService.getCurrentActiveCycle();
@@ -205,7 +146,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             var empStartedCycles = employeeCycleDao.getByEmployeeIdAndStatus(employee.getUuid(), CycleStatus.STARTED);
             empStartedCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE));
         }
-        profileDao.update(profile);
+        profileService.update(profile);
     }
 
 
@@ -215,36 +156,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-    public void managerAccess(MultipartFile file) throws IOException {
-        List<List<String>> rowValues = fileProcess(file);
-
-        for (List<String> rowValue : rowValues) {
-            if (rowValue.size() != 2) {
-                continue;
-            }
-            String email = rowValue.get(0);
-            String action = rowValue.get(1);
-
-            if (StringUtils.isNotBlank(action) && StringUtils.isNotBlank(email)) {
-                var employee = employeeDao.getByEmail(email);
-
-                if (ADD.equalsIgnoreCase(action)) {
-                    employee.setIsManager(Boolean.TRUE);
-                } else if (REMOVE.equalsIgnoreCase(action)) {
-                    var colleaguesByManager = getByManagerUuid(employee.getUuid());
-                    if (!colleaguesByManager.isEmpty()) {
-                        throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Colleagues exists under this manager, Please update their manager details to proceed");
-                    }
-                    employee.setIsManager(Boolean.FALSE);
-                }
-
-                update(employee);
-            }
-        }
-    }
-
-
-    private void update(Employee employee) {
+    public void update(Employee employee) {
         try {
             if (0 == employeeDao.update(employee)) {
                 throw new NotFoundException(EMPLOYEE_NOT_UPDATED.code(), "Failed in updating employee manager status");
@@ -254,74 +166,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
-    @Override
-    public void updateManagerId(MultipartFile file) throws IOException {
-        List<List<String>> rowDatas = fileProcess(file);
-        for (List<String> rowData : rowDatas) {
-            if (rowData.size() != 3) {
-                return;
-            }
-            String employeeEmail = rowData.get(0);
-            String managerEmail = rowData.get(1);
-            String action = rowData.get(2);
-            updateManager(employeeEmail, managerEmail, action);
-        }
-    }
-
-    private void updateManager(String employeeEmail, String managerEmail, String action) {
-        if (isValidInput(employeeEmail, managerEmail, action)) {
-            Employee employee = getByEmail(employeeEmail);
-            Employee manager = getByEmail(managerEmail);
-            performAction(action, employee, manager);
-        }
-    }
-
     public Employee getByEmail(String email) {
         var employee = employeeDao.getByEmail(email.trim());
         if (employee == null) {
             throw new NotFoundException(EMPLOYEE_NOT_FOUND.code(), "Employee not found with email " + email);
         }
         return employee;
-    }
-
-    private boolean isValidInput(String employeeEmail, String managerEmail, String action) {
-        return StringUtils.isNotBlank(employeeEmail)
-                && StringUtils.isNotBlank(managerEmail)
-                && StringUtils.isNotBlank(action);
-    }
-
-    private void performAction(String action, Employee employee, Employee manager) {
-        switch (action.toLowerCase()) {
-            case ADD:
-                addManager(employee, manager);
-                break;
-            case REMOVE:
-                removeManager(employee, manager);
-                break;
-            default:
-                throw new InvalidInputException(INVALID_INPUT_EXCEPTION.code(), "Invalid action provided: " + action);
-        }
-    }
-
-    private void addManager(Employee employee, Employee manager) {
-        validateManagerAccess(manager);
-        employee.setManagerUuid(manager.getUuid());
-        update(employee);
-    }
-
-    private void removeManager(Employee employee, Employee manager) {
-        if (manager.getUuid().equals(employee.getManagerUuid())) {
-            employee.setManagerUuid(null);
-            update(employee);
-        } else {
-            throw new InvalidInputException(INVALID_MANAGER_PROVIDED.code(), "Invalid Manager details provided");
-        }
-    }
-
-    private void validateManagerAccess(Employee manager) {
-        if (Boolean.FALSE.equals(manager.getIsManager())) {
-            throw new InvalidInputException(MANAGER_ACCESS_NOT_FOUND.code(), "Manager access not granted for email: " + manager.getEmail());
-        }
     }
 
     @Override
@@ -393,89 +243,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .currentPage(page)
                 .build();
     }
-
-    @Override
-    public SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, MessagingException {
-        var rowDatas = fileProcess(file);
-        List<UUID> employeeUuids = new ArrayList<>();
-        for (var rowData : rowDatas) {
-            if (rowData.size() != 11) {
-                continue;
-            }
-
-            var gender = rowData.get(3).equals("M") ? Gender.MALE : Gender.FEMALE;
-            var mangerUuid = rowData.get(10).trim().isEmpty() ? null : UUID.fromString(rowData.get(10).trim());
-
-            var decimalFormat = new DecimalFormat("0");
-            decimalFormat.setMaximumFractionDigits(0);
-            var employee = AddEmployeeDto.builder()
-                    .firstName(rowData.get(0))
-                    .lastName(rowData.get(1))
-                    .email(rowData.get(2))
-                    .gender(gender)
-                    .dateOfBirth(parseDate(rowData.get(4)))
-                    .phoneNumber(decimalFormat.format(Double.parseDouble(rowData.get(5))))
-                    .joiningDate(parseDate(rowData.get(6)))
-                    .leavingDate(parseDate(rowData.get(7)))
-                    .departmentName(rowData.get(8).trim())
-                    .isManager(rowData.get(9).trim())
-                    .managerUuid(mangerUuid)
-                    .build();
-            employeeUuids.add(add(employee).getUuid());
-        }
-        return SuccessResponseDto.builder()
-                .success(Boolean.TRUE)
-                .data(String.valueOf(employeeUuids))
-                .build();
-    }
-
-    private LocalDate parseDate(String value) {
-        if (value.isEmpty()) {
-            return null;
-        }
-        return LocalDate.parse(value, DateTimeFormatter.ofPattern(PARSE_DATE));
-    }
-
-    public List<List<String>> fileProcess(MultipartFile file) throws IOException {
-        try (XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            XSSFSheet sheet = workbook.getSheetAt(0);
-            if (sheet == null) {
-                throw new InvalidInputException(SHEET_NOT_FOUND.code(), "Sheet Not Found");
-            }
-
-            List<List<String>> rowValues = new ArrayList<>();
-
-            var headerRow = sheet.getRow(0);
-            List<String> columnHeadings = new ArrayList<>();
-
-            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
-                var cell = headerRow.getCell(i);
-                if (cell == null) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), "Invalid Column Headings");
-                }
-                columnHeadings.add(cell.toString());
-            }
-
-            var rows = sheet.rowIterator();
-            if (rows.hasNext()) {
-                rows.next();
-            }
-
-            while (rows.hasNext()) {
-                List<String> rowValue = new ArrayList<>();
-                var row = (XSSFRow) rows.next();
-
-                for (int i = 0; i < row.getLastCellNum(); i++) {
-                    var cell = row.getCell(i);
-                    var value = cell == null ? "" : cell.toString();
-                    rowValue.add(value);
-                }
-                rowValues.add(rowValue);
-            }
-            return rowValues;
-        }
-    }
-
 
     private String generateRandomPassword() {
         var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

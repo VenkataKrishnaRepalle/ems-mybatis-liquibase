@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface PasswordDao {
     List<Password> getByEmployeeUuidAndStatus(@Param("employeeUuid") UUID employeeUuid, @Param("status") PasswordStatus status);
 
+    Password getById(@Param("uuid") UUID uuid);
+
     int insert(@Param("password") Password password);
 
     int update(@Param("password") Password password);

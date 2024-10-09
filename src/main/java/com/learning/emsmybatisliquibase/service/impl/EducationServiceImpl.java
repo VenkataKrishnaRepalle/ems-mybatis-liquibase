@@ -61,13 +61,8 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     public Education update(Education educationDto, UUID id) {
-        var education = getById(educationDto.getUuid());
-        education.setEmployeeUuid(educationDto.getEmployeeUuid());
-        education.setDegree(educationDto.getDegree());
-        education.setSchoolName(educationDto.getSchoolName());
-        education.setStartDate(educationDto.getStartDate());
-        education.setEndDate(educationDto.getEndDate());
-        education.setUpdatedTime(Instant.now());
+        getById(educationDto.getUuid());
+        educationDto.setUpdatedTime(Instant.now());
 
         try {
             if (0 == educationDao.update(educationDto)) {
@@ -77,7 +72,7 @@ public class EducationServiceImpl implements EducationService {
             throw new IntegrityException(EDUCATION_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
 
-        return education;
+        return educationDto;
     }
 
     @Override

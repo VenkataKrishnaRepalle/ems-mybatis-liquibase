@@ -100,16 +100,16 @@ public class CycleServiceImpl implements CycleService {
                 activeCycle.getEndTime().atZone(ZoneId.systemDefault()).getYear() == cycleEndTime) {
             activeCycle.setStatus(CycleStatus.INACTIVE);
             activeCycle.setUpdatedTime(Instant.now());
-            update(activeCycle, cycleId);
+            update(activeCycle);
             updateEmployeesCycleStatus(activeCycle.getUuid());
         } else if (activeCycle != null && activeCycle.getStartTime().atZone(ZoneId.systemDefault()).getYear() < cycleStartTime) {
             activeCycle.setStatus(CycleStatus.COMPLETED);
             activeCycle.setUpdatedTime(Instant.now());
-            update(activeCycle, cycleId);
+            update(activeCycle);
         }
 
         cycle.setStatus(CycleStatus.STARTED);
-        update(cycle, cycleId);
+        update(cycle);
 
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
@@ -117,10 +117,10 @@ public class CycleServiceImpl implements CycleService {
                 .build();
     }
 
-    private void update(Cycle cycle, UUID cycleId) {
+    private void update(Cycle cycle) {
         try {
             if (0 == cycleDao.update(cycle)) {
-                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycleId);
+                throw new IntegrityException(CYCLE_NOT_UPDATED.code(), CYCLE_NOT_UPDATED_MESSAGE + cycle.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(CYCLE_NOT_UPDATED.code(), exception.getCause().getMessage());
@@ -141,7 +141,7 @@ public class CycleServiceImpl implements CycleService {
         var cycle = getById(cycleId);
         cycle.setStatus(status);
         cycle.setUpdatedTime(Instant.now());
-        update(cycle, cycleId);
+        update(cycle);
 
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)

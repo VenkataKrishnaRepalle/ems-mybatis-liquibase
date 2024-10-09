@@ -1,8 +1,6 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
-import com.learning.emsmybatisliquibase.dao.CycleDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.TimelineDao;
 import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
@@ -15,7 +13,9 @@ import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeCycleMapper;
+import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
+import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -40,9 +40,9 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
 
     private final EmployeeCycleDao employeeCycleDao;
 
-    private final CycleDao cycleDao;
+    private final CycleService cycleService;
 
-    private final EmployeeDao employeeDao;
+    private final EmployeeService employeeService;
 
     private final TimelineDao timelineDao;
 
@@ -51,7 +51,7 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
 
     @Override
     public SuccessResponseDto cycleAssignment(List<UUID> employeeIds) {
-        var cycle = cycleDao.getByStatus(CycleStatus.STARTED);
+        var cycle = cycleService.getCurrentActiveCycle();
 
         for (var employeeId : employeeIds) {
             handleEmployeeCycleAssignment(employeeId, cycle);
@@ -64,38 +64,36 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
     }
 
     private void handleEmployeeCycleAssignment(UUID employeeId, Cycle cycle) {
-        var employee = employeeDao.get(employeeId);
-        if (employee != null) {
-            if (!employeeCycleDao.getByEmployeeIdAndCycleId(employeeId, cycle.getUuid()).isEmpty()) {
-                return;
-            }
-
-            var employeeCycles = employeeCycleDao.getByEmployeeId(employeeId);
-            employeeCycles.stream()
-                    .filter(employeeCycle -> employeeCycle.getStatus().equals(CycleStatus.STARTED))
-                    .forEach(employeeCycle -> {
-                        if (employeeCycle.getCycleUuid().equals(cycle.getUuid())) {
-                            updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE);
-                        } else if (!cycle.getStatus().equals(CycleStatus.SCHEDULED)) {
-                            updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.COMPLETED);
-                        }
-                    });
-
-            var employeeCycle = saveEmployeeCycle(employeeId, cycle);
-
-            var currentMonth = LocalDateTime.now().getMonth();
-            var year = cycle.getStartTime().atZone(ZoneId.systemDefault()).getYear();
-            var timelines = generateTimelines(employeeCycle, currentMonth, year);
-            timelines.forEach(timeline -> {
-                try {
-                    if (0 == timelineDao.insert(timeline)) {
-                        throw new IntegrityException(TIMELINE_NOT_ASSIGNED.code(), "Timeline not assigned");
-                    }
-                } catch (DataIntegrityViolationException exception) {
-                    throw new IntegrityException(TIMELINE_NOT_ASSIGNED.code(), exception.getCause().getMessage());
-                }
-            });
+        employeeService.getById(employeeId);
+        if (!employeeCycleDao.getByEmployeeIdAndCycleId(employeeId, cycle.getUuid()).isEmpty()) {
+            return;
         }
+
+        var employeeCycles = employeeCycleDao.getByEmployeeId(employeeId);
+        employeeCycles.stream()
+                .filter(employeeCycle -> employeeCycle.getStatus().equals(CycleStatus.STARTED))
+                .forEach(employeeCycle -> {
+                    if (employeeCycle.getCycleUuid().equals(cycle.getUuid())) {
+                        updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE);
+                    } else if (!cycle.getStatus().equals(CycleStatus.SCHEDULED)) {
+                        updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.COMPLETED);
+                    }
+                });
+
+        var employeeCycle = saveEmployeeCycle(employeeId, cycle);
+
+        var currentMonth = LocalDateTime.now().getMonth();
+        var year = cycle.getStartTime().atZone(ZoneId.systemDefault()).getYear();
+        var timelines = generateTimelines(employeeCycle, currentMonth, year);
+        timelines.forEach(timeline -> {
+            try {
+                if (0 == timelineDao.insert(timeline)) {
+                    throw new IntegrityException(TIMELINE_NOT_ASSIGNED.code(), "Timeline not assigned");
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException(TIMELINE_NOT_ASSIGNED.code(), exception.getCause().getMessage());
+            }
+        });
     }
 
     private EmployeeCycle saveEmployeeCycle(UUID employeeId, Cycle cycle) {

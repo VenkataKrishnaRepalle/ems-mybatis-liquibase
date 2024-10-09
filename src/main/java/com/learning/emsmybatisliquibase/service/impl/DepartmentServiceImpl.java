@@ -1,16 +1,11 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.DepartmentDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeDao;
-import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.AddDepartmentDto;
 import com.learning.emsmybatisliquibase.entity.Department;
-import com.learning.emsmybatisliquibase.entity.Profile;
-import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.DepartmentService;
-import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,10 +14,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.*;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.FileErrorCodes.SHEET_NOT_FOUND;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,14 +29,6 @@ import java.util.UUID;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentDao departmentDao;
-
-    private final EmployeeDao employeeDao;
-
-    private final EmployeeService employeeService;
-
-    private static final String ADD = "add";
-
-    private static final String REMOVE = "remove";
 
     private static final String COLLEAGUE_UUID = "colleague_uuid";
 
@@ -61,75 +46,28 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private static final String DEPARTMENT_NAME = "department_name";
 
-    private final ProfileDao profileDao;
-
     private static final String DATE_PATTERN = "dd/MM/yyyy";
 
 
     @Override
     public Department add(AddDepartmentDto departmentDto) {
-        var isDepartmentExists = departmentDao.getByName(departmentDto.getName());
-        if (isDepartmentExists != null) {
-            throw new FoundException(DEPARTMENT_NOT_FOUND.code(), "Department already exists with name " + departmentDto.getName());
+        var department = departmentDao.getByName(departmentDto.getName());
+        if (department != null) {
+            return department;
         }
-        var department = Department.builder()
+        var newDepartment = Department.builder()
                 .uuid(UUID.randomUUID())
                 .name(departmentDto.getName())
                 .build();
 
         try {
-            if (0 == departmentDao.insert(department)) {
+            if (0 == departmentDao.insert(newDepartment)) {
                 throw new IntegrityException(DEPARTMENT_NOT_CREATED.code(), "Department not created");
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(DEPARTMENT_NOT_CREATED.code(), exception.getCause().getMessage());
         }
-        departmentDao.insert(department);
-        return department;
-    }
-
-    public void departmentPermission(MultipartFile file) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-
-        Sheet sheet = workbook.getSheetAt(0);
-        if (sheet == null) {
-            throw new NotFoundException(SHEET_NOT_FOUND.code(), "Sheet Not Found");
-        }
-        var rowValues = employeeService.fileProcess(file);
-
-        for (List<String> value : rowValues) {
-            var department = departmentDao.getByName(value.get(0).trim());
-
-            var employee = employeeDao.getByEmail(value.get(1));
-            if (department == null && employee != null) {
-                department = add(new AddDepartmentDto(value.get(0).trim()));
-            }
-
-            var action = value.get(2);
-            if (employee != null) {
-                if (action.equalsIgnoreCase(ADD)) {
-                    var profile = profileDao.get(employee.getUuid());
-                    profile.setDepartmentUuid(department.getUuid());
-                    updateProfile(profile);
-                } else if (action.equalsIgnoreCase(REMOVE)) {
-                    var profile = profileDao.get(employee.getUuid());
-                    if (profile.getDepartmentUuid() != null && department.getUuid().equals(profile.getDepartmentUuid())) {
-                        profile.setDepartmentUuid(null);
-                        updateProfile(profile);
-                    }
-                }
-            }
-        }
-    }
-
-    private void updateProfile(Profile profile) {
-        try {
-            if (0 == profileDao.update(profile)) {
-                throw new IntegrityException(PROFILE_NOT_UPDATED.code(), "Profile not updated");
-            }
-        } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(PROFILE_NOT_UPDATED.code(), exception.getCause().getMessage());
-        }
+        return newDepartment;
     }
 
     @Override
@@ -142,6 +80,15 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(DEPARTMENT_NOT_UPDATED.code(), exception.getCause().getMessage());
+        }
+        return department;
+    }
+
+    @Override
+    public Department getByName(String name) {
+        var department = departmentDao.getByName(name.trim());
+        if (department == null) {
+            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(), "Department not found with name " + name);
         }
         return department;
     }

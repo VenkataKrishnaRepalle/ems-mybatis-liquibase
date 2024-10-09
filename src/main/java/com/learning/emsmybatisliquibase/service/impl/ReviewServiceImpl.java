@@ -1,7 +1,6 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.ReviewDao;
-import com.learning.emsmybatisliquibase.dao.TimelineDao;
 import com.learning.emsmybatisliquibase.dto.AddReviewRequestDto;
 import com.learning.emsmybatisliquibase.entity.Review;
 import com.learning.emsmybatisliquibase.entity.ReviewStatus;
@@ -12,6 +11,7 @@ import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import com.learning.emsmybatisliquibase.service.ReviewService;
+import com.learning.emsmybatisliquibase.service.TimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +27,7 @@ import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErro
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
-    private final TimelineDao timelineDao;
+    private final TimelineService timelineService;
 
     private final ReviewDao reviewDao;
 
@@ -35,7 +35,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review add(UUID employeeUuid, AddReviewRequestDto employeeReviewDto) {
-        var timeline = timelineDao.getById(employeeReviewDto.getTimelineUuid());
+        var timeline = timelineService.getById(employeeReviewDto.getTimelineUuid());
 
         var reviewTimeline = reviewDao.getByTimelineId(employeeReviewDto.getTimelineUuid());
         if (reviewTimeline != null) {
@@ -74,7 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review update(UUID employeeUuid, UUID reviewUuid, Review review) {
-        var timeline = timelineDao.getById(review.getTimelineUuid());
+        var timeline = timelineService.getById(review.getTimelineUuid());
 
         var reviewTimeline = reviewDao.getByTimelineId(review.getTimelineUuid());
 

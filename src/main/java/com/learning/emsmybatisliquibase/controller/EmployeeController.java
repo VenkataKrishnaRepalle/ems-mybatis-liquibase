@@ -8,7 +8,6 @@ import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,11 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,18 +66,6 @@ public class EmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping(value = "/managerAccess/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> managerAccess(@RequestParam(name = "file") MultipartFile file) throws IOException {
-        employeeService.managerAccess(file);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/updateManagerId/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> updateManagerId(@RequestParam(name = "file") MultipartFile file) throws IOException {
-        employeeService.updateManagerId(file);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @GetMapping(value = "/getByManagerId/{managerId}")
     public ResponseEntity<List<Employee>> getByManagerId(@PathVariable UUID managerId) {
         return new ResponseEntity<>(employeeService.getByManagerUuid(managerId), HttpStatus.OK);
@@ -97,8 +81,4 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeService.getEmployeeFullReportingChain(employeeId), HttpStatus.OK);
     }
 
-    @PostMapping(value = "employee-onboard/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SuccessResponseDto> colleagueOnboard(@RequestParam(name = "file") MultipartFile file) throws IOException, ParseException, MessagingException {
-        return new ResponseEntity<>(employeeService.colleagueOnboard(file), HttpStatus.OK);
-    }
 }
