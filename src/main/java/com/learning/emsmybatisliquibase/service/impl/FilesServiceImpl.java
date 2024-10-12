@@ -4,6 +4,7 @@ import com.learning.emsmybatisliquibase.dao.DepartmentDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.AddDepartmentDto;
 import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
+import com.learning.emsmybatisliquibase.dto.FileType;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.Gender;
@@ -50,24 +51,22 @@ public class FilesServiceImpl implements FilesService {
 
     private final ProfileDao profileDao;
 
+    private static final String ACTION = "action";
+
     private static final String ADD = "add";
 
     private static final String REMOVE = "remove";
 
     private static final String PARSE_DATE = "dd/MM/yyyy";
 
-
     @Override
     public SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, MessagingException {
-        var rowDatas = fileProcess(file);
+        var rowDatas = fileProcess(file, FileType.COLLEAGUE_ONBOARD);
         List<UUID> employeeUuids = new ArrayList<>();
         for (var rowData : rowDatas) {
-            if (rowData.size() != 11) {
+            if (rowData.size() != 14) {
                 continue;
             }
-
-            var gender = rowData.get(3).equals("M") ? Gender.MALE : Gender.FEMALE;
-            var mangerUuid = rowData.get(10).trim().isEmpty() ? null : UUID.fromString(rowData.get(10).trim());
 
             var decimalFormat = new DecimalFormat("0");
             decimalFormat.setMaximumFractionDigits(0);
@@ -75,14 +74,17 @@ public class FilesServiceImpl implements FilesService {
                     .firstName(rowData.get(0))
                     .lastName(rowData.get(1))
                     .email(rowData.get(2))
-                    .gender(gender)
+                    .gender(rowData.get(3).equals("M") ? Gender.MALE : Gender.FEMALE)
                     .dateOfBirth(parseDate(rowData.get(4)))
                     .phoneNumber(decimalFormat.format(Double.parseDouble(rowData.get(5))))
                     .joiningDate(parseDate(rowData.get(6)))
                     .leavingDate(parseDate(rowData.get(7)))
                     .departmentName(rowData.get(8).trim())
                     .isManager(rowData.get(9).trim())
-                    .managerUuid(mangerUuid)
+                    .managerUuid(rowData.get(10).trim().isEmpty() ? null : UUID.fromString(rowData.get(10).trim()))
+                    .jobTitle(rowData.get(11))
+                    .password(rowData.get(12))
+                    .confirmPassword(rowData.get(13))
                     .build();
             employeeUuids.add(employeeService.add(employee).getUuid());
         }
@@ -93,7 +95,7 @@ public class FilesServiceImpl implements FilesService {
     }
 
     public void managerAccess(MultipartFile file) throws IOException {
-        List<List<String>> rowValues = fileProcess(file);
+        List<List<String>> rowValues = fileProcess(file, FileType.MANAGER_ACCESS);
 
         for (List<String> rowValue : rowValues) {
             if (rowValue.size() != 2) {
@@ -121,7 +123,7 @@ public class FilesServiceImpl implements FilesService {
 
     @Override
     public void updateManagerId(MultipartFile file) throws IOException {
-        List<List<String>> rowDatas = fileProcess(file);
+        List<List<String>> rowDatas = fileProcess(file, FileType.UPDATE_MANAGER);
         for (List<String> rowData : rowDatas) {
             if (rowData.size() != 3) {
                 return;
@@ -188,7 +190,7 @@ public class FilesServiceImpl implements FilesService {
         if (sheet == null) {
             throw new NotFoundException(SHEET_NOT_FOUND.code(), "Sheet Not Found");
         }
-        var rowValues = fileProcess(file);
+        var rowValues = fileProcess(file, FileType.DEPARTMENT_PERMISSION);
 
         for (List<String> value : rowValues) {
             var department = departmentDao.getByName(value.get(0).trim());
@@ -231,7 +233,7 @@ public class FilesServiceImpl implements FilesService {
         return LocalDate.parse(value, DateTimeFormatter.ofPattern(PARSE_DATE));
     }
 
-    public List<List<String>> fileProcess(MultipartFile file) throws IOException {
+    public List<List<String>> fileProcess(MultipartFile file, FileType fileType) throws IOException {
         try (XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream())) {
             XSSFSheet sheet = workbook.getSheetAt(0);
             if (sheet == null) {
@@ -246,10 +248,12 @@ public class FilesServiceImpl implements FilesService {
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 var cell = headerRow.getCell(i);
                 if (cell == null) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), "Invalid Column Headings");
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
                 }
-                columnHeadings.add(cell.toString());
+                columnHeadings.add(cell.toString().toLowerCase());
             }
+
+            validateColumnHeadings(columnHeadings, fileType);
 
             var rows = sheet.rowIterator();
             if (rows.hasNext()) {
@@ -268,6 +272,38 @@ public class FilesServiceImpl implements FilesService {
                 rowValues.add(rowValue);
             }
             return rowValues;
+        }
+    }
+
+    private void validateColumnHeadings(List<String> columnHeadings, FileType fileType) {
+        switch (fileType) {
+            case COLLEAGUE_ONBOARD:
+                if (!columnHeadings.get(0).equals("first_name") && !columnHeadings.get(1).equals("last_name") && !columnHeadings.get(2).equals("email") &&
+                        !columnHeadings.get(3).equals("gender") && !columnHeadings.get(4).equals("date_of_birth") && !columnHeadings.get(5).equals("phone_number") &&
+                        !columnHeadings.get(6).equals("joining_date") && !columnHeadings.get(7).equals("leaving_date") && !columnHeadings.get(8).equals("department_name") &&
+                        !columnHeadings.get(9).equals("is_manager") && !columnHeadings.get(10).equals("manager_uuid") && !columnHeadings.get(11).equals("job_title") &&
+                        !columnHeadings.get(12).equals("password") && !columnHeadings.get(13).equals("confirm_password")) {
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), "Please correct column headings");
+                }
+                break;
+            case MANAGER_ACCESS:
+                if (!columnHeadings.contains("manager_email") || !columnHeadings.contains(ACTION)) {
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                }
+                break;
+            case UPDATE_MANAGER:
+                if (!columnHeadings.contains("colleague_email") || !columnHeadings.contains("manager_email")
+                        || !columnHeadings.contains(ACTION)) {
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                }
+                break;
+            case DEPARTMENT_PERMISSION:
+                if (!columnHeadings.contains("department_name") && !columnHeadings.contains("email") && !columnHeadings.contains(ACTION)) {
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                }
+                break;
+            default:
+                break;
         }
     }
 }

@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +61,9 @@ public class JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException ex) {
             request.setAttribute("tokenExpired", true);
+            return false;
+        } catch (AccessDeniedException exception) {
+            request.setAttribute("not_authorized", true);
             return false;
         } catch (Exception ex) {
             request.setAttribute("invalidToken", true);

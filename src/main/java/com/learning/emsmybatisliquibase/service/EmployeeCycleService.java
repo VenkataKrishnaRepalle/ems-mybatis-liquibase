@@ -13,6 +13,8 @@ public interface EmployeeCycleService {
 
     SuccessResponseDto updateEmployeeCycleStatus(UUID employeeCycleId, CycleStatus status);
 
+    SuccessResponseDto updateEmployeeCyclesByCycleId(UUID cycleId, CycleStatus status);
+
     FullEmployeeCycleDto getEmployeeCycleById(UUID employeeCycleId);
 
     List<EmployeeCycle> getByEmployeeIdAndCycleId(UUID employeeId, UUID cycleId);

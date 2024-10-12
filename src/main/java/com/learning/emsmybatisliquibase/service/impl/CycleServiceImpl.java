@@ -1,7 +1,6 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.CycleDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.Cycle;
 import com.learning.emsmybatisliquibase.entity.CycleStatus;
@@ -12,6 +11,7 @@ import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,9 +31,7 @@ import static com.learning.emsmybatisliquibase.exception.errorcodes.CycleErrorCo
 public class CycleServiceImpl implements CycleService {
 
     private final CycleDao cycleDao;
-
-    private final EmployeeCycleDao employeeCycleDao;
-
+    
     private final EmployeeCycleService employeeCycleService;
 
     private static final UUID ADMIN_UUID = UUID.fromString("018fb996-a741-73ce-ac0d-79916b15ac0f");
@@ -101,20 +99,18 @@ public class CycleServiceImpl implements CycleService {
             activeCycle.setStatus(CycleStatus.INACTIVE);
             activeCycle.setUpdatedTime(Instant.now());
             update(activeCycle);
-            updateEmployeesCycleStatus(activeCycle.getUuid());
+            employeeCycleService.updateEmployeeCyclesByCycleId(activeCycle.getUuid(), CycleStatus.INACTIVE);
         } else if (activeCycle != null && activeCycle.getStartTime().atZone(ZoneId.systemDefault()).getYear() < cycleStartTime) {
             activeCycle.setStatus(CycleStatus.COMPLETED);
             activeCycle.setUpdatedTime(Instant.now());
             update(activeCycle);
+            employeeCycleService.updateEmployeeCyclesByCycleId(activeCycle.getUuid(), CycleStatus.COMPLETED);
         }
 
         cycle.setStatus(CycleStatus.STARTED);
         update(cycle);
 
-        return SuccessResponseDto.builder()
-                .success(Boolean.TRUE)
-                .data(String.valueOf(cycleId))
-                .build();
+        return successResponse();
     }
 
     private void update(Cycle cycle) {
@@ -143,10 +139,7 @@ public class CycleServiceImpl implements CycleService {
         cycle.setUpdatedTime(Instant.now());
         update(cycle);
 
-        return SuccessResponseDto.builder()
-                .success(Boolean.TRUE)
-                .data(String.valueOf(cycleId))
-                .build();
+        return successResponse();
     }
 
     @Override
@@ -159,8 +152,10 @@ public class CycleServiceImpl implements CycleService {
         return cycle;
     }
 
-    private void updateEmployeesCycleStatus(UUID cycleId) {
-        var employeeCycles = employeeCycleDao.getByStatusAndCycleId(CycleStatus.STARTED, cycleId);
-        employeeCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE));
+    private SuccessResponseDto successResponse() {
+        return SuccessResponseDto.builder()
+                .data(UUID.randomUUID().toString())
+                .success(Boolean.TRUE)
+                .build();
     }
 }

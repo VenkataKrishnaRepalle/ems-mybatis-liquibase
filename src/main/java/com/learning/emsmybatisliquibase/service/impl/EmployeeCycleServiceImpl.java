@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
+import com.learning.emsmybatisliquibase.dao.CycleDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
 import com.learning.emsmybatisliquibase.dao.TimelineDao;
 import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
@@ -13,13 +14,13 @@ import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeCycleMapper;
-import com.learning.emsmybatisliquibase.service.CycleService;
 import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
-import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import static com.learning.emsmybatisliquibase.exception.errorcodes.CycleErrorCodes.CYCLE_NOT_EXISTS;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeCycleErrorCodes.EMPLOYEE_CYCLE_NOT_CREATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeCycleErrorCodes.EMPLOYEE_CYCLE_NOT_UPDATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.*;
@@ -40,9 +41,7 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
 
     private final EmployeeCycleDao employeeCycleDao;
 
-    private final CycleService cycleService;
-
-    private final EmployeeService employeeService;
+    private final CycleDao cycleDao;
 
     private final TimelineDao timelineDao;
 
@@ -50,21 +49,27 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
 
 
     @Override
+    @Transactional
     public SuccessResponseDto cycleAssignment(List<UUID> employeeIds) {
-        var cycle = cycleService.getCurrentActiveCycle();
+        var cycle = getCurrentActiveCycle();
 
         for (var employeeId : employeeIds) {
             handleEmployeeCycleAssignment(employeeId, cycle);
         }
 
-        return SuccessResponseDto.builder()
-                .success(Boolean.TRUE)
-                .data(String.valueOf(UUID.randomUUID()))
-                .build();
+        return successResponse();
+    }
+
+    private Cycle getCurrentActiveCycle() {
+        var cycle = cycleDao.getByStatus(CycleStatus.STARTED);
+
+        if (cycle == null) {
+            throw new NotFoundException(CYCLE_NOT_EXISTS.code(), "No Active Cycle for Current Cycle");
+        }
+        return cycle;
     }
 
     private void handleEmployeeCycleAssignment(UUID employeeId, Cycle cycle) {
-        employeeService.getById(employeeId);
         if (!employeeCycleDao.getByEmployeeIdAndCycleId(employeeId, cycle.getUuid()).isEmpty()) {
             return;
         }
@@ -151,6 +156,14 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
         return timelines;
     }
 
+    @Override
+    public SuccessResponseDto updateEmployeeCyclesByCycleId(UUID cycleId, CycleStatus status) {
+        var employeeCycles = employeeCycleDao.getByStatusAndCycleId(CycleStatus.STARTED, cycleId);
+        employeeCycles.forEach(employeeCycle -> updateEmployeeCycleStatus(employeeCycle.getUuid(), status));
+
+        return successResponse();
+    }
+
 
     @Override
     public SuccessResponseDto updateEmployeeCycleStatus(UUID employeeCycleId, CycleStatus status) {
@@ -184,11 +197,9 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
                 throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), exception.getCause().getMessage());
             }
         });
-        return SuccessResponseDto.builder()
-                .success(Boolean.TRUE)
-                .data(String.valueOf(employeeCycleId))
-                .build();
+        return successResponse();
     }
+
 
     @Override
     public FullEmployeeCycleDto getEmployeeCycleById(UUID employeeCycleId) {
@@ -217,5 +228,12 @@ public class EmployeeCycleServiceImpl implements EmployeeCycleService {
             throw new NotFoundException("", "Employee Cycle not found with id " + employeeCycleId);
         }
         return employeeCycle;
+    }
+
+    private SuccessResponseDto successResponse() {
+        return SuccessResponseDto.builder()
+                .success(Boolean.TRUE)
+                .data(String.valueOf(UUID.randomUUID()))
+                .build();
     }
 }

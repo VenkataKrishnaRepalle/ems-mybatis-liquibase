@@ -1,13 +1,15 @@
 package com.learning.emsmybatisliquibase.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ForgotPasswordDto {
+@Builder
+public class PasswordDto {
 
     private String password;
 

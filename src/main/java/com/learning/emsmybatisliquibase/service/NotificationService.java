@@ -5,7 +5,7 @@ import com.learning.emsmybatisliquibase.entity.ReviewType;
 
 public interface NotificationService {
 
-    void sendSuccessfulEmployeeOnBoard(Employee employee, String password);
+    void sendSuccessfulEmployeeOnBoard(Employee employee, String password, int capacity);
 
     void sendNotificationBeforeStart(ReviewType reviewType);
 }

@@ -34,6 +34,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${email.template.name.successful.onboard}")
     String emailTemplateNameSuccessfulOnboard;
 
+    @Value("${email.template.name.successful.onboard.temp.password}")
+    String getEmailTemplateNameSuccessfulOnboardTempPassword;
+
     @Value("${email.template.successful.onboard}")
     String emailTemplateSuccessfulOnboard;
 
@@ -44,7 +47,8 @@ public class NotificationServiceImpl implements NotificationService {
     String beforeReviewStartSubject;
 
     @Override
-    public void sendSuccessfulEmployeeOnBoard(Employee employee, String password) {
+    public void sendSuccessfulEmployeeOnBoard(Employee employee, String password, int capacity) {
+        String templateName = capacity == 1 ? emailTemplateNameSuccessfulOnboard : getEmailTemplateNameSuccessfulOnboardTempPassword;
         Thread thread = new Thread(() -> {
             try {
                 MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(), emailTemplateSuccessfulOnboard);
@@ -55,7 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
                 context.setVariable("phoneNumber", employee.getPhoneNumber());
                 context.setVariable("password", password);
 
-                helper.setText(templateEngine.process(emailTemplateNameSuccessfulOnboard, context), true);
+                helper.setText(templateEngine.process(templateName, context), true);
                 mailSender.send(helper.getMimeMessage());
             } catch (MessagingException e) {
                 log.error("Error sending successful onboarding email for employee with UUID: {}", employee.getUuid(), e);

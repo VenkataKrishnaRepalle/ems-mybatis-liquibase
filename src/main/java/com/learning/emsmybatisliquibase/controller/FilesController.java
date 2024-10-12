@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ public class FilesController {
 
     private final FilesService filesService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "employee-onboard/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SuccessResponseDto> colleagueOnboard(@RequestParam(name = "file") MultipartFile file) throws IOException, MessagingException {
         return new ResponseEntity<>(filesService.colleagueOnboard(file), HttpStatus.OK);

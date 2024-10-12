@@ -42,4 +42,10 @@ public class AddEmployeeDto {
     private String isManager;
 
     private UUID managerUuid;
+
+    private String jobTitle;
+
+    private String password;
+
+    private String confirmPassword;
 }

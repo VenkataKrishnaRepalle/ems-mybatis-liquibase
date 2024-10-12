@@ -12,9 +12,11 @@ import com.learning.emsmybatisliquibase.service.*;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
 
@@ -36,8 +38,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final DepartmentService departmentService;
 
-    private final Random random = new Random();
-
     private final ProfileService profileService;
 
     private final EmployeeCycleService employeeCycleService;
@@ -48,17 +48,21 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final NotificationService notificationService;
 
+    private final Random random = new Random();
+
+
     @Override
+    @Transactional
     public AddEmployeeResponseDto add(AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
         if (employeeDto.getManagerUuid() != null) {
             isManager(employeeDto.getManagerUuid());
         }
 
-        var isEmployeeExistsByEmail = employeeDao.getByEmail(employeeDto.getEmail().trim());
-
-        if (isEmployeeExistsByEmail != null) {
-            throw new FoundException(EMPLOYEE_ALREADY_EXISTS.code(), "Email already exists: " + employeeDto.getEmail());
+        var employeeByEmail = employeeDao.getByEmail(employeeDto.getEmail());
+        if (employeeByEmail != null) {
+            throw new FoundException(EMPLOYEE_ALREADY_EXISTS.code(), "Employee with given email already exists");
         }
+
         var isManager = employeeDto.getIsManager().trim().equalsIgnoreCase("T".trim()) ? Boolean.TRUE : Boolean.FALSE;
         var employee = employeeMapper.addEmployeeDtoToEmployee(employeeDto);
         employee.setUuid(UUID.randomUUID());
@@ -66,11 +70,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setManagerUuid(employeeDto.getManagerUuid());
         employee.setCreatedTime(Instant.now());
         employee.setUpdatedTime(Instant.now());
-
-        Department department = null;
-        if (employeeDto.getDepartmentName() != null) {
-            department = departmentService.add(new AddDepartmentDto(employeeDto.getDepartmentName().trim()));
-        }
 
         try {
             if (0 == employeeDao.insert(employee)) {
@@ -80,24 +79,42 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IntegrityException(EMPLOYEE_NOT_CREATED.code(), exception.getCause().getMessage());
         }
 
-        var password = passwordService.create(employee.getUuid(), generateRandomPassword());
+        String password;
+        if (Boolean.TRUE.equals(validatePasswords(employeeDto.getPassword(), employeeDto.getConfirmPassword()))) {
+            password = employeeDto.getPassword();
+        } else {
+            password = generateRandomPassword();
+        }
 
-        notificationService.sendSuccessfulEmployeeOnBoard(employee, password.getPassword());
+        passwordService.create(employee.getUuid(),
+                PasswordDto.builder()
+                        .password(password)
+                        .confirmPassword(password)
+                        .build());
 
-        var profileStatus = employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isAfter(LocalDate.now()) ? ProfileStatus.PENDING : ProfileStatus.INACTIVE;
+        Department department = null;
+        if (employeeDto.getDepartmentName() != null) {
+            department = departmentService.add(new AddDepartmentDto(employeeDto.getDepartmentName().trim()));
+        }
+
         var profile = Profile.builder()
-                .profileStatus(profileStatus)
-                .jobTitle(JobTitleType.ENGINEER_TRAINEE)
+                .profileStatus(profileStatus(employeeDto))
+                .jobTitle(JobTitleType.valueOf(employeeDto.getJobTitle()))
                 .employeeUuid(employee.getUuid())
                 .departmentUuid(department == null ? null : department.getUuid())
                 .updatedTime(Instant.now())
                 .build();
+
         profileService.insert(profile);
 
-        List<UUID> uuid = new ArrayList<>();
-        uuid.add(employee.getUuid());
+        employeeCycleService.cycleAssignment(List.of(employee.getUuid()));
 
-        employeeCycleService.cycleAssignment(uuid);
+        if (Boolean.FALSE.equals(validatePasswords(employeeDto.getPassword(), employeeDto.getConfirmPassword()))) {
+            notificationService.sendSuccessfulEmployeeOnBoard(employee, password, 0);
+        } else {
+            notificationService.sendSuccessfulEmployeeOnBoard(employee, password, 1);
+        }
+
 
         var response = employeeMapper.employeeToAddEmployeeResponseDto(employee);
         response.setProfile(profile);
@@ -105,6 +122,26 @@ public class EmployeeServiceImpl implements EmployeeService {
         response.setIsManager(isManager);
 
         return response;
+    }
+
+
+    private ProfileStatus profileStatus(AddEmployeeDto employeeDto) {
+        ProfileStatus profileStatus;
+        Boolean value = validatePasswords(employeeDto.getPassword(), employeeDto.getConfirmPassword());
+        if (employeeDto.getLeavingDate() != null && employeeDto.getLeavingDate().isAfter(LocalDate.now())) {
+            profileStatus = ProfileStatus.INACTIVE;
+        } else if ((employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isBefore(LocalDate.now())) && Boolean.TRUE.equals(!value)) {
+            profileStatus = ProfileStatus.PENDING;
+        } else if ((employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isBefore(LocalDate.now())) && Boolean.TRUE.equals(value)) {
+            profileStatus = ProfileStatus.ACTIVE;
+        } else {
+            profileStatus = ProfileStatus.PENDING;
+        }
+        return profileStatus;
+    }
+
+    private Boolean validatePasswords(String password, String confirmPassword) {
+        return StringUtils.isNotEmpty(password) && StringUtils.isNotEmpty(confirmPassword);
     }
 
     @Override

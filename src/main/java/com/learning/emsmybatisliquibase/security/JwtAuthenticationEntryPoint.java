@@ -31,6 +31,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             errorResponse.put(ERROR_CODE, "INVALID_TOKEN_PROVIDED");
             errorResponse.put(ERROR_MESSAGE, "Invalid token");
+        } else if (Boolean.TRUE.equals(request.getAttribute("not_authorized"))) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            errorResponse.put(ERROR_CODE, "NOT_AUTHORIZED");
+            errorResponse.put(ERROR_MESSAGE, "You're not authorized to access this resource");
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             errorResponse.put(ERROR_CODE, "TOKEN_NOT_PROVIDED");
