@@ -41,8 +41,6 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public List<Attendance> apply(UUID employeeUuid, List<ApplyAttendanceDto> attendanceDtos) {
-        employeeService.getById(employeeUuid);
-
         var appliedAttendances = attendanceDao.getByEmployeeUuid(employeeUuid);
 
         for (var attendanceDto : attendanceDtos) {
@@ -97,9 +95,8 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public Attendance getByUuid(UUID employeeUuid, UUID attendanceUuid) {
-        employeeService.getById(employeeUuid);
         var attendance = attendanceDao.getById(attendanceUuid);
-        if (!attendance.getEmployeeUuid().equals(employeeUuid)) {
+        if (attendance == null || !attendance.getEmployeeUuid().equals(employeeUuid)) {
             throw new InvalidInputException(ATTENDANCE_NOT_EXISTS.code(), "Attendance not exists for employeeId: " + employeeUuid + " and attendanceId: " + attendanceUuid);
         }
         return attendance;
@@ -127,6 +124,12 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .build();
     }
 
+    private List<Attendance> filterAttendanceByStatus(List<Attendance> attendances, AttendanceStatus status) {
+        return attendances.stream()
+                .filter(attendance -> attendance.getStatus().equals(status))
+                .toList();
+    }
+
     @Override
     public List<ViewEmployeeAttendanceDto> getAllEmployeesAttendanceByManager(UUID managerUuid) {
         employeeService.isManager(managerUuid);
@@ -145,11 +148,5 @@ public class AttendanceServiceImpl implements AttendanceService {
             employeeAttendance.add(getEmployeeAttendance(employee.getUuid()));
         }
         return employeeAttendance;
-    }
-
-    private List<Attendance> filterAttendanceByStatus(List<Attendance> attendances, AttendanceStatus status) {
-        return attendances.stream()
-                .filter(attendance -> attendance.getStatus().equals(status))
-                .toList();
     }
 }
