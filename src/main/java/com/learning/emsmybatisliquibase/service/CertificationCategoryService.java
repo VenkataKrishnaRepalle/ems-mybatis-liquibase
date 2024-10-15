@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface CertificationCategoryService {
     CertificationCategory add(CertificationCategoryDto certificationCategoryDto);
 
-    CertificationCategory update(UUID id, CertificationCategoryDto certificationCategoryDto);
+    CertificationCategory update(UUID id, CertificationCategory certificationCategory);
 
     CertificationCategory getById(UUID id);
 

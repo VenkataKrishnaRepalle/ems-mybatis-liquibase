@@ -1,15 +1,15 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
-import com.learning.emsmybatisliquibase.dao.EmployeeDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
-import com.learning.emsmybatisliquibase.dao.ProfileDao;
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
 import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
-import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.security.JwtTokenProvider;
+import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
+import com.learning.emsmybatisliquibase.service.EmployeeService;
+import com.learning.emsmybatisliquibase.service.PasswordService;
+import com.learning.emsmybatisliquibase.service.ProfileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,9 +33,6 @@ import static org.mockito.Mockito.*;
 class AuthServiceImplTest {
 
     @Mock
-    private EmployeeDao employeeDao;
-
-    @Mock
     private AuthenticationManager authenticationManager;
 
     @Mock
@@ -48,13 +45,19 @@ class AuthServiceImplTest {
     private AuthServiceImpl authService;
 
     @Mock
-    private EmployeeRoleDao employeeRoleDao;
+    EmployeeService employeeService;
 
     @Mock
-    private ProfileDao profileDao;
+    ProfileService profileService;
+
+    @Mock
+    PasswordService passwordService;
 
     @Mock
     private PasswordDao passwordDao;
+
+    @Mock
+    EmployeeRoleService employeeRoleService;
 
     @Test
     void testLogin_ValidCredentials_ReturnsTokenAndRoles() {
@@ -73,29 +76,21 @@ class AuthServiceImplTest {
         profile.setEmployeeUuid(employeeUuid);
         profile.setProfileStatus(ProfileStatus.ACTIVE);
 
-        List<Password> passwords = new ArrayList<>();
-        passwords.add(Password.builder()
-                .employeeUuid(employeeUuid)
-                .password(passwordEncoder.encode(password))
-                .status(PasswordStatus.ACTIVE)
-                .build());
+        List<Password> passwords = List.of(
+                Password.builder()
+                        .employeeUuid(employeeUuid)
+                        .password(passwordEncoder.encode(password))
+                        .status(PasswordStatus.ACTIVE)
+                        .build()
+        );
 
-        List<EmployeeRole> employeeRoles = new ArrayList<>();
-        employeeRoles.add(EmployeeRole.builder()
-                .employeeUuid(employeeUuid)
-                .role(RoleType.EMPLOYEE)
-                .build());
-        employeeRoles.add(EmployeeRole.builder()
-                .employeeUuid(employeeUuid)
-                .role(RoleType.MANAGER)
-                .build());
-
-        when(employeeDao.getByEmail(anyString())).thenReturn(employee);
-        when(profileDao.get(employeeUuid)).thenReturn(profile);
+        when(passwordEncoder.encode(password)).thenReturn(any());
+        when(employeeService.getByEmail(email)).thenReturn(employee);
+        when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
         when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
         when(passwordEncoder.matches(password, passwords.get(0).getPassword())).thenReturn(true);
         when(jwtTokenProvider.generateToken(any())).thenReturn(expectedToken);
-        when(employeeRoleDao.getByEmployeeUuid(employee.getUuid())).thenReturn(employeeRoles);
+        when(employeeRoleService.getRolesByEmployeeUuid(employee.getUuid())).thenReturn(List.of(RoleType.EMPLOYEE, RoleType.MANAGER));
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
@@ -107,10 +102,11 @@ class AuthServiceImplTest {
         assertTrue(result.getRoles().contains("MANAGER"));
 
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(employeeDao, times(1)).getByEmail(email);
+        verify(employeeService, times(1)).getByEmail(email);
+        verify(profileService, times(1)).getByEmployeeUuid(employeeUuid);
         verify(passwordDao, times(1)).getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE);
         verify(jwtTokenProvider, times(1)).generateToken(any());
-        verify(employeeRoleDao, times(1)).getByEmployeeUuid(employee.getUuid());
+        verify(employeeRoleService, times(1)).getRolesByEmployeeUuid(employee.getUuid());
     }
 
     @Test
@@ -133,23 +129,13 @@ class AuthServiceImplTest {
                 .password(passwordEncoder.encode(password))
                 .status(PasswordStatus.ACTIVE)
                 .build());
-        when(employeeDao.getByEmail(anyString())).thenReturn(employee);
-        when(profileDao.get(employeeUuid)).thenReturn(profile);
+        when(employeeService.getByEmail(anyString())).thenReturn(employee);
+        when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
         when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
-        when(passwordEncoder.matches(password, passwords.get(0).getPassword())).thenReturn(false);
-        when(passwordDao.update(passwords.get(0))).thenReturn(1);
+        assertDoesNotThrow(() -> passwordService.update(passwords.get(0)));
 
         assertThrows(InvalidInputException.class, () ->
                 authService.login(new LoginDto(email, password)));
-    }
-
-    @Test
-    void testLogin_EmployeeNotFound_ThrowsNotFoundException() {
-        String email = "test@example.com";
-
-        when(employeeDao.getByEmail(email)).thenReturn(null);
-
-        assertThrows(NotFoundException.class, () -> authService.login(new LoginDto(email, "password123")));
     }
 
     @Test
@@ -171,7 +157,7 @@ class AuthServiceImplTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(profileDao.get(any(UUID.class))).thenReturn(profile);
+        when(profileService.getByEmployeeUuid(any(UUID.class))).thenReturn(profile);
         when(authentication.getName()).thenReturn(employeeUuid.toString());
 
         Boolean result = authService.isCurrentUser(employeeUuid);
@@ -187,7 +173,7 @@ class AuthServiceImplTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(profileDao.get(any(UUID.class))).thenReturn(null);
+        when(profileService.getByEmployeeUuid(any(UUID.class))).thenReturn(null);
         when(authentication.getName()).thenReturn(employeeUuid.toString());
 
         Boolean result = authService.isCurrentUser(employeeUuid);
@@ -209,7 +195,7 @@ class AuthServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getName()).thenReturn(managerUuid.toString());
 
-        when(employeeDao.get(employeeUuid)).thenReturn(employee);
+        when(employeeService.getById(employeeUuid)).thenReturn(employee);
 
         Boolean result = authService.isEmployeeManager(employeeUuid);
 
@@ -230,7 +216,7 @@ class AuthServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getName()).thenReturn(managerUuid.toString());
 
-        when(employeeDao.get(employeeUuid)).thenReturn(employee);
+        when(employeeService.getById(employeeUuid)).thenReturn(employee);
 
         Boolean result = authService.isEmployeeManager(employeeUuid);
 

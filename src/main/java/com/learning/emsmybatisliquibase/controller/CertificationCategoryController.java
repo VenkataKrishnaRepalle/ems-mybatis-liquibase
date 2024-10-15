@@ -35,8 +35,8 @@ public class CertificationCategoryController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<CertificationCategory> update(@RequestBody @PathVariable UUID id,
-                                                        @RequestBody CertificationCategoryDto certificationCategoryDto) {
-        return new ResponseEntity<>(certificationCategoryService.update(id, certificationCategoryDto), HttpStatus.ACCEPTED);
+                                                        @RequestBody CertificationCategory certificationCategory) {
+        return new ResponseEntity<>(certificationCategoryService.update(id, certificationCategory), HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete/{id}")

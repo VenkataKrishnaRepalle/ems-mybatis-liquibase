@@ -3,6 +3,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.CertificationCategoryDao;
 import com.learning.emsmybatisliquibase.dto.CertificationCategoryDto;
 import com.learning.emsmybatisliquibase.entity.CertificationCategory;
+import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.CertificationCategoryService;
@@ -41,7 +42,7 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
         var certificationCategoryByName = certificationCategoryDao.getByName(certificationCategoryDto.getName().trim());
 
         if (certificationCategoryByName != null) {
-            throw new IntegrityException("CERTIFICATION_CATEGORY_ALREADY_EXISTS", "Certification category already exists with name: " + certificationCategoryDto.getName());
+            throw new FoundException("CERTIFICATION_CATEGORY_ALREADY_EXISTS", "Certification category already exists with name: " + certificationCategoryDto.getName());
         }
         var certificationCategory = CertificationCategory.builder()
                 .uuid(UUID.randomUUID())
@@ -60,7 +61,7 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
     }
 
     @Override
-    public CertificationCategory update(UUID id, CertificationCategoryDto certificationCategoryDto) {
+    public CertificationCategory update(UUID id, CertificationCategory certificationCategoryDto) {
         var certificationCategory = getById(id);
         certificationCategory.setName(certificationCategoryDto.getName().trim());
 
