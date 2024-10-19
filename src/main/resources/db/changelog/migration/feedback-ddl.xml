@@ -1,0 +1,49 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="feedback">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="feedback_pk"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="look_back" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="look_forward" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="other_comments" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_time" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_time" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="feedback" baseColumnNames="employee_uuid"
+                                 constraintName="employee_fk" initiallyDeferred="false"
+                                 deferrable="false" onUpdate="CASCADE" onDelete="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+        <addForeignKeyConstraint baseTableName="feedback" baseColumnNames="target_employee_uuid"
+                                 constraintName="target_employee_fk" initiallyDeferred="false"
+                                 deferrable="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+
+        <sql>ALTER TABLE feedback
+            ADD CONSTRAINT type_check check (type = 'SEND' or
+                                             type = 'RECEIVE' or
+                                             type = 'REQUEST' or
+                                             type = 'RESPOND')</sql>
+    </changeSet>
+</databaseChangeLog>
