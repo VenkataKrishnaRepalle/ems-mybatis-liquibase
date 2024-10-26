@@ -15,5 +15,5 @@ public interface EmployeeMapper {
 
     EmployeeFullReportingChainDto employeeResponseDtoToEmployeeFullReportingChainDto(Employee employeeResponse);
 
-    EmployeeResponseDto employeeToEmployeeResponseDto(Employee employee);
+    EmployeeDetailsDto employeeToEmployeeDetailsDto(Employee employee);
 }

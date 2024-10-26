@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmployeeDetailsDto extends Timeline {
+public class EmployeeDetailsDto {
 
     private UUID uuid;
 
