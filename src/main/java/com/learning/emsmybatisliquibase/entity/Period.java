@@ -13,15 +13,21 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EmployeeCycle implements Serializable {
+public class Period implements Serializable {
 
     private UUID uuid;
 
-    private UUID employeeUuid;
+    private String name;
 
-    private UUID cycleUuid;
+    private String description;
 
-    private CycleStatus status;
+    private Instant startTime;
+
+    private Instant endTime;
+
+    private PeriodStatus status;
+
+    private UUID createdBy;
 
     private Instant createdTime;
 

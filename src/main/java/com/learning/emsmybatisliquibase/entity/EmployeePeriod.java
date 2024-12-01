@@ -13,23 +13,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Timeline implements Serializable {
+public class EmployeePeriod implements Serializable {
 
     private UUID uuid;
 
-    private UUID employeeCycleUuid;
+    private UUID employeeUuid;
 
-    private ReviewType type;
+    private UUID cycleUuid;
 
-    private Instant startTime;
-
-    private Instant overdueTime;
-
-    private Instant lockTime;
-
-    private Instant endTime;
-
-    private TimelineStatus status;
+    private PeriodStatus status;
 
     private Instant createdTime;
 

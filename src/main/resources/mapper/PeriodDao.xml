@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.learning.emsmybatisliquibase.dao.CycleDao">
-    <resultMap id="cycleStructure" type="com.learning.emsmybatisliquibase.entity.Cycle">
+<mapper namespace="com.learning.emsmybatisliquibase.dao.PeriodDao">
+    <resultMap id="periodStructure" type="com.learning.emsmybatisliquibase.entity.Period">
         <id property="uuid" column="uuid" javaType="java.util.UUID" jdbcType="VARCHAR"
             typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
         <result property="name" column="name"/>
@@ -15,37 +15,37 @@
         <result property="updatedTime" column="updated_time"/>
     </resultMap>
 
-    <select id="getById" resultMap="cycleStructure">
-        select * from cycle where uuid = #{uuid}
+    <select id="getById" resultMap="periodStructure">
+        select * from period where uuid = #{uuid}
     </select>
 
-    <select id="getByStatus" resultMap="cycleStructure">
+    <select id="getByStatus" resultMap="periodStructure">
         select *
-        from cycle
+        from period
         where status = #{status}
     </select>
 
-    <select id="getAll" resultMap="cycleStructure">
+    <select id="getAll" resultMap="periodStructure">
         select *
-        from cycle
+        from period
     </select>
 
     <insert id="insert" flushCache="true">
-        INSERT INTO cycle (uuid, name, description, start_time, end_time, status, created_by, created_time,
+        INSERT INTO period (uuid, name, description, start_time, end_time, status, created_by, created_time,
                            updated_time)
-        VALUES (#{cycle.uuid}, #{cycle.name}, #{cycle.description}, #{cycle.startTime}, #{cycle.endTime},
-                #{cycle.status}, #{cycle.createdBy}, current_timestamp, current_timestamp)
+        VALUES (#{period.uuid}, #{period.name}, #{period.description}, #{period.startTime}, #{period.endTime},
+                #{period.status}, #{period.createdBy}, current_timestamp, current_timestamp)
     </insert>
 
     <update id="update" flushCache="true">
-        UPDATE cycle
-        SET name         = #{cycle.name},
-            description  = #{cycle.description},
-            start_time   = #{cycle.startTime},
-            end_time     = #{cycle.endTime},
-            status       = #{cycle.status},
-            created_by   = #{cycle.createdBy},
+        UPDATE period
+        SET name         = #{period.name},
+            description  = #{period.description},
+            start_time   = #{period.startTime},
+            end_time     = #{period.endTime},
+            status       = #{period.status},
+            created_by   = #{period.createdBy},
             updated_time = current_timestamp
-        where uuid = #{cycle.uuid}
+        where uuid = #{period.uuid}
     </update>
 </mapper>

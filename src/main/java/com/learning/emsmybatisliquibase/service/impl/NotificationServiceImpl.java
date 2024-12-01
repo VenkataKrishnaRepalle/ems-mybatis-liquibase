@@ -1,12 +1,12 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
-import com.learning.emsmybatisliquibase.dao.TimelineDao;
+import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.dto.NotificationDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
-import com.learning.emsmybatisliquibase.entity.TimelineStatus;
+import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.service.NotificationService;
-import com.learning.emsmybatisliquibase.service.TimelineService;
+import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
-    private final TimelineDao timelineDao;
-    private final TimelineService timelineService;
+    private final ReviewTimelineDao reviewTimelineDao;
+    private final ReviewTimelineService reviewTimelineService;
 
     @Value("${default.send.email}")
     String defaultEmail;
@@ -70,12 +70,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendNotificationBeforeStart(ReviewType reviewType) {
-        var notifications = timelineDao.getTimelineIdsByReviewType(reviewType);
+        var notifications = reviewTimelineDao.getTimelineIdsByReviewType(reviewType);
 
         var employeeUuids = notifications.stream()
                 .map(NotificationDto::getUuid)
                 .toList();
-        timelineService.updateTimelineStatus(employeeUuids, reviewType, TimelineStatus.STARTED);
+        reviewTimelineService.updateTimelineStatus(employeeUuids, reviewType, ReviewTimelineStatus.STARTED);
 
         Thread thread = new Thread(() -> notifications.forEach(employee -> {
             log.info("Sending notification before start email to colleague {}", employee.getUuid());

@@ -2,9 +2,9 @@ package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.entity.CycleStatus;
-import com.learning.emsmybatisliquibase.entity.EmployeeCycle;
-import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
+import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
+import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,31 +19,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping("api/employeeCycle")
+@RequestMapping("api/employeePeriod")
 @RestController
 @RequiredArgsConstructor
-public class EmployeeCycleController {
+public class EmployeePeriodController {
 
-    private final EmployeeCycleService employeeCycleService;
+    private final EmployeePeriodService employeePeriodService;
 
     @PostMapping("employee-cycle-assignment")
     public ResponseEntity<SuccessResponseDto> cycleAssignment(@RequestBody List<UUID> employeeIds) {
-        return new ResponseEntity<>(employeeCycleService.cycleAssignment(employeeIds), HttpStatus.CREATED);
+        return new ResponseEntity<>(employeePeriodService.cycleAssignment(employeeIds), HttpStatus.CREATED);
     }
 
     @PutMapping("update-employee-cycle/{employeeCycleId}/status/{status}")
-    public ResponseEntity<SuccessResponseDto> updateEmployeeCycleStatus(@PathVariable UUID employeeCycleId, @PathVariable CycleStatus status) {
-        return new ResponseEntity<>(employeeCycleService.updateEmployeeCycleStatus(employeeCycleId, status), HttpStatus.ACCEPTED);
+    public ResponseEntity<SuccessResponseDto> updateEmployeeCycleStatus(@PathVariable UUID employeeCycleId, @PathVariable PeriodStatus status) {
+        return new ResponseEntity<>(employeePeriodService.updateEmployeeCycleStatus(employeeCycleId, status), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("getById/{employeeCycleId}")
     public ResponseEntity<FullEmployeeCycleDto> getById(@PathVariable UUID employeeCycleId) {
-        return new ResponseEntity<>(employeeCycleService.getEmployeeCycleById(employeeCycleId), HttpStatus.OK);
+        return new ResponseEntity<>(employeePeriodService.getEmployeeCycleById(employeeCycleId), HttpStatus.OK);
     }
 
     @GetMapping("getByCycleId/{employeeId}/cycle/{cycleId}")
-    public ResponseEntity<List<EmployeeCycle>> getByCycleId(@PathVariable UUID employeeId, @PathVariable UUID cycleId) {
-        return new ResponseEntity<>(employeeCycleService.getByEmployeeIdAndCycleId(employeeId, cycleId), HttpStatus.OK);
+    public ResponseEntity<List<EmployeePeriod>> getByCycleId(@PathVariable UUID employeeId, @PathVariable UUID cycleId) {
+        return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndCycleId(employeeId, cycleId), HttpStatus.OK);
     }
 
 }

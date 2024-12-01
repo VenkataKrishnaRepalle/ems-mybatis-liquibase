@@ -1,8 +1,8 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.Cycle;
-import com.learning.emsmybatisliquibase.entity.CycleStatus;
-import com.learning.emsmybatisliquibase.entity.Timeline;
+import com.learning.emsmybatisliquibase.entity.Period;
+import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,9 +19,9 @@ public class EmployeeCycleAndTimelineResponseDto {
 
     private UUID employeeCycleId;
 
-    private CycleStatus employeeCycleStatus;
+    private PeriodStatus employeePeriodStatus;
 
-    private Cycle cycle;
+    private Period period;
 
-    private Timeline timeline;
+    private ReviewTimeline reviewTimeline;
 }

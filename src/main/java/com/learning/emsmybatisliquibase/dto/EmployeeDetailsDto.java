@@ -1,8 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.Timeline;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -40,11 +40,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final ProfileService profileService;
 
-    private final EmployeeCycleService employeeCycleService;
+    private final EmployeePeriodService employeePeriodService;
 
-    private final CycleService cycleService;
+    private final PeriodService periodService;
 
-    private final EmployeeCycleDao employeeCycleDao;
+    private final EmployeePeriodDao employeePeriodDao;
 
     private final NotificationService notificationService;
 
@@ -107,7 +107,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         profileService.insert(profile);
 
-        employeeCycleService.cycleAssignment(List.of(employee.getUuid()));
+        employeePeriodService.cycleAssignment(List.of(employee.getUuid()));
 
         if (Boolean.FALSE.equals(validatePasswords(employeeDto.getPassword(), employeeDto.getConfirmPassword()))) {
             notificationService.sendSuccessfulEmployeeOnBoard(employee, password, 0);
@@ -168,20 +168,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         var profile = profileService.getByEmployeeUuid(id);
 
         if (updateLeavingDate.getLeavingDate() == null && profile.getProfileStatus().equals(ProfileStatus.INACTIVE)) {
-            var currentActiveCycle = cycleService.getCurrentActiveCycle();
-            var employeeCycles = employeeCycleDao.getByEmployeeIdAndCycleId(employee.getUuid(), currentActiveCycle.getUuid());
+            var currentActiveCycle = periodService.getCurrentActivePeriod();
+            var employeeCycles = employeePeriodDao.getByEmployeeIdAndCycleId(employee.getUuid(), currentActiveCycle.getUuid());
             if (employeeCycles == null) {
                 return;
             } else {
                 for (var employeeCycle : employeeCycles) {
-                    employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.STARTED);
+                    employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.STARTED);
                 }
             }
             profile.setProfileStatus(ProfileStatus.ACTIVE);
         } else if (updateLeavingDate.getLeavingDate() != null && updateLeavingDate.getLeavingDate().before(new Date())) {
             profile.setProfileStatus(ProfileStatus.INACTIVE);
-            var empStartedCycles = employeeCycleDao.getByEmployeeIdAndStatus(employee.getUuid(), CycleStatus.STARTED);
-            empStartedCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE));
+            var empStartedCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(), PeriodStatus.STARTED);
+            empStartedCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
         }
         profileService.update(profile);
     }

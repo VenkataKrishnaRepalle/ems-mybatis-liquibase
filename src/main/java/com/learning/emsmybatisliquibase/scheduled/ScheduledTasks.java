@@ -2,17 +2,17 @@ package com.learning.emsmybatisliquibase.scheduled;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.dao.CycleDao;
-import com.learning.emsmybatisliquibase.dao.EmployeeCycleDao;
+import com.learning.emsmybatisliquibase.dao.PeriodDao;
+import com.learning.emsmybatisliquibase.dao.EmployeePeriodDao;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
-import com.learning.emsmybatisliquibase.entity.CycleStatus;
+import com.learning.emsmybatisliquibase.entity.PeriodStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
-import com.learning.emsmybatisliquibase.service.CycleService;
-import com.learning.emsmybatisliquibase.service.EmployeeCycleService;
+import com.learning.emsmybatisliquibase.service.PeriodService;
+import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
 import com.learning.emsmybatisliquibase.service.NotificationService;
-import com.learning.emsmybatisliquibase.service.TimelineService;
+import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,15 +31,15 @@ public class ScheduledTasks {
 
     private final ProfileDao profileDao;
 
-    private final CycleDao cycleDao;
+    private final PeriodDao periodDao;
 
-    private final TimelineService timelineService;
+    private final ReviewTimelineService reviewTimelineService;
 
-    private final EmployeeCycleDao employeeCycleDao;
+    private final EmployeePeriodDao employeePeriodDao;
 
-    private final EmployeeCycleService employeeCycleService;
+    private final EmployeePeriodService employeePeriodService;
 
-    private final CycleService cycleService;
+    private final PeriodService periodService;
 
     private final NotificationService notificationService;
 
@@ -58,8 +58,8 @@ public class ScheduledTasks {
                     throw new IntegrityException("", "");
                 }
 
-                var employeeCycles = employeeCycleDao.getByEmployeeIdAndStatus(employee.getUuid(), CycleStatus.STARTED);
-                employeeCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.INACTIVE));
+                var employeeCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(), PeriodStatus.STARTED);
+                employeeCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
             }
         }
     }
@@ -67,31 +67,31 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 0 0 25 12 *")
     public void scheduleCycle() {
         var year = Instant.now().atZone(ZoneId.systemDefault()).getYear() + 1;
-        cycleService.createCycle(year);
+        periodService.createPeriod(year);
     }
 
     @Scheduled(cron = "0 0 0 1 1 *")
     public void startCycle() {
-        var oldCycle = cycleDao.getByStatus(CycleStatus.STARTED);
-        oldCycle.setStatus(CycleStatus.INACTIVE);
+        var oldCycle = periodDao.getByStatus(PeriodStatus.STARTED);
+        oldCycle.setStatus(PeriodStatus.INACTIVE);
         oldCycle.setUpdatedTime(Instant.now());
 
-        var employeeCycles = employeeCycleDao.getByStatusAndCycleId(CycleStatus.STARTED, oldCycle.getUuid());
-        employeeCycles.forEach(employeeCycle -> employeeCycleService.updateEmployeeCycleStatus(employeeCycle.getUuid(), CycleStatus.COMPLETED));
+        var employeeCycles = employeePeriodDao.getByStatusAndCycleId(PeriodStatus.STARTED, oldCycle.getUuid());
+        employeeCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.COMPLETED));
 
-        var cycle = cycleDao.getByStatus(CycleStatus.SCHEDULED);
+        var cycle = periodDao.getByStatus(PeriodStatus.SCHEDULED);
 
-        cycle.setStatus(CycleStatus.STARTED);
+        cycle.setStatus(PeriodStatus.STARTED);
         cycle.setUpdatedTime(Instant.now());
         try {
-            if (0 == cycleDao.update(cycle)) {
+            if (0 == periodDao.update(cycle)) {
                 throw new IntegrityException("CYCLE_NOT_UPDATED", "Cycle not updated");
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException("CYCLE_NOT_UPDATED", exception.getCause().getMessage());
         }
 
-        employeeCycleService.cycleAssignment(employeeDao.getAllActiveEmployeeIds());
+        employeePeriodService.cycleAssignment(employeeDao.getAllActiveEmployeeIds());
     }
 
     @Scheduled(cron = "0 15 0 1 4,7,10 *")
@@ -119,7 +119,7 @@ public class ScheduledTasks {
                 break;
         }
         if (completedReviewType != null) {
-            timelineService.startTimelinesForQuarter(completedReviewType, startedReviewType);
+            reviewTimelineService.startTimelinesForQuarter(completedReviewType, startedReviewType);
         }
     }
 

@@ -4,14 +4,14 @@ import com.learning.emsmybatisliquibase.dao.ReviewDao;
 import com.learning.emsmybatisliquibase.dto.AddReviewRequestDto;
 import com.learning.emsmybatisliquibase.entity.Review;
 import com.learning.emsmybatisliquibase.entity.ReviewStatus;
-import com.learning.emsmybatisliquibase.entity.Timeline;
+import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import com.learning.emsmybatisliquibase.service.ReviewService;
-import com.learning.emsmybatisliquibase.service.TimelineService;
+import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +27,7 @@ import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErro
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
-    private final TimelineService timelineService;
+    private final ReviewTimelineService reviewTimelineService;
 
     private final ReviewDao reviewDao;
 
@@ -35,7 +35,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review add(UUID employeeUuid, AddReviewRequestDto employeeReviewDto) {
-        var timeline = timelineService.getById(employeeReviewDto.getTimelineUuid());
+        var timeline = reviewTimelineService.getById(employeeReviewDto.getTimelineUuid());
 
         var reviewTimeline = reviewDao.getByTimelineId(employeeReviewDto.getTimelineUuid());
         if (reviewTimeline != null) {
@@ -74,7 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review update(UUID employeeUuid, UUID reviewUuid, Review review) {
-        var timeline = timelineService.getById(review.getTimelineUuid());
+        var timeline = reviewTimelineService.getById(review.getTimelineUuid());
 
         var reviewTimeline = reviewDao.getByTimelineId(review.getTimelineUuid());
 
@@ -157,7 +157,7 @@ public class ReviewServiceImpl implements ReviewService {
         existingReview.setUpdatedTime(Instant.now());
     }
 
-    private void validateTimeline(UUID employeeUuid, Timeline timeline) {
+    private void validateTimeline(UUID employeeUuid, ReviewTimeline reviewTimeline) {
         var currentUser = getCurrentUser();
         var employee = employeeService.getById(employeeUuid);
 
@@ -165,7 +165,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IntegrityException("INVALID_USER", "Invalid User trying to insert data");
         }
 
-        switch (timeline.getStatus()) {
+        switch (reviewTimeline.getStatus()) {
             case COMPLETED:
                 throw new InvalidInputException(TIMELINE_COMPLETED.code(), "Review already completed");
             case LOCKED:

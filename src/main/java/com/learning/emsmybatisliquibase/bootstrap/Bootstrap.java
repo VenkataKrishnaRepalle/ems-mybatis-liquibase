@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.bootstrap;
 import com.learning.emsmybatisliquibase.dao.*;
 import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
 import com.learning.emsmybatisliquibase.entity.*;
-import com.learning.emsmybatisliquibase.service.CycleService;
+import com.learning.emsmybatisliquibase.service.PeriodService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.Date;
-import java.time.Year;
 import java.util.Calendar;
 
 @Component
@@ -23,9 +22,9 @@ public class Bootstrap implements CommandLineRunner {
 
     private final EmployeeService employeeService;
 
-    private final CycleDao cycleDao;
+    private final PeriodDao periodDao;
 
-    private final CycleService cycleService;
+    private final PeriodService periodService;
 
     private static final String ADMIN = "admin";
 
@@ -35,9 +34,9 @@ public class Bootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws MessagingException, UnsupportedEncodingException {
-        if(cycleDao.getByStatus(CycleStatus.STARTED) == null) {
-            var cycle = cycleService.createCycle(Calendar.getInstance().get(Calendar.YEAR));
-            cycleService.updateStatus(cycle.getUuid(), CycleStatus.STARTED);
+        if(periodDao.getByStatus(PeriodStatus.STARTED) == null) {
+            var cycle = periodService.createPeriod(Calendar.getInstance().get(Calendar.YEAR));
+            periodService.updateStatus(cycle.getUuid(), PeriodStatus.STARTED);
         }
         if (employeeDao.count() < 6) {
             var employee = AddEmployeeDto.builder()
