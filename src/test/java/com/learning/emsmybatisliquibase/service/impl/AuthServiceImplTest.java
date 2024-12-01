@@ -1,12 +1,9 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
-import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
 import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
-import com.learning.emsmybatisliquibase.security.JwtTokenProvider;
-import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import com.learning.emsmybatisliquibase.service.PasswordService;
 import com.learning.emsmybatisliquibase.service.ProfileService;
@@ -15,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,12 +26,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
-
-    @Mock
-    private AuthenticationManager authenticationManager;
-
-    @Mock
-    private JwtTokenProvider jwtTokenProvider;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -55,9 +44,6 @@ class AuthServiceImplTest {
 
     @Mock
     private PasswordDao passwordDao;
-
-    @Mock
-    EmployeeRoleService employeeRoleService;
 
 //    @Test
 //    void testLogin_ValidCredentials_ReturnsTokenAndRoles() {

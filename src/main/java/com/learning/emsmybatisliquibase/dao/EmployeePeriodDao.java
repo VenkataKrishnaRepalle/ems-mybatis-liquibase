@@ -15,14 +15,14 @@ public interface EmployeePeriodDao {
 
     int update(@Param("employeePeriod") EmployeePeriod employeePeriod);
 
-    List<EmployeePeriod> getByEmployeeIdAndCycleId(@Param("employeeUuid") UUID employeeUuid, @Param("cycleUuid") UUID cycleUuid);
+    List<EmployeePeriod> getByEmployeeIdAndPeriodId(@Param("employeeUuid") UUID employeeUuid, @Param("periodUuid") UUID cycleUuid);
 
-    List<EmployeePeriod> getByStatusAndCycleId(@Param("status") PeriodStatus status, @Param("cycleUuid") UUID cycleUuid);
+    List<EmployeePeriod> getByStatusAndPeriodId(@Param("status") PeriodStatus status, @Param("periodUuid") UUID cycleUuid);
 
     List<EmployeePeriod> getByEmployeeIdAndStatus(@Param("employeeUuid") UUID employeeUuid, @Param("status") PeriodStatus status);
 
     List<EmployeePeriod> getByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
 
-    EmployeePeriod getActiveCycleByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
+    EmployeePeriod getActivePeriodByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
 
 }

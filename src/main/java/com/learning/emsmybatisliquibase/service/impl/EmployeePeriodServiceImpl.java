@@ -3,13 +3,13 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.PeriodDao;
 import com.learning.emsmybatisliquibase.dao.EmployeePeriodDao;
 import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
-import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.entity.Period;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
-import com.learning.emsmybatisliquibase.mapper.EmployeeCycleMapper;
+import com.learning.emsmybatisliquibase.mapper.EmployeePeriodMapper;
 import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.PERIOD_NOT_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_CYCLE_NOT_CREATED;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_CYCLE_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_PERIOD_NOT_CREATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_PERIOD_NOT_UPDATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.*;
 
 import java.time.Instant;
@@ -41,51 +41,51 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
     private final ReviewTimelineDao reviewTimelineDao;
 
-    private final EmployeeCycleMapper employeeCycleMapper;
+    private final EmployeePeriodMapper employeePeriodMapper;
 
 
     @Override
     @Transactional
-    public SuccessResponseDto cycleAssignment(List<UUID> employeeIds) {
-        var cycle = getCurrentActiveCycle();
+    public SuccessResponseDto periodAssignment(List<UUID> employeeIds) {
+        var period = getCurrentActivePeriod();
 
         for (var employeeId : employeeIds) {
-            handleEmployeeCycleAssignment(employeeId, cycle);
+            handleEmployeePeriodAssignment(employeeId, period);
         }
 
         return successResponse();
     }
 
-    private Period getCurrentActiveCycle() {
-        var cycle = periodDao.getByStatus(PeriodStatus.STARTED);
+    private Period getCurrentActivePeriod() {
+        var period = periodDao.getByStatus(PeriodStatus.STARTED);
 
-        if (cycle == null) {
-            throw new NotFoundException(PERIOD_NOT_EXISTS.code(), "No Active Cycle for Current Cycle");
+        if (period == null) {
+            throw new NotFoundException(PERIOD_NOT_EXISTS.code(), "No Active Period for Current Period");
         }
-        return cycle;
+        return period;
     }
 
-    private void handleEmployeeCycleAssignment(UUID employeeId, Period period) {
-        if (!employeePeriodDao.getByEmployeeIdAndCycleId(employeeId, period.getUuid()).isEmpty()) {
+    private void handleEmployeePeriodAssignment(UUID employeeId, Period period) {
+        if (!employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, period.getUuid()).isEmpty()) {
             return;
         }
 
-        var employeeCycles = employeePeriodDao.getByEmployeeId(employeeId);
-        employeeCycles.stream()
-                .filter(employeeCycle -> employeeCycle.getStatus().equals(PeriodStatus.STARTED))
-                .forEach(employeeCycle -> {
-                    if (employeeCycle.getCycleUuid().equals(period.getUuid())) {
-                        updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE);
+        var employeePeriods = employeePeriodDao.getByEmployeeId(employeeId);
+        employeePeriods.stream()
+                .filter(employeePeriod -> employeePeriod.getStatus().equals(PeriodStatus.STARTED))
+                .forEach(employeePeriod -> {
+                    if (employeePeriod.getPeriodUuid().equals(period.getUuid())) {
+                        updateEmployeePeriodStatus(employeePeriod.getUuid(), PeriodStatus.INACTIVE);
                     } else if (!period.getStatus().equals(PeriodStatus.SCHEDULED)) {
-                        updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.COMPLETED);
+                        updateEmployeePeriodStatus(employeePeriod.getUuid(), PeriodStatus.COMPLETED);
                     }
                 });
 
-        var employeeCycle = saveEmployeeCycle(employeeId, period);
+        var employeePeriod = saveEmployeePeriod(employeeId, period);
 
         var currentMonth = LocalDateTime.now().getMonth();
         var year = period.getStartTime().atZone(ZoneId.systemDefault()).getYear();
-        var timelines = generateTimelines(employeeCycle, currentMonth, year);
+        var timelines = generateTimelines(employeePeriod, currentMonth, year);
         timelines.forEach(timeline -> {
             try {
                 if (0 == reviewTimelineDao.insert(timeline)) {
@@ -97,24 +97,24 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         });
     }
 
-    private EmployeePeriod saveEmployeeCycle(UUID employeeId, Period period) {
-        var employeeCycle = EmployeePeriod.builder()
+    private EmployeePeriod saveEmployeePeriod(UUID employeeId, Period period) {
+        var employeePeriod = EmployeePeriod.builder()
                 .uuid(UUID.randomUUID())
                 .employeeUuid(employeeId)
-                .cycleUuid(period.getUuid())
+                .periodUuid(period.getUuid())
                 .status(period.getStatus())
                 .createdTime(Instant.now())
                 .updatedTime(Instant.now())
                 .build();
 
         try {
-            if (0 == employeePeriodDao.insert(employeeCycle)) {
-                throw new IntegrityException(EMPLOYEE_CYCLE_NOT_CREATED.code(), "Employee Cycle not created");
+            if (0 == employeePeriodDao.insert(employeePeriod)) {
+                throw new IntegrityException(EMPLOYEE_PERIOD_NOT_CREATED.code(), "Employee Period not created");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EMPLOYEE_CYCLE_NOT_CREATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EMPLOYEE_PERIOD_NOT_CREATED.code(), exception.getCause().getMessage());
         }
-        return employeeCycle;
+        return employeePeriod;
     }
 
     private List<ReviewTimeline> generateTimelines(EmployeePeriod employeePeriod, Month currentMonth, int year) {
@@ -136,7 +136,7 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
             var timeline = ReviewTimeline.builder()
                     .uuid(UUID.randomUUID())
-                    .employeeCycleUuid(employeePeriod.getUuid())
+                    .employeePeriodUuid(employeePeriod.getUuid())
                     .type(ReviewType.valueOf("Q" + quarter))
                     .status(status)
                     .startTime(startTime)
@@ -153,28 +153,28 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
     }
 
     @Override
-    public SuccessResponseDto updateEmployeeCyclesByCycleId(UUID cycleId, PeriodStatus status) {
-        var employeeCycles = employeePeriodDao.getByStatusAndCycleId(PeriodStatus.STARTED, cycleId);
-        employeeCycles.forEach(employeeCycle -> updateEmployeeCycleStatus(employeeCycle.getUuid(), status));
+    public SuccessResponseDto updateEmployeePeriodsByPeriodId(UUID periodId, PeriodStatus status) {
+        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED, periodId);
+        employeePeriods.forEach(employeePeriod -> updateEmployeePeriodStatus(employeePeriod.getUuid(), status));
 
         return successResponse();
     }
 
 
     @Override
-    public SuccessResponseDto updateEmployeeCycleStatus(UUID employeeCycleId, PeriodStatus status) {
-        var employeeCycle = getById(employeeCycleId);
-        employeeCycle.setStatus(status);
+    public SuccessResponseDto updateEmployeePeriodStatus(UUID employeePeriodId, PeriodStatus status) {
+        var employeePeriod = getById(employeePeriodId);
+        employeePeriod.setStatus(status);
 
         try {
-            if (0 == employeePeriodDao.update(employeeCycle)) {
-                throw new IntegrityException(EMPLOYEE_CYCLE_NOT_UPDATED.code(), "Employee Cycle not updated with id: " + employeeCycle.getUuid());
+            if (0 == employeePeriodDao.update(employeePeriod)) {
+                throw new IntegrityException(EMPLOYEE_PERIOD_NOT_UPDATED.code(), "Employee Period not updated with id: " + employeePeriod.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EMPLOYEE_CYCLE_NOT_UPDATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EMPLOYEE_PERIOD_NOT_UPDATED.code(), exception.getCause().getMessage());
         }
 
-        var timelines = reviewTimelineDao.getByEmployeeCycleId(employeeCycleId);
+        var timelines = reviewTimelineDao.getByEmployeePeriodId(employeePeriodId);
         ReviewTimelineStatus reviewTimelineStatus;
         switch (status) {
             case STARTED -> reviewTimelineStatus = ReviewTimelineStatus.STARTED;
@@ -198,32 +198,32 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
 
     @Override
-    public FullEmployeeCycleDto getEmployeeCycleById(UUID employeeCycleId) {
-        var employeeCycle = getById(employeeCycleId);
-        var fullEmployeeCycle = employeeCycleMapper.employeeCycleToFullEMployeeCycleDto(employeeCycle);
-        var timelines = reviewTimelineDao.getByEmployeeCycleId(employeeCycleId);
-        fullEmployeeCycle.setReviewTimelines(timelines);
-        return fullEmployeeCycle;
+    public FullEmployeePeriodDto getEmployeePeriodById(UUID employeePeriodId) {
+        var employeePeriod = getById(employeePeriodId);
+        var fullEmployeePeriod = employeePeriodMapper.employeePeriodToFullEmployeePeriodDto(employeePeriod);
+        var timelines = reviewTimelineDao.getByEmployeePeriodId(employeePeriodId);
+        fullEmployeePeriod.setReviewTimelines(timelines);
+        return fullEmployeePeriod;
     }
 
     @Override
-    public List<EmployeePeriod> getByEmployeeIdAndCycleId(UUID employeeId, UUID cycleId) {
-        var employeeCycles = employeePeriodDao.getByEmployeeIdAndCycleId(employeeId, cycleId);
+    public List<EmployeePeriod> getByEmployeeIdAndPeriodId(UUID employeeId, UUID periodId) {
+        var employeePeriods = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, periodId);
 
-        var latestEmployeeCycle = employeeCycles.stream()
-                .filter(employeeCycle -> employeeCycle.getUpdatedTime() != null)
+        var latestEmployeePeriod = employeePeriods.stream()
+                .filter(employeePeriod -> employeePeriod.getUpdatedTime() != null)
                 .max(Comparator.comparing(EmployeePeriod::getUpdatedTime));
 
-        return latestEmployeeCycle.map(List::of).orElseGet(List::of);
+        return latestEmployeePeriod.map(List::of).orElseGet(List::of);
     }
 
 
-    private EmployeePeriod getById(UUID employeeCycleId) {
-        var employeeCycle = employeePeriodDao.getById(employeeCycleId);
-        if (employeeCycle == null) {
-            throw new NotFoundException("", "Employee Cycle not found with id " + employeeCycleId);
+    private EmployeePeriod getById(UUID employeePeriodId) {
+        var employeePeriod = employeePeriodDao.getById(employeePeriodId);
+        if (employeePeriod == null) {
+            throw new NotFoundException("", "Employee Period not found with id " + employeePeriodId);
         }
-        return employeeCycle;
+        return employeePeriod;
     }
 
     private SuccessResponseDto successResponse() {

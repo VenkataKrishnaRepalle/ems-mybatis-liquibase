@@ -1,18 +1,8 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
-import com.learning.emsmybatisliquibase.dao.DepartmentDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
-import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
-import com.learning.emsmybatisliquibase.dto.AddEmployeeResponseDto;
-import com.learning.emsmybatisliquibase.entity.Department;
 import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.Gender;
-import com.learning.emsmybatisliquibase.entity.Profile;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
-import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,15 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.javamail.JavaMailSender;
 
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceImplTest {
@@ -38,18 +24,6 @@ class EmployeeServiceImplTest {
 
     @InjectMocks
     private EmployeeServiceImpl employeeService;
-
-    @Mock
-    private JavaMailSender mailSender;
-
-    @Mock
-    private EmployeeMapper employeeMapper;
-
-    @Mock
-    private DepartmentDao departmentDao;
-
-    @Mock
-    private ProfileDao profileDao;
 
     Employee employee;
 

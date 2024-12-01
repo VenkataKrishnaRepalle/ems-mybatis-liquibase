@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.service;
 
 
-import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
@@ -14,7 +14,7 @@ public interface ReviewTimelineService {
 
     ReviewTimeline getById(UUID uuid);
 
-    FullEmployeeCycleDto getActiveTimelineDetails(UUID employeeId);
+    FullEmployeePeriodDto getActiveTimelineDetails(UUID employeeId);
 
     void updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType, ReviewTimelineStatus reviewTimelineStatus);
 

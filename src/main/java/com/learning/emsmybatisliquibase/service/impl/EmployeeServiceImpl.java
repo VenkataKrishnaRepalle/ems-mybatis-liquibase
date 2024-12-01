@@ -107,7 +107,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         profileService.insert(profile);
 
-        employeePeriodService.cycleAssignment(List.of(employee.getUuid()));
+        employeePeriodService.periodAssignment(List.of(employee.getUuid()));
 
         if (Boolean.FALSE.equals(validatePasswords(employeeDto.getPassword(), employeeDto.getConfirmPassword()))) {
             notificationService.sendSuccessfulEmployeeOnBoard(employee, password, 0);
@@ -169,19 +169,19 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (updateLeavingDate.getLeavingDate() == null && profile.getProfileStatus().equals(ProfileStatus.INACTIVE)) {
             var currentActiveCycle = periodService.getCurrentActivePeriod();
-            var employeeCycles = employeePeriodDao.getByEmployeeIdAndCycleId(employee.getUuid(), currentActiveCycle.getUuid());
+            var employeeCycles = employeePeriodDao.getByEmployeeIdAndPeriodId(employee.getUuid(), currentActiveCycle.getUuid());
             if (employeeCycles == null) {
                 return;
             } else {
                 for (var employeeCycle : employeeCycles) {
-                    employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.STARTED);
+                    employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(), PeriodStatus.STARTED);
                 }
             }
             profile.setProfileStatus(ProfileStatus.ACTIVE);
         } else if (updateLeavingDate.getLeavingDate() != null && updateLeavingDate.getLeavingDate().before(new Date())) {
             profile.setProfileStatus(ProfileStatus.INACTIVE);
             var empStartedCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(), PeriodStatus.STARTED);
-            empStartedCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
+            empStartedCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
         }
         profileService.update(profile);
     }

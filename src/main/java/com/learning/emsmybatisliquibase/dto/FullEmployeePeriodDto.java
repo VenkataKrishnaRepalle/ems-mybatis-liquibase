@@ -15,13 +15,13 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FullEmployeeCycleDto {
+public class FullEmployeePeriodDto {
 
     private UUID uuid;
 
     private UUID employeeUuid;
 
-    private UUID cycleUuid;
+    private UUID periodUuid;
 
     private PeriodStatus status;
 

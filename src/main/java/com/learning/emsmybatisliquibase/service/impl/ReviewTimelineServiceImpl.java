@@ -2,7 +2,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeePeriodDao;
 import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
-import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.PeriodStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
@@ -10,7 +10,7 @@ import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
-import com.learning.emsmybatisliquibase.mapper.EmployeeCycleMapper;
+import com.learning.emsmybatisliquibase.mapper.EmployeePeriodMapper;
 import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_CYCLE_NOT_FOUND;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_PERIOD_NOT_FOUND;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_FOUND;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_UPDATED;
 
@@ -32,7 +32,7 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
 
     private final EmployeePeriodDao employeePeriodDao;
 
-    private final EmployeeCycleMapper employeeCycleMapper;
+    private final EmployeePeriodMapper employeePeriodMapper;
 
     public ReviewTimeline getById(UUID uuid) {
         var timeline = reviewTimelineDao.getById(uuid);
@@ -43,13 +43,13 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
     }
 
     @Override
-    public FullEmployeeCycleDto getActiveTimelineDetails(UUID employeeId) {
-        var employeeCycle = employeePeriodDao.getActiveCycleByEmployeeId(employeeId);
+    public FullEmployeePeriodDto getActiveTimelineDetails(UUID employeeId) {
+        var employeeCycle = employeePeriodDao.getActivePeriodByEmployeeId(employeeId);
         if (employeeCycle == null) {
-            throw new NotFoundException(EMPLOYEE_CYCLE_NOT_FOUND.code(), "Active Employee Cycle not found for employeeId: " + employeeId);
+            throw new NotFoundException(EMPLOYEE_PERIOD_NOT_FOUND.code(), "Active Employee Cycle not found for employeeId: " + employeeId);
         }
-        var fullTimeline = employeeCycleMapper.employeeCycleToFullEMployeeCycleDto(employeeCycle);
-        fullTimeline.setReviewTimelines(reviewTimelineDao.getByEmployeeCycleId(employeeCycle.getUuid()));
+        var fullTimeline = employeePeriodMapper.employeePeriodToFullEmployeePeriodDto(employeeCycle);
+        fullTimeline.setReviewTimelines(reviewTimelineDao.getByEmployeePeriodId(employeeCycle.getUuid()));
         return fullTimeline;
     }
 

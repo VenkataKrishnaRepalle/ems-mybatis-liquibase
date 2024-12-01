@@ -19,7 +19,7 @@ public class EmployeePeriod implements Serializable {
 
     private UUID employeeUuid;
 
-    private UUID cycleUuid;
+    private UUID periodUuid;
 
     private PeriodStatus status;
 

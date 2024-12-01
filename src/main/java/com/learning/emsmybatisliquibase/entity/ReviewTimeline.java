@@ -17,7 +17,7 @@ public class ReviewTimeline implements Serializable {
 
     private UUID uuid;
 
-    private UUID employeeCycleUuid;
+    private UUID employeePeriodUuid;
 
     private ReviewType type;
 

@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.controller;
 
-import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
@@ -21,7 +21,7 @@ public class ReviewTimelineController {
     private final ReviewTimelineService reviewTimelineService;
 
     @GetMapping("/getActiveTimelineDetails/{employeeId}")
-    public ResponseEntity<FullEmployeeCycleDto> getActiveTimelineDetails(@PathVariable UUID employeeId) {
+    public ResponseEntity<FullEmployeePeriodDto> getActiveTimelineDetails(@PathVariable UUID employeeId) {
         return new ResponseEntity<>(reviewTimelineService.getActiveTimelineDetails(employeeId), HttpStatus.OK);
     }
 

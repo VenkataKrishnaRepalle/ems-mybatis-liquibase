@@ -6,7 +6,7 @@
             typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
         <result property="employeeUuid" column="employee_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
                 typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
-        <result property="cycleUuid" column="period_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+        <result property="periodUuid" column="period_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
                 typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
         <result property="status" column="status"/>
         <result property="createdTime" column="created_time"/>
@@ -21,31 +21,31 @@
 
     <insert id="insert" flushCache="true">
         INSERT INTO employee_period (uuid, employee_uuid, period_uuid, status, created_time, updated_time)
-        VALUES (#{employeePeriod.uuid}, #{employeePeriod.employeeUuid}, #{employeePeriod.cycleUuid},
+        VALUES (#{employeePeriod.uuid}, #{employeePeriod.employeeUuid}, #{employeePeriod.periodUuid},
                 #{employeePeriod.status}, current_timestamp, current_timestamp)
     </insert>
 
     <update id="update" flushCache="true">
         UPDATE employee_period
         SET employee_uuid = #{employeePeriod.employeeUuid},
-            period_uuid   = #{employeePeriod.cycleUuid},
+            period_uuid   = #{employeePeriod.periodUuid},
             status        = #{employeePeriod.status},
             updated_time  = current_timestamp
         where uuid = #{employeePeriod.uuid}
     </update>
 
-    <select id="getByEmployeeIdAndCycleId" resultMap="employeePeriodStructure">
+    <select id="getByEmployeeIdAndPeriodId" resultMap="employeePeriodStructure">
         select *
         from employee_period
         where employee_uuid = #{employeeUuid}
-          and period_uuid = #{cycleUuid}
+          and period_uuid = #{periodUuid}
     </select>
 
-    <select id="getByStatusAndCycleId" resultMap="employeePeriodStructure">
+    <select id="getByStatusAndPeriodId" resultMap="employeePeriodStructure">
         select *
         from employee_period
         where status = #{status}
-          and period_uuid = #{cycleUuid}
+          and period_uuid = #{periodUuid}
     </select>
 
     <select id="getByEmployeeIdAndStatus" resultMap="employeePeriodStructure">
@@ -61,7 +61,7 @@
         where employee_uuid = #{employeeUuid}
     </select>
 
-    <select id="getActiveCycleByEmployeeId" resultMap="employeePeriodStructure">
+    <select id="getActivePeriodByEmployeeId" resultMap="employeePeriodStructure">
         select *
         from employee_period
         where status = 'STARTED'

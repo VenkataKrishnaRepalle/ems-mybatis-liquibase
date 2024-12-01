@@ -59,39 +59,39 @@ public class ScheduledTasks {
                 }
 
                 var employeeCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(), PeriodStatus.STARTED);
-                employeeCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
+                employeeCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
             }
         }
     }
 
     @Scheduled(cron = "0 0 0 25 12 *")
-    public void scheduleCycle() {
+    public void schedulePeriod() {
         var year = Instant.now().atZone(ZoneId.systemDefault()).getYear() + 1;
         periodService.createPeriod(year);
     }
 
     @Scheduled(cron = "0 0 0 1 1 *")
-    public void startCycle() {
-        var oldCycle = periodDao.getByStatus(PeriodStatus.STARTED);
-        oldCycle.setStatus(PeriodStatus.INACTIVE);
-        oldCycle.setUpdatedTime(Instant.now());
+    public void startPeriod() {
+        var oldPeriod = periodDao.getByStatus(PeriodStatus.STARTED);
+        oldPeriod.setStatus(PeriodStatus.INACTIVE);
+        oldPeriod.setUpdatedTime(Instant.now());
 
-        var employeeCycles = employeePeriodDao.getByStatusAndCycleId(PeriodStatus.STARTED, oldCycle.getUuid());
-        employeeCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeeCycleStatus(employeeCycle.getUuid(), PeriodStatus.COMPLETED));
+        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED, oldPeriod.getUuid());
+        employeePeriods.forEach(employeePeriod -> employeePeriodService.updateEmployeePeriodStatus(employeePeriod.getUuid(), PeriodStatus.COMPLETED));
 
-        var cycle = periodDao.getByStatus(PeriodStatus.SCHEDULED);
+        var period = periodDao.getByStatus(PeriodStatus.SCHEDULED);
 
-        cycle.setStatus(PeriodStatus.STARTED);
-        cycle.setUpdatedTime(Instant.now());
+        period.setStatus(PeriodStatus.STARTED);
+        period.setUpdatedTime(Instant.now());
         try {
-            if (0 == periodDao.update(cycle)) {
-                throw new IntegrityException("CYCLE_NOT_UPDATED", "Cycle not updated");
+            if (0 == periodDao.update(period)) {
+                throw new IntegrityException("PERIOD_NOT_UPDATED", "Period not updated");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException("CYCLE_NOT_UPDATED", exception.getCause().getMessage());
+            throw new IntegrityException("PERIOD_NOT_UPDATED", exception.getCause().getMessage());
         }
 
-        employeePeriodService.cycleAssignment(employeeDao.getAllActiveEmployeeIds());
+        employeePeriodService.periodAssignment(employeeDao.getAllActiveEmployeeIds());
     }
 
     @Scheduled(cron = "0 15 0 1 4,7,10 *")

@@ -98,12 +98,12 @@ public class PeriodServiceImpl implements PeriodService {
             activePeriod.setStatus(PeriodStatus.INACTIVE);
             activePeriod.setUpdatedTime(Instant.now());
             update(activePeriod);
-            employeePeriodService.updateEmployeeCyclesByCycleId(activePeriod.getUuid(), PeriodStatus.INACTIVE);
+            employeePeriodService.updateEmployeePeriodsByPeriodId(activePeriod.getUuid(), PeriodStatus.INACTIVE);
         } else if (activePeriod != null && activePeriod.getStartTime().atZone(ZoneId.systemDefault()).getYear() < periodStartTime) {
             activePeriod.setStatus(PeriodStatus.COMPLETED);
             activePeriod.setUpdatedTime(Instant.now());
             update(activePeriod);
-            employeePeriodService.updateEmployeeCyclesByCycleId(activePeriod.getUuid(), PeriodStatus.COMPLETED);
+            employeePeriodService.updateEmployeePeriodsByPeriodId(activePeriod.getUuid(), PeriodStatus.COMPLETED);
         }
 
         period.setStatus(PeriodStatus.STARTED);

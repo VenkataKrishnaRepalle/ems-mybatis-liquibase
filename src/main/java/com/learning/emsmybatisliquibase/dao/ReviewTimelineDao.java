@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface ReviewTimelineDao {
 
-    List<ReviewTimeline> getByEmployeeCycleId(@Param("employeeCycleUuid") UUID employeeCycleId);
+    List<ReviewTimeline> getByEmployeePeriodId(@Param("employeePeriodUuid") UUID employeePeriodUuid);
 
     int insert(@Param("reviewTimeline") ReviewTimeline reviewTimeline);
 

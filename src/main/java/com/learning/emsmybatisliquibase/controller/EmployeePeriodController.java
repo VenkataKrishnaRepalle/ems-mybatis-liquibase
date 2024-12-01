@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.controller;
 
-import com.learning.emsmybatisliquibase.dto.FullEmployeeCycleDto;
+import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
 import com.learning.emsmybatisliquibase.entity.PeriodStatus;
@@ -26,24 +26,24 @@ public class EmployeePeriodController {
 
     private final EmployeePeriodService employeePeriodService;
 
-    @PostMapping("employee-cycle-assignment")
+    @PostMapping("employee-period-assignment")
     public ResponseEntity<SuccessResponseDto> cycleAssignment(@RequestBody List<UUID> employeeIds) {
-        return new ResponseEntity<>(employeePeriodService.cycleAssignment(employeeIds), HttpStatus.CREATED);
+        return new ResponseEntity<>(employeePeriodService.periodAssignment(employeeIds), HttpStatus.CREATED);
     }
 
-    @PutMapping("update-employee-cycle/{employeeCycleId}/status/{status}")
-    public ResponseEntity<SuccessResponseDto> updateEmployeeCycleStatus(@PathVariable UUID employeeCycleId, @PathVariable PeriodStatus status) {
-        return new ResponseEntity<>(employeePeriodService.updateEmployeeCycleStatus(employeeCycleId, status), HttpStatus.ACCEPTED);
+    @PutMapping("update-employee-period/{employeePeriodId}/status/{status}")
+    public ResponseEntity<SuccessResponseDto> updateEmployeeCycleStatus(@PathVariable UUID employeePeriodId, @PathVariable PeriodStatus status) {
+        return new ResponseEntity<>(employeePeriodService.updateEmployeePeriodStatus(employeePeriodId, status), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("getById/{employeeCycleId}")
-    public ResponseEntity<FullEmployeeCycleDto> getById(@PathVariable UUID employeeCycleId) {
-        return new ResponseEntity<>(employeePeriodService.getEmployeeCycleById(employeeCycleId), HttpStatus.OK);
+    @GetMapping("getById/{employeePeriodId}")
+    public ResponseEntity<FullEmployeePeriodDto> getById(@PathVariable UUID employeePeriodId) {
+        return new ResponseEntity<>(employeePeriodService.getEmployeePeriodById(employeePeriodId), HttpStatus.OK);
     }
 
-    @GetMapping("getByCycleId/{employeeId}/cycle/{cycleId}")
-    public ResponseEntity<List<EmployeePeriod>> getByCycleId(@PathVariable UUID employeeId, @PathVariable UUID cycleId) {
-        return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndCycleId(employeeId, cycleId), HttpStatus.OK);
+    @GetMapping("getByPeriodId/{employeeId}/cycle/{periodId}")
+    public ResponseEntity<List<EmployeePeriod>> getByPeriodId(@PathVariable UUID employeeId, @PathVariable UUID periodId) {
+        return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndPeriodId(employeeId, periodId), HttpStatus.OK);
     }
 
 }
