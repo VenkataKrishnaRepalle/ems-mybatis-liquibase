@@ -1,6 +1,7 @@
 package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.dto.FeedbackResponseDto;
+import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
 import com.learning.emsmybatisliquibase.entity.FeedbackType;
 import com.learning.emsmybatisliquibase.service.FeedbackService;
@@ -34,6 +35,12 @@ public class FeedbackController {
     public ResponseEntity<Feedback> addFeedback(@RequestBody Feedback feedback) {
         return new ResponseEntity<>(feedbackService.send(feedback), HttpStatus.CREATED);
     }
+
+    @PostMapping("/request")
+    public ResponseEntity<Feedback> requestFeedback(@RequestBody RequestFeedbackDto requestFeedbackDto) {
+        return new ResponseEntity<>(feedbackService.requestFeedback(requestFeedbackDto), HttpStatus.CREATED);
+    }
+
 
     @PutMapping("/update/{feedbackId}")
     public ResponseEntity<Feedback> update(@PathVariable UUID feedbackId, @RequestBody Feedback feedback) {

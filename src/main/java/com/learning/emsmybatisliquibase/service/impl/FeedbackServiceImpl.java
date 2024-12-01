@@ -2,6 +2,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.FeedbackDao;
 import com.learning.emsmybatisliquibase.dto.FeedbackResponseDto;
+import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
 import com.learning.emsmybatisliquibase.entity.FeedbackType;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,8 +42,14 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public List<FeedbackResponseDto> getFeedback(UUID employeeUuid, FeedbackType feedbackType) {
-        var sendFeedbacks = feedbackDao.findSendFeedback(employeeUuid, feedbackType);
-        return sendFeedbacks.stream()
+        List<Feedback> feedbacks = null;
+        if (feedbackType.equals(FeedbackType.SEND) || feedbackType.equals(FeedbackType.DRAFT)) {
+            feedbacks = feedbackDao.findSendFeedback(employeeUuid, feedbackType);
+        } else {
+            feedbacks = feedbackDao.findReceivedFeedback(employeeUuid, feedbackType);
+        }
+        assert feedbacks != null;
+        return feedbacks.stream()
                 .map(this::toFeedbackResponse)
                 .toList();
     }
@@ -58,6 +66,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public Feedback send(Feedback feedback) {
         feedback.setUuid(UUID.randomUUID());
+        feedback.setCreatedTime(Instant.now());
+        feedback.setUpdatedTime(Instant.now());
 
         try {
             if (0 == feedbackDao.insert(feedback)) {
@@ -96,5 +106,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException("FEEDBACK_NOT_DELETED", exception.getCause().getMessage());
         }
+    }
+
+    @Override
+    public Feedback requestFeedback(RequestFeedbackDto requestFeedbackDto) {
+        var feedback = feedbackMapper.requestFeedbackDtoToFeedback(requestFeedbackDto);
+        feedback.setType(FeedbackType.REQUEST);
+        /* Save Feedback*/
+        return send(feedback);
     }
 }

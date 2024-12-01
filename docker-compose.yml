@@ -7,13 +7,15 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: ems
+      POSTGRES_DB: ems-docker
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5430:5432"
     networks:
       - mynetwork
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

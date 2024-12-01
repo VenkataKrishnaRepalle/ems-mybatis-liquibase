@@ -1,6 +1,7 @@
 package com.learning.emsmybatisliquibase.service;
 
 import com.learning.emsmybatisliquibase.dto.FeedbackResponseDto;
+import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
 import com.learning.emsmybatisliquibase.entity.FeedbackType;
 
@@ -17,4 +18,6 @@ public interface FeedbackService {
     Feedback update(UUID feedbackId, Feedback feedback);
 
     void delete(UUID feedbackId);
+
+    Feedback requestFeedback(RequestFeedbackDto requestFeedbackDto);
 }

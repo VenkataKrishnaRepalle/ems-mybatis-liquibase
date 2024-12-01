@@ -15,15 +15,9 @@
             <column name="type" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="look_back" type="VARCHAR">
-                <constraints nullable="false"/>
-            </column>
-            <column name="look_forward" type="VARCHAR">
-                <constraints nullable="false"/>
-            </column>
-            <column name="other_comments" type="VARCHAR">
-                <constraints nullable="true"/>
-            </column>
+            <column name="look_back" type="VARCHAR"/>
+            <column name="look_forward" type="VARCHAR"/>
+            <column name="other_comments" type="VARCHAR"/>
             <column name="created_time" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
@@ -41,8 +35,8 @@
                                  referencedTableName="employee" referencedColumnNames="uuid"/>
 
         <sql>ALTER TABLE feedback
-            ADD CONSTRAINT type_check check (type = 'SEND' or
-                                             type = 'RECEIVE' or
+            ADD CONSTRAINT type_check check (type = 'DRAFT' or
+                                             type = 'SEND' or
                                              type = 'REQUEST' or
                                              type = 'RESPOND')</sql>
     </changeSet>

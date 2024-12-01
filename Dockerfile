@@ -7,6 +7,7 @@ COPY ${JAR_FILE} app.jar
 
 # Expose the application port
 EXPOSE 8080
+EXPOSE 5430
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "/app.jar"]

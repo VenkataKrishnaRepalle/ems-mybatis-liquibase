@@ -79,25 +79,6 @@ class FeedbackControllerTest {
     }
 
     @Test
-    void testGetReceiveFeedback() throws Exception {
-        var employee = new EmployeeDetailsDto();
-        employee.setUuid(UUID.randomUUID());
-        var feedback1 = new FeedbackResponseDto();
-        feedback1.setUuid(UUID.randomUUID());
-        feedback1.setSender(employee);
-        feedback1.setType(FeedbackType.RECEIVE);
-        List<FeedbackResponseDto> feedbacks = List.of(feedback1);
-
-        when(feedbackService.getFeedback(employee.getUuid(), FeedbackType.RECEIVE)).thenReturn(feedbacks);
-
-        mockMvc.perform(get("/api/feedback/getFeedback/{employeeId}?feedbackType={type}", employee.getUuid(), FeedbackType.RECEIVE)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(feedbackService, times(1)).getFeedback(employee.getUuid(), FeedbackType.RECEIVE);
-    }
-
-    @Test
     void testGetRequestFeedback() throws Exception {
         var employee = new EmployeeDetailsDto();
         employee.setUuid(UUID.randomUUID());
@@ -161,9 +142,9 @@ class FeedbackControllerTest {
         when(feedbackService.update(uuid, feedback)).thenReturn(feedback);
 
         mockMvc.perform(put("/api/feedback/update/{feedbackId}", uuid)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(feedback))
-                .accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(feedback))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted());
 
         verify(feedbackService, times(1)).update(uuid, feedback);
@@ -176,7 +157,7 @@ class FeedbackControllerTest {
         doNothing().when(feedbackService).delete(uuid);
 
         mockMvc.perform(delete("/api/feedback/delete/{feedbackId}", uuid))
-               .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
 
         verify(feedbackService, times(1)).delete(uuid);
     }
