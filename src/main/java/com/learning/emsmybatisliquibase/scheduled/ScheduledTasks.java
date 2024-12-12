@@ -123,8 +123,6 @@ public class ScheduledTasks {
         }
     }
 
-
-
     @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
     public void sendBeforeStartNotification() {
         var calendar = Calendar.getInstance();
