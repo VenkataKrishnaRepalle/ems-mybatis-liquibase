@@ -2,12 +2,11 @@ FROM openjdk:17-jdk-alpine
 LABEL authors="rvenkata"
 
 # Copy the application jar file
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+ARG JAR_FILE=target/ems-mybatis-liquibase.jar
+COPY ${JAR_FILE} ems-mybatis-liquibase.jar
 
 # Expose the application port
 EXPOSE 8080
-EXPOSE 5430
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "/ems-mybatis-liquibase.jar"]
