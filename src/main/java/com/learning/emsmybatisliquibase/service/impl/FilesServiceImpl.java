@@ -112,7 +112,8 @@ public class FilesServiceImpl implements FilesService {
                 } else if (REMOVE.equalsIgnoreCase(action)) {
                     var colleaguesByManager = employeeService.getByManagerUuid(employee.getUuid());
                     if (!colleaguesByManager.isEmpty()) {
-                        throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Colleagues exists under this manager, Please update their manager details to proceed");
+                        throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(),
+                                "Colleagues exists under this manager, Please update their manager details to proceed");
                     }
                     employee.setIsManager(Boolean.FALSE);
                 }
@@ -170,7 +171,8 @@ public class FilesServiceImpl implements FilesService {
 
     private void validateManagerAccess(Employee manager) {
         if (Boolean.FALSE.equals(manager.getIsManager())) {
-            throw new InvalidInputException(MANAGER_ACCESS_NOT_FOUND.code(), "Manager access not granted for email: " + manager.getEmail());
+            throw new InvalidInputException(MANAGER_ACCESS_NOT_FOUND.code(),
+                    "Manager access not granted for email: " + manager.getEmail());
         }
     }
 
@@ -193,11 +195,11 @@ public class FilesServiceImpl implements FilesService {
         var rowValues = fileProcess(file, FileType.DEPARTMENT_PERMISSION);
 
         for (List<String> value : rowValues) {
-            var department = departmentDao.getByName(value.get(0).trim());
+            var department = departmentDao.getByName(value.getFirst().trim());
 
             var employee = employeeService.getByEmail(value.get(1));
             if (department == null) {
-                department = departmentService.add(new AddDepartmentDto(value.get(0).trim()));
+                department = departmentService.add(new AddDepartmentDto(value.getFirst().trim()));
             }
 
             var action = value.get(2);
@@ -248,7 +250,8 @@ public class FilesServiceImpl implements FilesService {
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 var cell = headerRow.getCell(i);
                 if (cell == null) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(),
+                            INVALID_COLUMN_HEADINGS.code().toLowerCase());
                 }
                 columnHeadings.add(cell.toString().toLowerCase());
             }
@@ -278,28 +281,42 @@ public class FilesServiceImpl implements FilesService {
     private void validateColumnHeadings(List<String> columnHeadings, FileType fileType) {
         switch (fileType) {
             case COLLEAGUE_ONBOARD:
-                if (!columnHeadings.get(0).equals("first_name") && !columnHeadings.get(1).equals("last_name") && !columnHeadings.get(2).equals("email") &&
-                        !columnHeadings.get(3).equals("gender") && !columnHeadings.get(4).equals("date_of_birth") && !columnHeadings.get(5).equals("phone_number") &&
-                        !columnHeadings.get(6).equals("joining_date") && !columnHeadings.get(7).equals("leaving_date") && !columnHeadings.get(8).equals("department_name") &&
-                        !columnHeadings.get(9).equals("is_manager") && !columnHeadings.get(10).equals("manager_uuid") && !columnHeadings.get(11).equals("job_title") &&
-                        !columnHeadings.get(12).equals("password") && !columnHeadings.get(13).equals("confirm_password")) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), "Please correct column headings");
+                if (!columnHeadings.get(0).equals("first_name") &&
+                        !columnHeadings.get(1).equals("last_name") &&
+                        !columnHeadings.get(2).equals("email") &&
+                        !columnHeadings.get(3).equals("gender") &&
+                        !columnHeadings.get(4).equals("date_of_birth") &&
+                        !columnHeadings.get(5).equals("phone_number") &&
+                        !columnHeadings.get(6).equals("joining_date") &&
+                        !columnHeadings.get(7).equals("leaving_date") &&
+                        !columnHeadings.get(8).equals("department_name") &&
+                        !columnHeadings.get(9).equals("is_manager") &&
+                        !columnHeadings.get(10).equals("manager_uuid") &&
+                        !columnHeadings.get(11).equals("job_title") &&
+                        !columnHeadings.get(12).equals("password") &&
+                        !columnHeadings.get(13).equals("confirm_password")) {
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(),
+                            "Please correct column headings");
                 }
                 break;
             case MANAGER_ACCESS:
                 if (!columnHeadings.contains("manager_email") || !columnHeadings.contains(ACTION)) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(),
+                            INVALID_COLUMN_HEADINGS.code().toLowerCase());
                 }
                 break;
             case UPDATE_MANAGER:
                 if (!columnHeadings.contains("colleague_email") || !columnHeadings.contains("manager_email")
                         || !columnHeadings.contains(ACTION)) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(),
+                            INVALID_COLUMN_HEADINGS.code().toLowerCase());
                 }
                 break;
             case DEPARTMENT_PERMISSION:
-                if (!columnHeadings.contains("department_name") && !columnHeadings.contains("email") && !columnHeadings.contains(ACTION)) {
-                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), INVALID_COLUMN_HEADINGS.code().toLowerCase());
+                if (!columnHeadings.contains("department_name") && !columnHeadings.contains("email") &&
+                        !columnHeadings.contains(ACTION)) {
+                    throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(),
+                            INVALID_COLUMN_HEADINGS.code().toLowerCase());
                 }
                 break;
             default:

@@ -22,7 +22,8 @@ public class ProfileServiceImpl implements ProfileService {
     public Profile getByEmployeeUuid(UUID employeeUuid) {
         var profile = profileDao.get(employeeUuid);
         if (profile == null) {
-            throw new NotFoundException(PROFILE_NOT_FOUND.code(), "Profile not found for colleague id: " + employeeUuid);
+            throw new NotFoundException(PROFILE_NOT_FOUND.code(),
+                    "Profile not found for colleague id: " + employeeUuid);
         }
         return profile;
     }
@@ -32,10 +33,12 @@ public class ProfileServiceImpl implements ProfileService {
     public Profile insert(Profile profile) {
         try {
             if (0 == profileDao.insert(profile)) {
-                throw new NotFoundException(PROFILE_NOT_CREATED.code(), "Failed in saving profile");
+                throw new NotFoundException(PROFILE_NOT_CREATED.code(),
+                        "Failed in saving profile");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(PROFILE_NOT_CREATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(PROFILE_NOT_CREATED.code(),
+                    exception.getCause().getMessage());
         }
         return profile;
     }
@@ -46,10 +49,12 @@ public class ProfileServiceImpl implements ProfileService {
 
         try {
             if (0 == profileDao.update(profileInput)) {
-                throw new IntegrityException(PROFILE_NOT_UPDATED.code(), "Profile not updated");
+                throw new IntegrityException(PROFILE_NOT_UPDATED.code(),
+                        "Profile not updated");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(PROFILE_NOT_UPDATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(PROFILE_NOT_UPDATED.code(),
+                    exception.getCause().getMessage());
         }
 
         return profileInput;

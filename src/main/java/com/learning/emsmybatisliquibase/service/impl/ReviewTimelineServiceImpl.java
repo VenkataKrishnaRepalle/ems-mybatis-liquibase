@@ -49,15 +49,18 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
             throw new NotFoundException(EMPLOYEE_PERIOD_NOT_FOUND.code(),
                     "Active Employee Cycle not found for employeeId: " + employeeId);
         }
-        var fullTimeline = employeePeriodMapper.employeePeriodToFullEmployeePeriodDto(employeeCycle);
-        fullTimeline.setReviewTimelines(reviewTimelineDao.getByEmployeePeriodId(employeeCycle.getUuid()));
+        var fullTimeline = employeePeriodMapper
+                .employeePeriodToFullEmployeePeriodDto(employeeCycle);
+        fullTimeline.setReviewTimelines(reviewTimelineDao
+                .getByEmployeePeriodId(employeeCycle.getUuid()));
         return fullTimeline;
     }
 
     @Override
     public void updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType,
                                      ReviewTimelineStatus reviewTimelineStatus) {
-        var timelines = reviewTimelineDao.getByEmployeeUuidsAndReviewType(employeeUuids, reviewType);
+        var timelines = reviewTimelineDao
+                .getByEmployeeUuidsAndReviewType(employeeUuids, reviewType);
 
         timelines.forEach(timeline -> {
             timeline.setStatus(reviewTimelineStatus);

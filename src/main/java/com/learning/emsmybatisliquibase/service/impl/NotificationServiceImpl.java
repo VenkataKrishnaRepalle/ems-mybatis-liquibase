@@ -54,10 +54,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendSuccessfulEmployeeOnBoard(Employee employee, String password, int capacity) {
-        String templateName = capacity == 1 ? emailTemplateNameSuccessfulOnboard : getEmailTemplateNameSuccessfulOnboardTempPassword;
+        String templateName = capacity == 1 ? emailTemplateNameSuccessfulOnboard :
+                getEmailTemplateNameSuccessfulOnboardTempPassword;
         Thread thread = new Thread(() -> {
             try {
-                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(), emailTemplateSuccessfulOnboard);
+                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(),
+                        emailTemplateSuccessfulOnboard);
 
                 Context context = new Context();
                 context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());
@@ -81,12 +83,14 @@ public class NotificationServiceImpl implements NotificationService {
         var employeeUuids = notifications.stream()
                 .map(NotificationDto::getUuid)
                 .toList();
-        reviewTimelineService.updateTimelineStatus(employeeUuids, reviewType, ReviewTimelineStatus.STARTED);
+        reviewTimelineService.updateTimelineStatus(employeeUuids, reviewType,
+                ReviewTimelineStatus.STARTED);
 
         Thread thread = new Thread(() -> notifications.forEach(employee -> {
             log.info("Sending notification before start email to colleague {}", employee.getUuid());
             try {
-                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(), beforeReviewStartSubject);
+                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(),
+                        beforeReviewStartSubject);
 
                 Context context = new Context();
                 context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());
@@ -108,7 +112,8 @@ public class NotificationServiceImpl implements NotificationService {
         Thread thread = new Thread(() -> notifications.forEach(employee -> {
             log.info("Sending notification before start email to colleague {}", employee.getUuid());
             try {
-                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(), beforeReviewStartSubject);
+                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(),
+                        beforeReviewStartSubject);
 
                 Context context = new Context();
                 context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());

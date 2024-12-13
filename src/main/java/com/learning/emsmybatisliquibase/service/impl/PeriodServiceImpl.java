@@ -55,7 +55,8 @@ public class PeriodServiceImpl implements PeriodService {
             if (period.getStatus().equals(PeriodStatus.SCHEDULED)
                     && period.getStartTime().atZone(ZoneId.systemDefault()).getYear() == year
                     && period.getEndTime().atZone(ZoneId.systemDefault()).getYear() == year) {
-                throw new FoundException(PERIOD_ALREADY_EXISTS.code(), "Period already created with scheduled Status " + period.getUuid());
+                throw new FoundException(PERIOD_ALREADY_EXISTS.code(),
+                        "Period already created with scheduled Status " + period.getUuid());
             }
         }
 
@@ -66,7 +67,8 @@ public class PeriodServiceImpl implements PeriodService {
                 .startTime(startDateTime)
                 .endTime(endDateTime)
                 .status(PeriodStatus.SCHEDULED)
-                .createdBy(SecurityContextHolder.getContext().getAuthentication() == null ? ADMIN_UUID : UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName()))
+                .createdBy(SecurityContextHolder.getContext().getAuthentication() == null ? ADMIN_UUID :
+                        UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName()))
                 .createdTime(Instant.now())
                 .updatedTime(Instant.now())
                 .build();
@@ -93,17 +95,20 @@ public class PeriodServiceImpl implements PeriodService {
 
         var activePeriod = periodDao.getByStatus(PeriodStatus.STARTED);
 
-        if (activePeriod != null && activePeriod.getStartTime().atZone(ZoneId.systemDefault()).getYear() == periodStartTime &&
-                activePeriod.getEndTime().atZone(ZoneId.systemDefault()).getYear() == periodEndTime) {
+        if (activePeriod != null && activePeriod.getStartTime().atZone(ZoneId.systemDefault()).getYear() ==
+                periodStartTime && activePeriod.getEndTime().atZone(ZoneId.systemDefault()).getYear() == periodEndTime) {
             activePeriod.setStatus(PeriodStatus.INACTIVE);
             activePeriod.setUpdatedTime(Instant.now());
             update(activePeriod);
-            employeePeriodService.updateEmployeePeriodsByPeriodId(activePeriod.getUuid(), PeriodStatus.INACTIVE);
-        } else if (activePeriod != null && activePeriod.getStartTime().atZone(ZoneId.systemDefault()).getYear() < periodStartTime) {
+            employeePeriodService.updateEmployeePeriodsByPeriodId(activePeriod.getUuid(),
+                    PeriodStatus.INACTIVE);
+        } else if (activePeriod != null && activePeriod.getStartTime().atZone(
+                ZoneId.systemDefault()).getYear() < periodStartTime) {
             activePeriod.setStatus(PeriodStatus.COMPLETED);
             activePeriod.setUpdatedTime(Instant.now());
             update(activePeriod);
-            employeePeriodService.updateEmployeePeriodsByPeriodId(activePeriod.getUuid(), PeriodStatus.COMPLETED);
+            employeePeriodService.updateEmployeePeriodsByPeriodId(activePeriod.getUuid(),
+                    PeriodStatus.COMPLETED);
         }
 
         period.setStatus(PeriodStatus.STARTED);

@@ -64,7 +64,8 @@ public class SkillsServiceImpl implements SkillsService {
         skills.setUpdatedTime(Instant.now());
         try {
             if (0 == skillsDao.update(skills)) {
-                throw new IntegrityException(SKILLS_NOT_UPDATED.code(), "Skills not updated for skillsId: " + skillsUuid);
+                throw new IntegrityException(SKILLS_NOT_UPDATED.code(),
+                        "Skills not updated for skillsId: " + skillsUuid);
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(SKILLS_NOT_UPDATED.code(), exception.getCause().getMessage());
@@ -77,7 +78,8 @@ public class SkillsServiceImpl implements SkillsService {
     public Skills getById(UUID skillsUuid) {
         var skill = skillsDao.getById(skillsUuid);
         if (skill == null) {
-            throw new NotFoundException(SKILLS_NOT_EXISTS.code(), "Skills not found with id " + skillsUuid);
+            throw new NotFoundException(SKILLS_NOT_EXISTS.code(),
+                    "Skills not found with id " + skillsUuid);
         }
         return skill;
     }
@@ -92,7 +94,8 @@ public class SkillsServiceImpl implements SkillsService {
         getById(skillsUuid);
         try {
             if (0 == skillsDao.delete(skillsUuid)) {
-                throw new IntegrityException(SKILLS_NOT_DELETED.code(), "Skills not deleted for skillsId: " + skillsUuid);
+                throw new IntegrityException(SKILLS_NOT_DELETED.code(),
+                        "Skills not deleted for skillsId: " + skillsUuid);
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(SKILLS_NOT_DELETED.code(), exception.getCause().getMessage());
@@ -102,10 +105,12 @@ public class SkillsServiceImpl implements SkillsService {
 
     private void inputValidation(SkillsDto skillsDto) {
         if (skillsDto.getName().isEmpty() || skillsDto.getName().isBlank()) {
-            throw new InvalidInputException(INVALID_RATINGS_INPUT.code(), "Name cannot be empty or null");
+            throw new InvalidInputException(INVALID_RATINGS_INPUT.code(),
+                    "Name cannot be empty or null");
         }
         if (skillsDto.getRating() < 1 || skillsDto.getRating() > 10) {
-            throw new InvalidInputException(INVALID_RATINGS_INPUT.code(), "Ratings must between 1 and 10");
+            throw new InvalidInputException(INVALID_RATINGS_INPUT.code(),
+                    "Ratings must between 1 and 10");
         }
     }
 
@@ -117,7 +122,8 @@ public class SkillsServiceImpl implements SkillsService {
         }
         for (var skill : skills) {
             if (name.equalsIgnoreCase(skill.getName().toLowerCase())) {
-                throw new InvalidInputException(SKILLS_ALREADY_EXISTS.code(), "Skill already exists");
+                throw new InvalidInputException(SKILLS_ALREADY_EXISTS.code(),
+                        "Skill already exists");
             }
         }
     }

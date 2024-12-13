@@ -53,7 +53,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public AddEmployeeResponseDto add(AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
+    public AddEmployeeResponseDto add(AddEmployeeDto employeeDto) throws MessagingException,
+            UnsupportedEncodingException {
         if (employeeDto.getManagerUuid() != null) {
             isManager(employeeDto.getManagerUuid());
         }
@@ -63,7 +64,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new FoundException(EMPLOYEE_ALREADY_EXISTS.code(), "Employee with given email already exists");
         }
 
-        var isManager = employeeDto.getIsManager().trim().equalsIgnoreCase("T".trim()) ? Boolean.TRUE : Boolean.FALSE;
+        var isManager = employeeDto.getIsManager().trim()
+                .equalsIgnoreCase("T".trim()) ? Boolean.TRUE : Boolean.FALSE;
         var employee = employeeMapper.addEmployeeDtoToEmployee(employeeDto);
         employee.setUuid(UUID.randomUUID());
         employee.setIsManager(isManager);
@@ -130,9 +132,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         Boolean value = validatePasswords(employeeDto.getPassword(), employeeDto.getConfirmPassword());
         if (employeeDto.getLeavingDate() != null && employeeDto.getLeavingDate().isAfter(LocalDate.now())) {
             profileStatus = ProfileStatus.INACTIVE;
-        } else if ((employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isBefore(LocalDate.now())) && Boolean.TRUE.equals(!value)) {
+        } else if ((employeeDto.getLeavingDate() == null ||
+                employeeDto.getLeavingDate().isBefore(LocalDate.now())) && Boolean.TRUE.equals(!value)) {
             profileStatus = ProfileStatus.PENDING;
-        } else if ((employeeDto.getLeavingDate() == null || employeeDto.getLeavingDate().isBefore(LocalDate.now())) && Boolean.TRUE.equals(value)) {
+        } else if ((employeeDto.getLeavingDate() == null ||
+                employeeDto.getLeavingDate().isBefore(LocalDate.now())) && Boolean.TRUE.equals(value)) {
             profileStatus = ProfileStatus.ACTIVE;
         } else {
             profileStatus = ProfileStatus.PENDING;
@@ -159,29 +163,37 @@ public class EmployeeServiceImpl implements EmployeeService {
         var employee = getById(id);
         try {
             if (0 == employeeDao.updateLeavingDate(updateLeavingDate.getLeavingDate(), id)) {
-                throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(), "Problem in updating LeavingDate");
+                throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(),
+                        "Problem in updating LeavingDate");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EMPLOYEE_INTEGRATE_VIOLATION.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EMPLOYEE_INTEGRATE_VIOLATION.code(),
+                    exception.getCause().getMessage());
         }
 
         var profile = profileService.getByEmployeeUuid(id);
 
         if (updateLeavingDate.getLeavingDate() == null && profile.getProfileStatus().equals(ProfileStatus.INACTIVE)) {
             var currentActiveCycle = periodService.getCurrentActivePeriod();
-            var employeeCycles = employeePeriodDao.getByEmployeeIdAndPeriodId(employee.getUuid(), currentActiveCycle.getUuid());
+            var employeeCycles = employeePeriodDao.getByEmployeeIdAndPeriodId(employee.getUuid(),
+                    currentActiveCycle.getUuid());
             if (employeeCycles == null) {
                 return;
             } else {
                 for (var employeeCycle : employeeCycles) {
-                    employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(), PeriodStatus.STARTED);
+                    employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
+                            PeriodStatus.STARTED);
                 }
             }
             profile.setProfileStatus(ProfileStatus.ACTIVE);
-        } else if (updateLeavingDate.getLeavingDate() != null && updateLeavingDate.getLeavingDate().before(new Date())) {
+        } else if (updateLeavingDate.getLeavingDate() != null &&
+                updateLeavingDate.getLeavingDate().before(new Date())) {
             profile.setProfileStatus(ProfileStatus.INACTIVE);
-            var empStartedCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(), PeriodStatus.STARTED);
-            empStartedCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
+            var empStartedCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(),
+                    PeriodStatus.STARTED);
+            empStartedCycles.forEach(employeeCycle ->
+                    employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
+                            PeriodStatus.INACTIVE));
         }
         profileService.update(profile);
     }
@@ -264,7 +276,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeResponseDto getMe() {
-        var employeeUuid = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+        var employeeUuid = UUID.fromString(SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName());
         return employeeDao.getMe(employeeUuid);
     }
 

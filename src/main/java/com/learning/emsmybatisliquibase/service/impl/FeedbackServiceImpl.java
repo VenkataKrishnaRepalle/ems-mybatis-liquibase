@@ -42,7 +42,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public List<FeedbackResponseDto> getFeedback(UUID employeeUuid, FeedbackType feedbackType) {
-        List<Feedback> feedbacks = null;
+        List<Feedback> feedbacks;
         if (feedbackType.equals(FeedbackType.SEND) || feedbackType.equals(FeedbackType.DRAFT)) {
             feedbacks = feedbackDao.findSendFeedback(employeeUuid, feedbackType);
         } else {
@@ -55,8 +55,10 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     private FeedbackResponseDto toFeedbackResponse(Feedback feedback) {
-        var sender = employeeMapper.employeeToEmployeeDetailsDto(employeeService.getById(feedback.getEmployeeUuid()));
-        var receiver = employeeMapper.employeeToEmployeeDetailsDto(employeeService.getById(feedback.getTargetEmployeeUuid()));
+        var sender = employeeMapper.employeeToEmployeeDetailsDto(
+                employeeService.getById(feedback.getEmployeeUuid()));
+        var receiver = employeeMapper.employeeToEmployeeDetailsDto(
+                employeeService.getById(feedback.getTargetEmployeeUuid()));
         var feedbackResponse = feedbackMapper.feedbackToFeedbackResponseDto(feedback);
         feedbackResponse.setSender(sender);
         feedbackResponse.setReceiver(receiver);
@@ -86,7 +88,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         try {
             if (0 == feedbackDao.update(feedback)) {
-                throw new IntegrityException("FEEDBACK_NOT_UPDATED", "Feedback not updated with uuid: " + feedback.getUuid());
+                throw new IntegrityException("FEEDBACK_NOT_UPDATED",
+                        "Feedback not updated with uuid: " + feedback.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException("FEEDBACK_NOT_UPDATED", exception.getCause().getMessage());
@@ -101,7 +104,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         try {
             if (0 == feedbackDao.delete(feedbackId)) {
-                throw new IntegrityException("FEEDBACK_NOT_DELETED", "Feedback not deleted with uuid: " + feedbackId);
+                throw new IntegrityException("FEEDBACK_NOT_DELETED",
+                        "Feedback not deleted with uuid: " + feedbackId);
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException("FEEDBACK_NOT_DELETED", exception.getCause().getMessage());

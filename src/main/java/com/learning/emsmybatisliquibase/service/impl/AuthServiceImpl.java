@@ -53,12 +53,13 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidInputException("NOT_AUTHORIZED_USER", "You're not eligible to access this application");
         }
 
-        var passwords = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(), PasswordStatus.ACTIVE);
+        var passwords = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(),
+                PasswordStatus.ACTIVE);
         if (passwords.size() != 1) {
             throw new InvalidInputException("INVALID_LOGIN", "Account Locked, Please reset password");
         }
 
-        var password = passwords.get(0);
+        var password = passwords.getFirst();
 
         if (!passwordEncoder.matches(loginDto.getPassword(), password.getPassword())) {
             password.setNoOfIncorrectEntries(password.getNoOfIncorrectEntries() + 1);
@@ -72,14 +73,16 @@ public class AuthServiceImpl implements AuthService {
             }
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
                 String.valueOf(employee.getUuid()),
                 loginDto.getPassword()
         ));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtTokenProvider.generateToken(authentication);
-        var roles = employeeRoleService.getRolesByEmployeeUuid(employee.getUuid()).stream()
+        var roles = employeeRoleService.getRolesByEmployeeUuid(employee.getUuid())
+                .stream()
                 .map(RoleType::toString)
                 .toList();
         return JwtAuthResponseDto.builder()

@@ -32,18 +32,23 @@ public class EmployeePeriodController {
     }
 
     @PutMapping("update-employee-period/{employeePeriodId}/status/{status}")
-    public ResponseEntity<SuccessResponseDto> updateEmployeeCycleStatus(@PathVariable UUID employeePeriodId, @PathVariable PeriodStatus status) {
-        return new ResponseEntity<>(employeePeriodService.updateEmployeePeriodStatus(employeePeriodId, status), HttpStatus.ACCEPTED);
+    public ResponseEntity<SuccessResponseDto> updateEmployeeCycleStatus(@PathVariable UUID employeePeriodId,
+                                                                        @PathVariable PeriodStatus status) {
+        return new ResponseEntity<>(employeePeriodService.updateEmployeePeriodStatus(employeePeriodId, status),
+                HttpStatus.ACCEPTED);
     }
 
     @GetMapping("getById/{employeePeriodId}")
     public ResponseEntity<FullEmployeePeriodDto> getById(@PathVariable UUID employeePeriodId) {
-        return new ResponseEntity<>(employeePeriodService.getEmployeePeriodById(employeePeriodId), HttpStatus.OK);
+        return new ResponseEntity<>(employeePeriodService.getEmployeePeriodById(employeePeriodId),
+                HttpStatus.OK);
     }
 
     @GetMapping("getByPeriodId/{employeeId}/cycle/{periodId}")
-    public ResponseEntity<List<EmployeePeriod>> getByPeriodId(@PathVariable UUID employeeId, @PathVariable UUID periodId) {
-        return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndPeriodId(employeeId, periodId), HttpStatus.OK);
+    public ResponseEntity<List<EmployeePeriod>> getByPeriodId(@PathVariable UUID employeeId,
+                                                              @PathVariable UUID periodId) {
+        return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndPeriodId(employeeId, periodId),
+                HttpStatus.OK);
     }
 
 }

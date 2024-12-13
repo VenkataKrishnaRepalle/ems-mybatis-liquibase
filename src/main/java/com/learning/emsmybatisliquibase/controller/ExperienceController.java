@@ -19,22 +19,28 @@ public class ExperienceController {
 
     @GetMapping("/getById/{experienceId}")
     public ResponseEntity<Experience> getById(@PathVariable UUID experienceId) {
-        return new ResponseEntity<>(experienceService.getById(experienceId), HttpStatus.OK);
+        return new ResponseEntity<>(experienceService.getById(experienceId),
+                HttpStatus.OK);
     }
 
     @GetMapping("/getAll/employee/{employeeId}")
     public ResponseEntity<List<Experience>> getAllByEmployeeUuid(@PathVariable UUID employeeId) {
-        return new ResponseEntity<>(experienceService.getAllByEmployeeUuid(employeeId), HttpStatus.OK);
+        return new ResponseEntity<>(experienceService.getAllByEmployeeUuid(employeeId),
+                HttpStatus.OK);
     }
 
     @PostMapping("/add/employee/{employeeId}")
-    public ResponseEntity<List<Experience>> add(@PathVariable UUID employeeId, @RequestBody List<Experience> experiences) {
-        return new ResponseEntity<>(experienceService.add(employeeId, experiences), HttpStatus.CREATED);
+    public ResponseEntity<List<Experience>> add(@PathVariable UUID employeeId,
+                                                @RequestBody List<Experience> experiences) {
+        return new ResponseEntity<>(experienceService.add(employeeId, experiences),
+                HttpStatus.CREATED);
     }
 
     @PutMapping("/update/employee/{employeeId}")
-    public ResponseEntity<List<Experience>> update(@PathVariable UUID employeeId, @RequestBody List<Experience> experiences) {
-        return new ResponseEntity<>(experienceService.update(employeeId, experiences), HttpStatus.ACCEPTED);
+    public ResponseEntity<List<Experience>> update(@PathVariable UUID employeeId,
+                                                   @RequestBody List<Experience> experiences) {
+        return new ResponseEntity<>(experienceService.update(employeeId, experiences),
+                HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/deleteById/{experienceId}")

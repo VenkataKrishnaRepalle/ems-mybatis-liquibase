@@ -26,7 +26,8 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
         var certificationCategory = certificationCategoryDao.getById(id);
 
         if (certificationCategory == null) {
-            throw new NotFoundException(CERTIFICATION_CATEGORY_NOT_FOUND.code(), "Certification category not found with id: " + id);
+            throw new NotFoundException(CERTIFICATION_CATEGORY_NOT_FOUND.code(),
+                    "Certification category not found with id: " + id);
         }
 
         return certificationCategory;
@@ -39,10 +40,12 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
 
     @Override
     public CertificationCategory add(CertificationCategoryDto certificationCategoryDto) {
-        var certificationCategoryByName = certificationCategoryDao.getByName(certificationCategoryDto.getName().trim());
+        var certificationCategoryByName = certificationCategoryDao.
+                getByName(certificationCategoryDto.getName().trim());
 
         if (certificationCategoryByName != null) {
-            throw new FoundException("CERTIFICATION_CATEGORY_ALREADY_EXISTS", "Certification category already exists with name: " + certificationCategoryDto.getName());
+            throw new FoundException("CERTIFICATION_CATEGORY_ALREADY_EXISTS",
+                    "Certification category already exists with name: " + certificationCategoryDto.getName());
         }
         var certificationCategory = CertificationCategory.builder()
                 .uuid(UUID.randomUUID())
@@ -51,10 +54,12 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
 
         try {
             if (0 == certificationCategoryDao.insert(certificationCategory)) {
-                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_CREATED.code(), "Certification category not created");
+                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_CREATED.code(),
+                        "Certification category not created");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_CREATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_CREATED.code(),
+                    exception.getCause().getMessage());
         }
 
         return certificationCategory;
@@ -67,10 +72,12 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
 
         try {
             if (0 == certificationCategoryDao.update(certificationCategory)) {
-                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_UPDATED.code(), "Certification category not updated with id: " + id);
+                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_UPDATED.code(),
+                        "Certification category not updated with id: " + id);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_UPDATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_UPDATED.code(),
+                    exception.getCause().getMessage());
         }
 
         return certificationCategory;
@@ -81,10 +88,12 @@ public class CertificationCategoryServiceImpl implements CertificationCategorySe
         getById(id);
         try {
             if (0 == certificationCategoryDao.delete(id)) {
-                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(), "Certification Category not deleted with id: " + id);
+                throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(),
+                        "Certification Category not deleted with id: " + id);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(CERTIFICATION_CATEGORY_NOT_DELETED.code(),
+                    exception.getCause().getMessage());
         }
     }
 

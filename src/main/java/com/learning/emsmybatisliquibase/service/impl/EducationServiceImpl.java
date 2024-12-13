@@ -35,13 +35,16 @@ public class EducationServiceImpl implements EducationService {
 
         if (educations == null) {
             if (degree != EducationDegree.SSC_10TH) {
-                throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(), "Education Details of " + EducationDegree.SSC_10TH + " not found");
+                throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(),
+                        "Education Details of " + EducationDegree.SSC_10TH + " not found");
             }
         } else {
             var isDegreePresent = educations.stream()
-                    .filter(education -> education.getDegree().equals(educationDto.getDegree())).findFirst();
+                    .filter(education -> education.getDegree().equals(educationDto.getDegree()))
+                    .findFirst();
             if (isDegreePresent.isPresent()) {
-                throw new FoundException(EDUCATION_DEGREE_ALREADY_EXISTS.code(), "Degree already exists: " + degree);
+                throw new FoundException(EDUCATION_DEGREE_ALREADY_EXISTS.code(),
+                        "Degree already exists: " + degree);
             }
         }
         educationDto.setUuid(UUID.randomUUID());
@@ -50,10 +53,12 @@ public class EducationServiceImpl implements EducationService {
 
         try {
             if (0 == educationDao.insert(educationDto)) {
-                throw new IntegrityException(EDUCATION_NOT_CREATED.code(), "Education Details not created");
+                throw new IntegrityException(EDUCATION_NOT_CREATED.code(),
+                        "Education Details not created");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EDUCATION_NOT_CREATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EDUCATION_NOT_CREATED.code(),
+                    exception.getCause().getMessage());
         }
 
         return educationDto;
@@ -66,10 +71,12 @@ public class EducationServiceImpl implements EducationService {
 
         try {
             if (0 == educationDao.update(educationDto)) {
-                throw new IntegrityException(EDUCATION_NOT_UPDATED.code(), "Education Details not updated");
+                throw new IntegrityException(EDUCATION_NOT_UPDATED.code(),
+                        "Education Details not updated");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EDUCATION_NOT_UPDATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EDUCATION_NOT_UPDATED.code(),
+                    exception.getCause().getMessage());
         }
 
         return educationDto;
@@ -79,7 +86,8 @@ public class EducationServiceImpl implements EducationService {
     public Education getById(UUID id) {
         var education = educationDao.get(id);
         if (education == null) {
-            throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(), "Education details not found with id: " + id);
+            throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(),
+                    "Education details not found with id: " + id);
         }
         return education;
     }
@@ -88,7 +96,8 @@ public class EducationServiceImpl implements EducationService {
     public List<Education> getAll(UUID employeeId) {
         List<Education> educations = educationDao.getAllByEmployeeUuid(employeeId);
         if (educations == null) {
-            throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(), "Education details not found");
+            throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(),
+                    "Education details not found");
         }
         return educations;
     }
@@ -99,10 +108,12 @@ public class EducationServiceImpl implements EducationService {
 
         try {
             if (0 == educationDao.delete(id)) {
-                throw new IntegrityException(EDUCATION_NOT_DELETED.code(), "Education Details not deleted");
+                throw new IntegrityException(EDUCATION_NOT_DELETED.code(),
+                        "Education Details not deleted");
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EDUCATION_NOT_DELETED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EDUCATION_NOT_DELETED.code(),
+                    exception.getCause().getMessage());
         }
 
     }

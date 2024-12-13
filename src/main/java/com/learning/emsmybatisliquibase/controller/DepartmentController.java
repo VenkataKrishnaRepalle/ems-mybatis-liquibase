@@ -34,8 +34,10 @@ public class DepartmentController {
     }
 
     @PutMapping("/updateDepartment/{departmentUuid}")
-    public ResponseEntity<Department> update(@PathVariable UUID departmentUuid, @RequestBody AddDepartmentDto department) {
-        return new ResponseEntity<>(departmentService.update(departmentUuid, department), HttpStatus.ACCEPTED);
+    public ResponseEntity<Department> update(@PathVariable UUID departmentUuid,
+                                             @RequestBody AddDepartmentDto department) {
+        return new ResponseEntity<>(departmentService.update(departmentUuid, department),
+                HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/deleteDepartment/{departmentUuid}")

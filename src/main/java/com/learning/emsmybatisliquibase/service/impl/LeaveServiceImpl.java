@@ -145,7 +145,8 @@ public class LeaveServiceImpl implements LeaveService {
     }
 
     @Override
-    public SuccessResponseDto updateLeavesByManager(UUID managerUuid, LeaveStatus status, List<UpdateLeaveByManagerDto> leavesDto) {
+    public SuccessResponseDto updateLeavesByManager(UUID managerUuid, LeaveStatus status,
+                                                    List<UpdateLeaveByManagerDto> leavesDto) {
         employeeService.isManager(managerUuid);
 
         var leaves = leavesDto.stream()

@@ -31,7 +31,8 @@ public class LeaveController {
     private final LeaveService leaveService;
 
     @PostMapping("/applyLeave/{employeeId}")
-    public ResponseEntity<List<Leave>> add(@PathVariable UUID employeeId, @RequestBody List<ApplyLeaveDto> applyLeaveDto) {
+    public ResponseEntity<List<Leave>> add(@PathVariable UUID employeeId,
+                                           @RequestBody List<ApplyLeaveDto> applyLeaveDto) {
         return new ResponseEntity<>(leaveService.applyLeave(employeeId, applyLeaveDto), HttpStatus.CREATED);
     }
 
@@ -47,13 +48,15 @@ public class LeaveController {
 
     @GetMapping("/get-leaves/manager/{managerUuid}")
     public ResponseEntity<List<ViewEmployeeLeavesDto>> getAllEmployeesLeavesByManager(@PathVariable UUID managerUuid) {
-        return new ResponseEntity<>(leaveService.getAllEmployeesLeavesByManager(managerUuid), HttpStatus.OK);
+        return new ResponseEntity<>(leaveService.getAllEmployeesLeavesByManager(managerUuid),
+                HttpStatus.OK);
     }
 
     @PostMapping("/update-leaves/manager/{managerUuid}")
     public ResponseEntity<SuccessResponseDto> updateLeavesByManager(@PathVariable UUID managerUuid,
                                                                     @RequestParam LeaveStatus status,
                                                                     @RequestBody List<UpdateLeaveByManagerDto> leavesDto) {
-        return new ResponseEntity<>(leaveService.updateLeavesByManager(managerUuid, status, leavesDto), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(leaveService.updateLeavesByManager(managerUuid, status, leavesDto),
+                HttpStatus.ACCEPTED);
     }
 }

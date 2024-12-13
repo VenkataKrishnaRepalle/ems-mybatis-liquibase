@@ -26,13 +26,17 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/add/{employeeUuid}")
-    public ResponseEntity<Review> add(@PathVariable UUID employeeUuid, @RequestBody AddReviewRequestDto employeeReviewDto) {
-        return new ResponseEntity<>(reviewService.add(employeeUuid, employeeReviewDto), HttpStatus.CREATED);
+    public ResponseEntity<Review> add(@PathVariable UUID employeeUuid,
+                                      @RequestBody AddReviewRequestDto employeeReviewDto) {
+        return new ResponseEntity<>(reviewService.add(employeeUuid, employeeReviewDto),
+                HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{employeeUuid}/review/{reviewUuid}")
-    public ResponseEntity<Review> update(@PathVariable UUID reviewUuid, @RequestBody Review review, @PathVariable UUID employeeUuid) {
-        return new ResponseEntity<>(reviewService.update(employeeUuid, reviewUuid, review), HttpStatus.ACCEPTED);
+    public ResponseEntity<Review> update(@PathVariable UUID reviewUuid, @RequestBody Review review,
+                                         @PathVariable UUID employeeUuid) {
+        return new ResponseEntity<>(reviewService.update(employeeUuid, reviewUuid, review),
+                HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/getById/{reviewUuid}")

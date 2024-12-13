@@ -107,7 +107,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         Sheet sheet = workbook.createSheet("Department Report");
         Row headerRow = sheet.createRow(0);
 
-        String[] headers = {COLLEAGUE_UUID, COLLEAGUE_FULL_NAME, EMAIL, JOINING_DATE, LEAVING_DATE, PROFILE_STATUS, MANAGER_FULL_NAME, DEPARTMENT_NAME};
+        String[] headers = {COLLEAGUE_UUID, COLLEAGUE_FULL_NAME, EMAIL, JOINING_DATE, LEAVING_DATE,
+                PROFILE_STATUS, MANAGER_FULL_NAME, DEPARTMENT_NAME};
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -138,7 +139,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     private Department isDepartmentExists(UUID departmentUuid) {
         var department = departmentDao.get(departmentUuid);
         if (department == null) {
-            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(), "Department not exists with Id: " + departmentUuid);
+            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(),
+                    "Department not exists with Id: " + departmentUuid);
         }
         return department;
     }

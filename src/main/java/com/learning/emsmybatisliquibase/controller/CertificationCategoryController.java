@@ -30,13 +30,15 @@ public class CertificationCategoryController {
 
     @PostMapping("/add")
     public ResponseEntity<CertificationCategory> add(@RequestBody CertificationCategoryDto certificationCategoryDto) {
-        return new ResponseEntity<>(certificationCategoryService.add(certificationCategoryDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(certificationCategoryService.add(certificationCategoryDto),
+                HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<CertificationCategory> update(@RequestBody @PathVariable UUID id,
                                                         @RequestBody CertificationCategory certificationCategory) {
-        return new ResponseEntity<>(certificationCategoryService.update(id, certificationCategory), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(certificationCategoryService.update(id, certificationCategory),
+                HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete/{id}")

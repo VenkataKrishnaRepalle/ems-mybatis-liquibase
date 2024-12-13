@@ -27,12 +27,14 @@ public class EmployeeRoleController {
 
     @PostMapping("/add")
     public ResponseEntity<EmployeeRole> add(@RequestBody EmployeeRole employeeRole) {
-        return new ResponseEntity<>(employeeRoleService.add(employeeRole), HttpStatus.CREATED);
+        return new ResponseEntity<>(employeeRoleService.add(employeeRole),
+                HttpStatus.CREATED);
     }
 
     @GetMapping("/getRoles/{employeeUuid}")
     public ResponseEntity<List<RoleType>> getRoles(@PathVariable UUID employeeUuid) {
-        return new ResponseEntity<>(employeeRoleService.getRolesByEmployeeUuid(employeeUuid), HttpStatus.OK);
+        return new ResponseEntity<>(employeeRoleService.getRolesByEmployeeUuid(employeeUuid),
+                HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")

@@ -48,10 +48,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         try {
             if (0 == reviewDao.insert(review)) {
-                throw new IntegrityException(REVIEW_NOT_CREATED.code(), "Review is not inserted with Id: " + review.getUuid());
+                throw new IntegrityException(REVIEW_NOT_CREATED.code(),
+                        "Review is not inserted with Id: " + review.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(REVIEW_NOT_CREATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(REVIEW_NOT_CREATED.code(),
+                    exception.getCause().getMessage());
         }
 
         return review;
@@ -79,7 +81,8 @@ public class ReviewServiceImpl implements ReviewService {
         var reviewTimeline = reviewDao.getByTimelineId(review.getTimelineUuid());
 
         if (reviewTimeline == null) {
-            throw new NotFoundException(REVIEW_NOT_EXISTS.code(), "Review not found with Id: " + reviewUuid);
+            throw new NotFoundException(REVIEW_NOT_EXISTS.code(),
+                    "Review not found with Id: " + reviewUuid);
         }
 
         validateTimeline(employeeUuid, timeline);
@@ -88,10 +91,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         try {
             if (0 == reviewDao.update(reviewTimeline)) {
-                throw new IntegrityException(REVIEW_NOT_UPDATED.code(), "Review not updated for Id: " + reviewUuid);
+                throw new IntegrityException(REVIEW_NOT_UPDATED.code(),
+                        "Review not updated for Id: " + reviewUuid);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(REVIEW_NOT_UPDATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(REVIEW_NOT_UPDATED.code(),
+                    exception.getCause().getMessage());
         }
         return reviewTimeline;
     }
@@ -100,7 +105,8 @@ public class ReviewServiceImpl implements ReviewService {
     public Review getById(UUID reviewUuid) {
         var review = reviewDao.getById(reviewUuid);
         if (review == null) {
-            throw new NotFoundException(REVIEW_NOT_EXISTS.code(), "Review not found with Id: " + reviewUuid);
+            throw new NotFoundException(REVIEW_NOT_EXISTS.code(),
+                    "Review not found with Id: " + reviewUuid);
         }
         return review;
     }
@@ -110,14 +116,17 @@ public class ReviewServiceImpl implements ReviewService {
         getById(reviewUuid);
         try {
             if (0 == reviewDao.delete(reviewUuid)) {
-                throw new IntegrityException(REVIEW_NOT_DELETED.code(), "Review not deleted with Id: " + reviewUuid);
+                throw new IntegrityException(REVIEW_NOT_DELETED.code(),
+                        "Review not deleted with Id: " + reviewUuid);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(REVIEW_NOT_DELETED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(REVIEW_NOT_DELETED.code(),
+                    exception.getCause().getMessage());
         }
         var isReviewExists = reviewDao.getById(reviewUuid);
         if (isReviewExists != null) {
-            throw new FoundException(REVIEW_NOT_DELETED.code(), "Review not deleted with Id: " + reviewUuid);
+            throw new FoundException(REVIEW_NOT_DELETED.code(),
+                    "Review not deleted with Id: " + reviewUuid);
         }
     }
 

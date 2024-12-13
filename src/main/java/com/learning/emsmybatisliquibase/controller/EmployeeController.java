@@ -53,15 +53,18 @@ public class EmployeeController {
     }
 
     @GetMapping("/getAll/pagination")
-    public ResponseEntity<PaginatedResponse<Employee>> viewAllEmployees(@RequestParam(name = "page", defaultValue = "1") int page,
-                                                           @RequestParam(name = "size", defaultValue = "3") int size,
-                                                           @RequestParam(name = "sortBy", defaultValue = "uuid") String sortBy,
-                                                           @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder) {
-        return new ResponseEntity<>(employeeService.getAllByPagination(page, size, sortBy, sortOrder), HttpStatus.OK);
+    public ResponseEntity<PaginatedResponse<Employee>> viewAllEmployees(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "3") int size,
+            @RequestParam(name = "sortBy", defaultValue = "uuid") String sortBy,
+            @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder) {
+        return new ResponseEntity<>(employeeService.getAllByPagination(page, size, sortBy, sortOrder),
+                HttpStatus.OK);
     }
 
     @PostMapping("/updateLeavingDate/{id}")
-    public ResponseEntity<HttpStatus> updateLeavingStatus(@PathVariable UUID id, @RequestBody UpdateLeavingDateDto updateLeavingDate) {
+    public ResponseEntity<HttpStatus> updateLeavingStatus(@PathVariable UUID id,
+                                                          @RequestBody UpdateLeavingDateDto updateLeavingDate) {
         employeeService.updateLeavingDate(id, updateLeavingDate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -78,7 +81,8 @@ public class EmployeeController {
 
     @GetMapping(value = "getEmployeeFullReportingChain/{employeeId}")
     public ResponseEntity<EmployeeFullReportingChainDto> getEmployeeFullReportingChain(@PathVariable UUID employeeId) {
-        return new ResponseEntity<>(employeeService.getEmployeeFullReportingChain(employeeId), HttpStatus.OK);
+        return new ResponseEntity<>(employeeService.getEmployeeFullReportingChain(employeeId),
+                HttpStatus.OK);
     }
 
 }

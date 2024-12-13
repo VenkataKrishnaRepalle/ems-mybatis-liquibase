@@ -23,24 +23,28 @@ public class FilesController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "employee-onboard/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SuccessResponseDto> colleagueOnboard(@RequestParam(name = "file") MultipartFile file) throws IOException, MessagingException {
+    public ResponseEntity<SuccessResponseDto> colleagueOnboard(@RequestParam(name = "file") MultipartFile file)
+            throws IOException, MessagingException {
         return new ResponseEntity<>(filesService.colleagueOnboard(file), HttpStatus.OK);
     }
 
     @PostMapping(value = "/managerAccess/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> managerAccess(@RequestParam(name = "file") MultipartFile file) throws IOException {
+    public ResponseEntity<HttpStatus> managerAccess(@RequestParam(name = "file") MultipartFile file)
+            throws IOException {
         filesService.managerAccess(file);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/updateManagerId/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> updateManagerId(@RequestParam(name = "file") MultipartFile file) throws IOException {
+    public ResponseEntity<HttpStatus> updateManagerId(@RequestParam(name = "file") MultipartFile file)
+            throws IOException {
         filesService.updateManagerId(file);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/departmentPermission/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> departmentPermission(@RequestParam(name = "file") MultipartFile file) throws IOException {
+    public ResponseEntity<HttpStatus> departmentPermission(@RequestParam(name = "file") MultipartFile file)
+            throws IOException {
         filesService.departmentPermission(file);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

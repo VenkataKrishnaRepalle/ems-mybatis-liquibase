@@ -84,10 +84,12 @@ public class ExperienceServiceImpl implements ExperienceService {
             }
             try {
                 if (0 == experienceDao.update(experience)) {
-                    throw new IntegrityException(EXPERIENCE_NOT_UPDATED.code(), "experience not updated with id: " + experience.getUuid());
+                    throw new IntegrityException(EXPERIENCE_NOT_UPDATED.code(),
+                            "experience not updated with id: " + experience.getUuid());
                 }
             } catch (DataIntegrityViolationException exception) {
-                throw new IntegrityException(EXPERIENCE_NOT_UPDATED.code(), exception.getCause().getMessage());
+                throw new IntegrityException(EXPERIENCE_NOT_UPDATED.code(),
+                        exception.getCause().getMessage());
             }
         });
 
@@ -99,14 +101,17 @@ public class ExperienceServiceImpl implements ExperienceService {
         getById(experienceId);
         try {
             if (0 == experienceDao.delete(experienceId)) {
-                throw new IntegrityException(EXPERIENCE_NOT_DELETED.code(), "experience not deleted with id: " + experienceId);
+                throw new IntegrityException(EXPERIENCE_NOT_DELETED.code(),
+                        "experience not deleted with id: " + experienceId);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EXPERIENCE_NOT_DELETED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EXPERIENCE_NOT_DELETED.code(),
+                    exception.getCause().getMessage());
         }
         var isExperienceDeleted = experienceDao.getById(experienceId);
         if (isExperienceDeleted != null) {
-            throw new FoundException(EXPERIENCE_NOT_DELETED.code(), "experience not deleted with id: " + experienceId);
+            throw new FoundException(EXPERIENCE_NOT_DELETED.code(),
+                    "experience not deleted with id: " + experienceId);
         }
     }
 

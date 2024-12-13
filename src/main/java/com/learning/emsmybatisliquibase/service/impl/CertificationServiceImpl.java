@@ -37,8 +37,10 @@ public class CertificationServiceImpl implements CertificationService {
         }
 
         for (var certification : certifications) {
-            var certificationCategory = certificationCategoryService.getById(certification.getCertificationCategoryUuid());
-            var certificationResponse = certificationMapper.certificationToCertificationResponseDto(certification);
+            var certificationCategory = certificationCategoryService
+                    .getById(certification.getCertificationCategoryUuid());
+            var certificationResponse = certificationMapper
+                    .certificationToCertificationResponseDto(certification);
             certificationResponse.setCertificationCategory(certificationCategory);
             response.add(certificationResponse);
         }
@@ -47,7 +49,8 @@ public class CertificationServiceImpl implements CertificationService {
 
     @Override
     public CertificationResponseDto add(CertificationRequestDto addCertificationDto) {
-        isCertificationExistsWithName(addCertificationDto.getName().strip(), addCertificationDto.getEmployeeUuid());
+        isCertificationExistsWithName(addCertificationDto.getName().strip(),
+                addCertificationDto.getEmployeeUuid());
         var certificationCategory = findOrCreateCertificationCategory(addCertificationDto);
 
         var certification = certificationMapper.addCertificationDtoToCertification(addCertificationDto);
@@ -70,8 +73,10 @@ public class CertificationServiceImpl implements CertificationService {
     }
 
     @Override
-    public CertificationResponseDto update(UUID certificationUuid, CertificationRequestDto updateCertificationDto) {
-        isCertificationExistsWithName(updateCertificationDto.getName().strip(), updateCertificationDto.getEmployeeUuid());
+    public CertificationResponseDto update(UUID certificationUuid,
+                                           CertificationRequestDto updateCertificationDto) {
+        isCertificationExistsWithName(updateCertificationDto.getName().strip(),
+                updateCertificationDto.getEmployeeUuid());
         var certificationCategory = findOrCreateCertificationCategory(updateCertificationDto);
         var certification = get(certificationUuid);
         certification.setCertificationCategoryUuid(certificationCategory.getUuid());
@@ -85,10 +90,12 @@ public class CertificationServiceImpl implements CertificationService {
 
         try {
             if (0 == certificationDao.update(certification)) {
-                throw new IntegrityException("CERTIFICATION_UPDATE_FAILED", "Failed to update certification with id: " + certificationUuid);
+                throw new IntegrityException("CERTIFICATION_UPDATE_FAILED",
+                        "Failed to update certification with id: " + certificationUuid);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException("CERTIFICATION_UPDATE_FAILED", "Failed to update certification with id: " + certificationUuid);
+            throw new IntegrityException("CERTIFICATION_UPDATE_FAILED",
+                    "Failed to update certification with id: " + certificationUuid);
         }
 
         return certificationToCertificationResponse(certification, certificationCategory);
@@ -100,10 +107,12 @@ public class CertificationServiceImpl implements CertificationService {
 
         try {
             if (0 == certificationDao.delete(certificationUuid)) {
-                throw new IntegrityException("CERTIFICATION_DELETE_FAILED", "Failed to delete certification with id: " + certificationUuid);
+                throw new IntegrityException("CERTIFICATION_DELETE_FAILED",
+                        "Failed to delete certification with id: " + certificationUuid);
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException("CERTIFICATION_DELETE_FAILED", "Failed to delete certification with id: " + certificationUuid);
+            throw new IntegrityException("CERTIFICATION_DELETE_FAILED",
+                    "Failed to delete certification with id: " + certificationUuid);
         }
     }
 
@@ -120,31 +129,41 @@ public class CertificationServiceImpl implements CertificationService {
     private void isCertificationExistsWithName(String name, UUID employeeUuid) {
         var isCertificationExists = certificationDao.getByNameAndEmployeeUuid(name, employeeUuid);
         if (isCertificationExists != null) {
-            throw new IntegrityException("CERTIFICATION_ALREADY_EXISTS", "Certification with the same name already exists for the given employee: " + name);
+            throw new IntegrityException("CERTIFICATION_ALREADY_EXISTS",
+                    "Certification with the same name already exists for the given employee: " + name);
         }
     }
 
     private Certification get(UUID certificationUuid) {
         var certification = certificationDao.getById(certificationUuid);
         if (certification == null) {
-            throw new InvalidInputException("CERTIFICATION_NOT_FOUND", "Certification not found with id: " + certificationUuid);
+            throw new InvalidInputException("CERTIFICATION_NOT_FOUND",
+                    "Certification not found with id: " + certificationUuid);
         }
         return certification;
     }
 
     private CertificationCategory findOrCreateCertificationCategory(CertificationRequestDto addCertificationDto) {
         if (addCertificationDto.getCertificationCategoryUuid() != null) {
-            CertificationCategory certificationCategory = certificationCategoryService.getById(addCertificationDto.getCertificationCategoryUuid());
+            CertificationCategory certificationCategory = certificationCategoryService
+                    .getById(addCertificationDto.getCertificationCategoryUuid());
             if (certificationCategory != null) {
                 return certificationCategory;
             } else if (addCertificationDto.getCertificationCategoryName() == null) {
-                throw new InvalidInputException("CERTIFICATION_CATEGORY_NOT_FOUND", "Certification category not found with id: " + addCertificationDto.getCertificationCategoryUuid());
+                throw new InvalidInputException("CERTIFICATION_CATEGORY_NOT_FOUND",
+                        "Certification category not found with id: " + addCertificationDto.getCertificationCategoryUuid());
             }
         }
         if (addCertificationDto.getCertificationCategoryName() != null) {
-            return certificationCategoryService.add(CertificationCategoryDto.builder().name(addCertificationDto.getCertificationCategoryName()).build());
+            return certificationCategoryService.add(
+                    CertificationCategoryDto
+                            .builder()
+                            .name(addCertificationDto.getCertificationCategoryName())
+                            .build()
+            );
         }
-        throw new InvalidInputException("CERTIFICATION_CATEGORY_NAME_NOT_FOUND", "Certification category name is required when UUID is not found.");
+        throw new InvalidInputException("CERTIFICATION_CATEGORY_NAME_NOT_FOUND",
+                "Certification category name is required when UUID is not found.");
     }
 
     private void insert(Certification certification) {
@@ -157,7 +176,8 @@ public class CertificationServiceImpl implements CertificationService {
         }
     }
 
-    private CertificationResponseDto certificationToCertificationResponse(Certification certification, CertificationCategory certificationCategory) {
+    private CertificationResponseDto certificationToCertificationResponse(Certification certification,
+                                                                          CertificationCategory certificationCategory) {
         var response = certificationMapper.certificationToCertificationResponseDto(certification);
         response.setCertificationCategory(certificationCategory);
         return response;

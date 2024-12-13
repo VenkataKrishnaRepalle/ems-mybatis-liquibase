@@ -47,7 +47,8 @@ public class AttendanceServiceImpl implements AttendanceService {
             var formattedDate = new SimpleDateFormat(DATE_FORMAT).format(attendanceDto.getDate());
             for (var attendance : appliedAttendances) {
                 if (formattedDate.equals(new SimpleDateFormat(DATE_FORMAT).format(attendance.getDate()))) {
-                    throw new FoundException(ATTENDANCE_ALREADY_EXISTS.code(), "Attendance already applied for date " + formattedDate);
+                    throw new FoundException(ATTENDANCE_ALREADY_EXISTS.code(),
+                            "Attendance already applied for date " + formattedDate);
                 }
             }
         }
@@ -97,7 +98,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     public Attendance getByUuid(UUID employeeUuid, UUID attendanceUuid) {
         var attendance = attendanceDao.getById(attendanceUuid);
         if (attendance == null || !attendance.getEmployeeUuid().equals(employeeUuid)) {
-            throw new InvalidInputException(ATTENDANCE_NOT_EXISTS.code(), "Attendance not exists for employeeId: " + employeeUuid + " and attendanceId: " + attendanceUuid);
+            throw new InvalidInputException(ATTENDANCE_NOT_EXISTS.code(),
+                    "Attendance not exists for employeeId: " + employeeUuid + " and attendanceId: " + attendanceUuid);
         }
         return attendance;
     }
@@ -119,7 +121,8 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .employeeFirstName(employee.getFirstName())
                 .employeeLastName(employee.getLastName())
                 .submittedAttendance(attendanceStatusListMap.get(AttendanceStatus.SUBMITTED))
-                .waitingForCancellationAttendance(attendanceStatusListMap.get(AttendanceStatus.WAITING_FOR_CANCELLATION))
+                .waitingForCancellationAttendance(attendanceStatusListMap
+                        .get(AttendanceStatus.WAITING_FOR_CANCELLATION))
                 .cancelledAttendance(attendanceStatusListMap.get(AttendanceStatus.CANCELLED))
                 .build();
     }

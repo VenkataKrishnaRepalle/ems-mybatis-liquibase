@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Random;
 import java.util.UUID;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
@@ -66,10 +65,12 @@ public class PasswordServiceImpl implements PasswordService {
     private void validatePassword(String password, String confirmPassword) {
         if (StringUtils.isNotEmpty(password) && password.equals(confirmPassword)) {
             if (password.length() < 8) {
-                throw new InvalidInputException(EMPLOYEE_PASSWORD_LENGTH_TOO_SHORT.code(), "Password length should be at least 8 characters");
+                throw new InvalidInputException(EMPLOYEE_PASSWORD_LENGTH_TOO_SHORT.code(),
+                        "Password length should be at least 8 characters");
             }
         } else {
-            throw new InvalidInputException(EMPLOYEE_PASSWORD_MISMATCH.code(), "Password and Confirm Password should be the same");
+            throw new InvalidInputException(EMPLOYEE_PASSWORD_MISMATCH.code(),
+                    "Password and Confirm Password should be the same");
         }
     }
 

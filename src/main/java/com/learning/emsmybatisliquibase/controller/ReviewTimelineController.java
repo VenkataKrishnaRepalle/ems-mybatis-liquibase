@@ -22,7 +22,8 @@ public class ReviewTimelineController {
 
     @GetMapping("/getActiveTimelineDetails/{employeeId}")
     public ResponseEntity<FullEmployeePeriodDto> getActiveTimelineDetails(@PathVariable UUID employeeId) {
-        return new ResponseEntity<>(reviewTimelineService.getActiveTimelineDetails(employeeId), HttpStatus.OK);
+        return new ResponseEntity<>(reviewTimelineService.getActiveTimelineDetails(employeeId),
+                HttpStatus.OK);
     }
 
     @PutMapping("/updateTimelineStatus")
@@ -36,7 +37,8 @@ public class ReviewTimelineController {
     @PutMapping("/startTimeline")
     public ResponseEntity<SuccessResponseDto> updateTimelineForQuarter(@RequestBody ReviewType completedReviewType,
                                                                        @RequestBody ReviewType startReviewType) {
-        return new ResponseEntity<>(reviewTimelineService.startTimelinesForQuarter(completedReviewType, startReviewType),
+        return new ResponseEntity<>(reviewTimelineService.startTimelinesForQuarter(completedReviewType,
+                startReviewType),
                 HttpStatus.ACCEPTED);
     }
 }

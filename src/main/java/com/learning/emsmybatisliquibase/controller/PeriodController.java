@@ -40,7 +40,8 @@ public class PeriodController {
     }
 
     @PutMapping("updateStatus/{periodId}")
-    public ResponseEntity<SuccessResponseDto> updateStatus(@PathVariable UUID periodId, @RequestParam PeriodStatus status) {
+    public ResponseEntity<SuccessResponseDto> updateStatus(@PathVariable UUID periodId,
+                                                           @RequestParam PeriodStatus status) {
         return new ResponseEntity<>(periodService.updateStatus(periodId, status), HttpStatus.ACCEPTED);
     }
 

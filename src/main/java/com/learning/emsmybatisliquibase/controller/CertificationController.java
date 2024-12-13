@@ -35,8 +35,10 @@ public class CertificationController {
     }
 
     @PutMapping("/update/{certificationUuid}")
-    public ResponseEntity<CertificationResponseDto> update(@PathVariable UUID certificationUuid, @RequestBody CertificationRequestDto updateCertificationDto) {
-        return new ResponseEntity<>(certificationService.update(certificationUuid, updateCertificationDto), HttpStatus.ACCEPTED);
+    public ResponseEntity<CertificationResponseDto> update(@PathVariable UUID certificationUuid,
+                                                           @RequestBody CertificationRequestDto updateCertificationDto) {
+        return new ResponseEntity<>(certificationService.update(certificationUuid, updateCertificationDto),
+                HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete/{certificationUuid}")
@@ -47,6 +49,7 @@ public class CertificationController {
 
     @GetMapping("/getByCertificationCategory/{certificationCategoryUuid}")
     public ResponseEntity<Map<UUID, String>> getByCertificationCategory(@PathVariable UUID certificationCategoryUuid) {
-        return new ResponseEntity<>(certificationService.getByCertificationCategory(certificationCategoryUuid), HttpStatus.OK);
+        return new ResponseEntity<>(certificationService.getByCertificationCategory(certificationCategoryUuid),
+                HttpStatus.OK);
     }
 }

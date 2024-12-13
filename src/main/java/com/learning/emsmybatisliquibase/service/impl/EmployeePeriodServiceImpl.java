@@ -60,13 +60,15 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         var period = periodDao.getByStatus(PeriodStatus.STARTED);
 
         if (period == null) {
-            throw new NotFoundException(PERIOD_NOT_EXISTS.code(), "No Active Period for Current Period");
+            throw new NotFoundException(PERIOD_NOT_EXISTS.code(),
+                    "No Active Period for Current Period");
         }
         return period;
     }
 
     private void handleEmployeePeriodAssignment(UUID employeeId, Period period) {
-        if (!employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, period.getUuid()).isEmpty()) {
+        if (!employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId,
+                period.getUuid()).isEmpty()) {
             return;
         }
 
@@ -128,11 +130,19 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
                 status = ReviewTimelineStatus.LOCKED;
             }
 
-            var startTime = LocalDateTime.of(year, quarter * 3 - 2, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant();
-            var overdueTime = LocalDateTime.of(year, quarter * 3 - 1, 15, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant();
-            var lockTime = LocalDateTime.of(year, quarter * 3, 15, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant();
+            var startTime = LocalDateTime.of(year, quarter * 3 - 2, 1, 0, 0, 0)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant();
+            var overdueTime = LocalDateTime.of(year, quarter * 3 - 1, 15, 0, 0, 0)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant();
+            var lockTime = LocalDateTime.of(year, quarter * 3, 15, 0, 0, 0)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant();
             var endDayOfMonth = YearMonth.of(year, quarter * 3).lengthOfMonth();
-            var endTime = LocalDateTime.of(year, quarter * 3, endDayOfMonth, 23, 59, 59).atZone(ZoneId.systemDefault()).toInstant();
+            var endTime = LocalDateTime.of(year, quarter * 3, endDayOfMonth, 23, 59, 59)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant();
 
             var timeline = ReviewTimeline.builder()
                     .uuid(UUID.randomUUID())
@@ -154,8 +164,10 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
     @Override
     public SuccessResponseDto updateEmployeePeriodsByPeriodId(UUID periodId, PeriodStatus status) {
-        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED, periodId);
-        employeePeriods.forEach(employeePeriod -> updateEmployeePeriodStatus(employeePeriod.getUuid(), status));
+        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED,
+                periodId);
+        employeePeriods.forEach(employeePeriod ->
+                updateEmployeePeriodStatus(employeePeriod.getUuid(), status));
 
         return successResponse();
     }
@@ -168,10 +180,12 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
         try {
             if (0 == employeePeriodDao.update(employeePeriod)) {
-                throw new IntegrityException(EMPLOYEE_PERIOD_NOT_UPDATED.code(), "Employee Period not updated with id: " + employeePeriod.getUuid());
+                throw new IntegrityException(EMPLOYEE_PERIOD_NOT_UPDATED.code(),
+                        "Employee Period not updated with id: " + employeePeriod.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException(EMPLOYEE_PERIOD_NOT_UPDATED.code(), exception.getCause().getMessage());
+            throw new IntegrityException(EMPLOYEE_PERIOD_NOT_UPDATED.code(),
+                    exception.getCause().getMessage());
         }
 
         var timelines = reviewTimelineDao.getByEmployeePeriodId(employeePeriodId);
@@ -187,10 +201,12 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
             timeline.setUpdatedTime(Instant.now());
             try {
                 if (0 == reviewTimelineDao.update(timeline)) {
-                    throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), "Timeline not updated for id: " + timeline.getUuid());
+                    throw new IntegrityException(TIMELINE_NOT_UPDATED.code(),
+                            "Timeline not updated for id: " + timeline.getUuid());
                 }
             } catch (DataIntegrityViolationException exception) {
-                throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), exception.getCause().getMessage());
+                throw new IntegrityException(TIMELINE_NOT_UPDATED.code(),
+                        exception.getCause().getMessage());
             }
         });
         return successResponse();
@@ -200,7 +216,8 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
     @Override
     public FullEmployeePeriodDto getEmployeePeriodById(UUID employeePeriodId) {
         var employeePeriod = getById(employeePeriodId);
-        var fullEmployeePeriod = employeePeriodMapper.employeePeriodToFullEmployeePeriodDto(employeePeriod);
+        var fullEmployeePeriod = employeePeriodMapper
+                .employeePeriodToFullEmployeePeriodDto(employeePeriod);
         var timelines = reviewTimelineDao.getByEmployeePeriodId(employeePeriodId);
         fullEmployeePeriod.setReviewTimelines(timelines);
         return fullEmployeePeriod;
@@ -208,7 +225,8 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
     @Override
     public List<EmployeePeriod> getByEmployeeIdAndPeriodId(UUID employeeId, UUID periodId) {
-        var employeePeriods = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, periodId);
+        var employeePeriods = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId,
+                periodId);
 
         var latestEmployeePeriod = employeePeriods.stream()
                 .filter(employeePeriod -> employeePeriod.getUpdatedTime() != null)
