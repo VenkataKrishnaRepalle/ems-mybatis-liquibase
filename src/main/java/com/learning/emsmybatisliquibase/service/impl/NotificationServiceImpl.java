@@ -31,20 +31,26 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${default.send.email}")
     String defaultEmail;
 
-    @Value("${email.template.name.successful.onboard}")
+    @Value("${email.template.successful-onboard.name}")
     String emailTemplateNameSuccessfulOnboard;
 
-    @Value("${email.template.name.successful.onboard.temp.password}")
+    @Value("${email.template.successful-onboard.temp-password.name}")
     String getEmailTemplateNameSuccessfulOnboardTempPassword;
 
-    @Value("${email.template.successful.onboard}")
+    @Value("${email.template.successful-onboard.subject}")
     String emailTemplateSuccessfulOnboard;
 
-    @Value("${email.template.name.before.review.start}")
+    @Value("${email.template.review.start.before.name}")
     String beforeReviewStartEmail;
 
-    @Value("${email.template.subject.before.review.start}")
+    @Value("${email.template.review.start.before.subject}")
     String beforeReviewStartSubject;
+
+    @Value("${email.template.review.start.name}")
+    String reviewStartName;
+
+    @Value("${email.template.review.start.subject}")
+    String reviewStartSubject;
 
     @Override
     public void sendSuccessfulEmployeeOnBoard(Employee employee, String password, int capacity) {
@@ -77,6 +83,28 @@ public class NotificationServiceImpl implements NotificationService {
                 .toList();
         reviewTimelineService.updateTimelineStatus(employeeUuids, reviewType, ReviewTimelineStatus.STARTED);
 
+        Thread thread = new Thread(() -> notifications.forEach(employee -> {
+            log.info("Sending notification before start email to colleague {}", employee.getUuid());
+            try {
+                MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(), beforeReviewStartSubject);
+
+                Context context = new Context();
+                context.setVariable("name", employee.getFirstName() + " " + employee.getLastName());
+                context.setVariable("reviewStartDate", employee.getStartTime());
+                context.setVariable("reviewType", reviewType);
+
+                helper.setText(templateEngine.process(beforeReviewStartEmail, context), true);
+                mailSender.send(helper.getMimeMessage());
+            } catch (MessagingException e) {
+                log.error("Error Sending Notification before start email to colleague {}", employee.getUuid(), e);
+            }
+        }));
+        thread.start();
+    }
+
+    @Override
+    public void sendStartNotification(ReviewType reviewType) {
+        var notifications = reviewTimelineDao.getTimelineIdsByReviewType(reviewType);
         Thread thread = new Thread(() -> notifications.forEach(employee -> {
             log.info("Sending notification before start email to colleague {}", employee.getUuid());
             try {

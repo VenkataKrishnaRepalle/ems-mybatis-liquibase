@@ -1,0 +1,107 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: ems-mybatis-liquibase
+  datasource:
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/ems?characterEncoding=UTF-8&serverTimezone=UTC
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: RestDB-Pool
+      maximum-pool-size: 5
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStatus: false
+  jpa:
+    database: postgresql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.xml
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+  main:
+    allow-circular-references: true
+
+  mail:
+    host: smtp.gmail.com
+    username: v4431365@gmail.com
+    password: iponuhntztqltauh
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.learning.emsmybatisliquibase.entity
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+springdoc:
+  swagger-ui:
+    operations-sorter: alpha
+
+logging:
+  level:
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: trace
+
+app:
+  jwt:
+    secret: 8ae2a6ebc0cd16aecb0e94e85c1eed0a1b1d8a668f65c3838b341a99197ff370
+  jwt-expiration-milliseconds: 1800000
+
+default:
+  send:
+    email: v4431365@gmail.com
+
+email:
+  template:
+    successful-onboard:
+      name: colleague-successful-onboard-mail
+      subject: Employee On-Boarded Successfully
+      temp-password:
+        name: colleague-successful-onboard-temp-password
+    review:
+      start:
+        name: review-start
+        subject: Your Quarter Review Started
+        before:
+          name: review-before-start
+          subject: Your Quarter Review will start

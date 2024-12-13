@@ -76,8 +76,11 @@ public class ScheduledTasks {
         oldPeriod.setStatus(PeriodStatus.INACTIVE);
         oldPeriod.setUpdatedTime(Instant.now());
 
-        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED, oldPeriod.getUuid());
-        employeePeriods.forEach(employeePeriod -> employeePeriodService.updateEmployeePeriodStatus(employeePeriod.getUuid(), PeriodStatus.COMPLETED));
+        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED,
+                oldPeriod.getUuid());
+        employeePeriods.forEach(employeePeriod ->
+                employeePeriodService.updateEmployeePeriodStatus(employeePeriod.getUuid(),
+                        PeriodStatus.COMPLETED));
 
         var period = periodDao.getByStatus(PeriodStatus.SCHEDULED);
 
@@ -96,8 +99,8 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "0 15 0 1 4,7,10 *")
     public void startTimeline() {
-        var calendar = Calendar.getInstance();
-        var month = calendar.get(Calendar.MONTH);
+        var calender = Calendar.getInstance();
+        var month = calender.get(Calendar.MONTH);
 
         ReviewType completedReviewType = null;
         ReviewType startedReviewType = null;
@@ -120,13 +123,14 @@ public class ScheduledTasks {
         }
         if (completedReviewType != null) {
             reviewTimelineService.startTimelinesForQuarter(completedReviewType, startedReviewType);
+            notificationService.sendStartNotification(startedReviewType);
         }
     }
 
     @Scheduled(cron = "0 0 0 25 3,6,9,12 *")
     public void sendBeforeStartNotification() {
-        var calendar = Calendar.getInstance();
-        var month = calendar.get(Calendar.MONTH);
+        var calender = Calendar.getInstance();
+        var month = calender.get(Calendar.MONTH);
 
         ReviewType reviewType = null;
         switch (month) {

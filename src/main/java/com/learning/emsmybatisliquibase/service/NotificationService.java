@@ -8,4 +8,6 @@ public interface NotificationService {
     void sendSuccessfulEmployeeOnBoard(Employee employee, String password, int capacity);
 
     void sendNotificationBeforeStart(ReviewType reviewType);
+
+    void sendStartNotification(ReviewType startedReviewType);
 }

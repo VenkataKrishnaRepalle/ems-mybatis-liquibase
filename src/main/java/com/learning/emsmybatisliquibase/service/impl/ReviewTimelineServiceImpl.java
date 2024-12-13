@@ -36,7 +36,7 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
 
     public ReviewTimeline getById(UUID uuid) {
         var timeline = reviewTimelineDao.getById(uuid);
-        if(timeline == null) {
+        if (timeline == null) {
             throw new NotFoundException(TIMELINE_NOT_FOUND.code(), "Timeline not found with id: " + uuid);
         }
         return timeline;
@@ -46,7 +46,8 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
     public FullEmployeePeriodDto getActiveTimelineDetails(UUID employeeId) {
         var employeeCycle = employeePeriodDao.getActivePeriodByEmployeeId(employeeId);
         if (employeeCycle == null) {
-            throw new NotFoundException(EMPLOYEE_PERIOD_NOT_FOUND.code(), "Active Employee Cycle not found for employeeId: " + employeeId);
+            throw new NotFoundException(EMPLOYEE_PERIOD_NOT_FOUND.code(),
+                    "Active Employee Cycle not found for employeeId: " + employeeId);
         }
         var fullTimeline = employeePeriodMapper.employeePeriodToFullEmployeePeriodDto(employeeCycle);
         fullTimeline.setReviewTimelines(reviewTimelineDao.getByEmployeePeriodId(employeeCycle.getUuid()));
@@ -54,7 +55,8 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
     }
 
     @Override
-    public void updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType, ReviewTimelineStatus reviewTimelineStatus) {
+    public void updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType,
+                                     ReviewTimelineStatus reviewTimelineStatus) {
         var timelines = reviewTimelineDao.getByEmployeeUuidsAndReviewType(employeeUuids, reviewType);
 
         timelines.forEach(timeline -> {
@@ -70,22 +72,20 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
 
     @Override
     public SuccessResponseDto startTimelinesForQuarter(ReviewType completedReviewType, ReviewType startedReviewType) {
-        List<ReviewTimeline> completedReviewTimelines = reviewTimelineDao.findByStatusAndReviewType(PeriodStatus.STARTED, completedReviewType);
+        var completedReviewTimelines = reviewTimelineDao.findByStatusAndReviewType(PeriodStatus.STARTED,
+                completedReviewType);
         completedReviewTimelines.forEach(timeline -> {
             timeline.setStatus(ReviewTimelineStatus.COMPLETED);
             timeline.setUpdatedTime(Instant.now());
-            if (0 == reviewTimelineDao.update(timeline)) {
-                throw new IntegrityException("", "");
-            }
+            update(timeline);
         });
 
-        List<ReviewTimeline> startedReviewTimelines = reviewTimelineDao.findByStatusAndReviewType(PeriodStatus.SCHEDULED, startedReviewType);
+        List<ReviewTimeline> startedReviewTimelines = reviewTimelineDao.findByStatusAndReviewType(PeriodStatus.SCHEDULED,
+                startedReviewType);
         startedReviewTimelines.forEach(timeline -> {
             timeline.setStatus(ReviewTimelineStatus.STARTED);
             timeline.setUpdatedTime(Instant.now());
-            if (0 == reviewTimelineDao.update(timeline)) {
-                throw new IntegrityException("", "");
-            }
+            update(timeline);
         });
         return SuccessResponseDto.builder()
                 .data(UUID.randomUUID().toString())
@@ -96,7 +96,8 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
     private void update(ReviewTimeline reviewTimeline) {
         try {
             if (0 == reviewTimelineDao.update(reviewTimeline)) {
-                throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), "Timeline not updated for id: " + reviewTimeline.getUuid());
+                throw new IntegrityException(TIMELINE_NOT_UPDATED.code(),
+                        "Timeline not updated for id: " + reviewTimeline.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(TIMELINE_NOT_UPDATED.code(), exception.getCause().getMessage());
