@@ -164,7 +164,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         try {
             if (0 == employeeDao.updateLeavingDate(updateLeavingDate.getLeavingDate(), id)) {
                 throw new InvalidInputException(EMPLOYEE_INTEGRATE_VIOLATION.code(),
-                        "Problem in updating LeavingDate");
+                        "Error in updating LeavingDate");
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException(EMPLOYEE_INTEGRATE_VIOLATION.code(),

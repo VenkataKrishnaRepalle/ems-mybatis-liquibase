@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
         return employee.getUuid();
     }
 
-    public Boolean isCurrentUser(final UUID userId) {
+    public boolean isCurrentUser(final UUID userId) {
         if (userId == null) {
             return false;
         }
@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
         return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
-    public Boolean isEmployeeManager(final UUID userId) {
+    public boolean isEmployeeManager(final UUID userId) {
         var currentUserId = getCurrentUserId();
         var employee = employeeService.getById(userId);
         return employee.getManagerUuid().equals(currentUserId);

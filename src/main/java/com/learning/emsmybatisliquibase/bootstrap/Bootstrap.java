@@ -3,6 +3,7 @@ package com.learning.emsmybatisliquibase.bootstrap;
 import com.learning.emsmybatisliquibase.dao.*;
 import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
 import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import com.learning.emsmybatisliquibase.service.PeriodService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import jakarta.mail.MessagingException;
@@ -22,6 +23,8 @@ public class Bootstrap implements CommandLineRunner {
 
     private final EmployeeService employeeService;
 
+    private final EmployeeRoleService employeeRoleService;
+
     private final PeriodDao periodDao;
 
     private final PeriodService periodService;
@@ -34,7 +37,7 @@ public class Bootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws MessagingException, UnsupportedEncodingException {
-        if(periodDao.getByStatus(PeriodStatus.STARTED) == null) {
+        if (periodDao.getByStatus(PeriodStatus.STARTED) == null) {
             var cycle = periodService.createPeriod(Calendar.getInstance().get(Calendar.YEAR));
             periodService.updateStatus(cycle.getUuid(), PeriodStatus.STARTED);
         }
@@ -53,7 +56,11 @@ public class Bootstrap implements CommandLineRunner {
                     .password("Admin@123")
                     .confirmPassword("Admin@123")
                     .build();
-            employeeService.add(employee);
+            var employeeResponse = employeeService.add(employee);
+            employeeRoleService.add(EmployeeRole.builder()
+                    .employeeUuid(employeeResponse.getUuid())
+                    .role(RoleType.ADMIN)
+                    .build());
 
             var employee1 = AddEmployeeDto.builder()
                     .firstName("venky")

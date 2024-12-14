@@ -58,8 +58,11 @@ public class ScheduledTasks {
                     throw new IntegrityException("", "");
                 }
 
-                var employeeCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(), PeriodStatus.STARTED);
-                employeeCycles.forEach(employeeCycle -> employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(), PeriodStatus.INACTIVE));
+                var employeeCycles = employeePeriodDao.getByEmployeeIdAndStatus(
+                        employee.getUuid(), PeriodStatus.STARTED);
+                employeeCycles.forEach(employeeCycle ->
+                        employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
+                                PeriodStatus.INACTIVE));
             }
         }
     }

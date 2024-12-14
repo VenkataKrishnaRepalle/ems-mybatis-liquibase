@@ -40,7 +40,8 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with uuid: " + uuid);
         }
 
-        var password = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(), PasswordStatus.ACTIVE).get(0);
+        var password = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(),
+                PasswordStatus.ACTIVE).getFirst();
         var employeeRoles = employeeRoleDao.getByEmployeeUuid(employee.getUuid());
 
         Set<GrantedAuthority> authorities = employeeRoles.stream().map(role ->

@@ -118,7 +118,7 @@ class AuthServiceImplTest {
         when(employeeService.getByEmail(anyString())).thenReturn(employee);
         when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
         when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
-        assertDoesNotThrow(() -> passwordService.update(passwords.get(0)));
+        assertDoesNotThrow(() -> passwordService.update(passwords.getFirst()));
 
         assertThrows(InvalidInputException.class, () ->
                 authService.login(new LoginDto(email, password)));
@@ -126,7 +126,7 @@ class AuthServiceImplTest {
 
     @Test
     void testIsCurrentUser_UserIdNull() {
-        Boolean result = authService.isCurrentUser(null);
+        boolean result = authService.isCurrentUser(null);
         assertFalse(result);
     }
 
@@ -146,7 +146,7 @@ class AuthServiceImplTest {
         when(profileService.getByEmployeeUuid(any(UUID.class))).thenReturn(profile);
         when(authentication.getName()).thenReturn(employeeUuid.toString());
 
-        Boolean result = authService.isCurrentUser(employeeUuid);
+        boolean result = authService.isCurrentUser(employeeUuid);
         assertTrue(result);
         assertEquals(employeeUuid, profile.getEmployeeUuid());
     }
@@ -162,7 +162,7 @@ class AuthServiceImplTest {
         when(profileService.getByEmployeeUuid(any(UUID.class))).thenReturn(null);
         when(authentication.getName()).thenReturn(employeeUuid.toString());
 
-        Boolean result = authService.isCurrentUser(employeeUuid);
+        boolean result = authService.isCurrentUser(employeeUuid);
 
         assertFalse(result);
     }
@@ -183,7 +183,7 @@ class AuthServiceImplTest {
 
         when(employeeService.getById(employeeUuid)).thenReturn(employee);
 
-        Boolean result = authService.isEmployeeManager(employeeUuid);
+        boolean result = authService.isEmployeeManager(employeeUuid);
 
         assertTrue(result);
     }
@@ -204,7 +204,7 @@ class AuthServiceImplTest {
 
         when(employeeService.getById(employeeUuid)).thenReturn(employee);
 
-        Boolean result = authService.isEmployeeManager(employeeUuid);
+        boolean result = authService.isEmployeeManager(employeeUuid);
 
         assertFalse(result);
     }
