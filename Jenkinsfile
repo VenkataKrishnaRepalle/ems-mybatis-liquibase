@@ -31,7 +31,6 @@ pipeline {
                     }
 
 //                     bat 'docker tag ems-mybatis-liquibase rvkrishna13052001/ems-mybatis-liquibase:latest'
-//
 //                     bat 'docker push rvkrishna13052001/ems-mybatis-liquibase:latest'
                     bat 'docker-compose down'
                     bat 'docker-compose up --build -d'
