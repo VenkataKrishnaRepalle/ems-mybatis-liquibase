@@ -40,11 +40,6 @@
             <version>${mybatis.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.cdimascio</groupId>
-            <artifactId>spring-boot-starter-dotenv</artifactId>
-            <version>2.5.4</version>
-        </dependency>
-        <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.5</version>
