@@ -6,7 +6,7 @@ ARG JAR_FILE=target/ems-mybatis-liquibase.jar
 COPY ${JAR_FILE} ems-mybatis-liquibase.jar
 
 # Expose the application port
-EXPOSE 8080
+EXPOSE 8082
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "/ems-mybatis-liquibase.jar"]

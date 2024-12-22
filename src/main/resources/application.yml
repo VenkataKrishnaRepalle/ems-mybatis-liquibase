@@ -7,9 +7,9 @@ spring:
   application:
     name: ems-mybatis-liquibase
   datasource:
-    username: postgres
-    password: root
-    url: jdbc:postgresql://localhost:5432/ems?characterEncoding=UTF-8&serverTimezone=UTC
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
     driver-class-name: org.postgresql.Driver
     hikari:
       pool-name: RestDB-Pool

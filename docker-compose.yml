@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 services:
   db:
@@ -14,8 +14,23 @@ services:
       - "5430:5432"
     networks:
       - mynetwork
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ems-mybatis-liquibase:latest
+    container_name: ems-mybatis-liquibase
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ems-docker
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
     depends_on:
       - db
+    ports:
+      - "8082:8082"
+    networks:
+      - mynetwork
 
 volumes:
   postgres_data:
