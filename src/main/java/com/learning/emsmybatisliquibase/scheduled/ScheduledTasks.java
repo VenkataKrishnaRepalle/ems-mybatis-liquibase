@@ -1,13 +1,7 @@
 package com.learning.emsmybatisliquibase.scheduled;
 
-import com.learning.emsmybatisliquibase.dao.EmployeeDao;
-import com.learning.emsmybatisliquibase.dao.ProfileDao;
-import com.learning.emsmybatisliquibase.dao.PeriodDao;
-import com.learning.emsmybatisliquibase.dao.EmployeePeriodDao;
-import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.ProfileStatus;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.dao.*;
+import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.service.PeriodService;
 import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
@@ -43,6 +37,8 @@ public class ScheduledTasks {
 
     private final NotificationService notificationService;
 
+    private final ReviewTimelineDao reviewTimelineDao;
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void updateProfileStatusLeavingDate() {
         List<Employee> employees = employeeDao.getActiveEmployeesWithPastLeavingDate();
@@ -54,8 +50,12 @@ public class ScheduledTasks {
             if (employee.getLeavingDate() != null && profile.getProfileStatus() != ProfileStatus.INACTIVE) {
                 profile.setProfileStatus(ProfileStatus.INACTIVE);
                 profile.setUpdatedTime(Instant.now());
-                if (0 == profileDao.update(profile)) {
-                    throw new IntegrityException("", "");
+                try {
+                    if (0 == profileDao.update(profile)) {
+                        throw new IntegrityException("PROFILE_UPDATE_FAILED", "Profile not updated for uuid: " + profile.getEmployeeUuid());
+                    }
+                } catch (DataIntegrityViolationException exception) {
+                    throw new IntegrityException("PROFILE_UPDATE_FAILED", exception.getMessage());
                 }
 
                 var employeeCycles = employeePeriodDao.getByEmployeeIdAndStatus(
@@ -97,7 +97,8 @@ public class ScheduledTasks {
             throw new IntegrityException("PERIOD_NOT_UPDATED", exception.getCause().getMessage());
         }
 
-        employeePeriodService.periodAssignment(employeeDao.getAllActiveEmployeeIds());
+        employeePeriodService.periodAssignment(employeeDao.getAllActiveEmployeeIds(
+                List.of(ProfileStatus.ACTIVE, ProfileStatus.PENDING)));
     }
 
     @Scheduled(cron = "0 15 0 1 4,7,10 *")
@@ -126,7 +127,6 @@ public class ScheduledTasks {
         }
         if (completedReviewType != null) {
             reviewTimelineService.startTimelinesForQuarter(completedReviewType, startedReviewType);
-            notificationService.sendStartNotification(startedReviewType);
         }
     }
 
@@ -136,17 +136,14 @@ public class ScheduledTasks {
         var month = calender.get(Calendar.MONTH);
 
         ReviewType reviewType = null;
-        switch (month) {
-            case Calendar.MARCH:
-                reviewType = ReviewType.Q1;
-                break;
-            case Calendar.JUNE:
+        switch (month + 1) {
+            case Calendar.APRIL:
                 reviewType = ReviewType.Q2;
                 break;
-            case Calendar.SEPTEMBER:
+            case Calendar.JULY:
                 reviewType = ReviewType.Q3;
                 break;
-            case Calendar.DECEMBER:
+            case Calendar.OCTOBER:
                 reviewType = ReviewType.Q4;
                 break;
             default:
@@ -154,7 +151,8 @@ public class ScheduledTasks {
         }
 
         if (reviewType != null) {
-            notificationService.sendNotificationBeforeStart(reviewType);
+            var notifications = reviewTimelineDao.getTimelineIdsByReviewType(reviewType);
+            notificationService.sendNotificationBeforeStart(notifications, reviewType);
         }
     }
 }

@@ -51,7 +51,7 @@
         from employee
     </select>
 
-    <select id="count">
+    <select id="count" resultType="long">
         select count(*)
         from employee
     </select>
@@ -89,9 +89,12 @@
     <select id="getAllActiveEmployeeIds" resultMap="uuidResultMap">
         select e.uuid
         from employee e
-                 left join profile p on e.uuid = p.employee_uuid
-        where p.profile_status in ('ACTIVE', 'PENDING')
-          and (e.leaving_date is null or e.leaving_date > current_date)
+        left join profile p on e.uuid = p.employee_uuid
+        where p.profile_status in
+        <foreach collection="profileStatuses" item="profileStatus" open="(" separator="," close=")">
+            #{profileStatus}
+        </foreach>
+        and (e.leaving_date is null or e.leaving_date > current_date)
     </select>
 
     <resultMap id="employeeResponseDtoStructure" type="com.learning.emsmybatisliquibase.dto.EmployeeResponseDto">
@@ -144,10 +147,11 @@
         LIMIT #{size} OFFSET #{offSet}
     </select>
 
-    <select id="activeEmployeesCount">
-        select count(e.*)
-        from employee e
-                 join profile p on e.uuid = p.employee_uuid
-        where p.profile_status = 'ACTIVE'
+    <select id="employeesCount" resultType="long">
+        SELECT count(p.*)
+        FROM employee e
+        JOIN profile p ON e.uuid = p.employee_uuid
+        WHERE p.profile_status = #{status}
+        GROUP BY p.profile_status
     </select>
 </mapper>

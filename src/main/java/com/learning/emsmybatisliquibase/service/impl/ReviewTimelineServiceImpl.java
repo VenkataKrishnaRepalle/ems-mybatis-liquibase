@@ -11,6 +11,7 @@ import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeePeriodMapper;
+import com.learning.emsmybatisliquibase.service.NotificationService;
 import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,6 +34,8 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
     private final EmployeePeriodDao employeePeriodDao;
 
     private final EmployeePeriodMapper employeePeriodMapper;
+
+    private final NotificationService notificationService;
 
     public ReviewTimeline getById(UUID uuid) {
         var timeline = reviewTimelineDao.getById(uuid);
@@ -85,11 +88,14 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
 
         List<ReviewTimeline> startedReviewTimelines = reviewTimelineDao.findByStatusAndReviewType(PeriodStatus.SCHEDULED,
                 startedReviewType);
+
         startedReviewTimelines.forEach(timeline -> {
             timeline.setStatus(ReviewTimelineStatus.STARTED);
             timeline.setUpdatedTime(Instant.now());
             update(timeline);
         });
+        notificationService.sendStartNotification(startedReviewType);
+
         return SuccessResponseDto.builder()
                 .data(UUID.randomUUID().toString())
                 .success(Boolean.TRUE)

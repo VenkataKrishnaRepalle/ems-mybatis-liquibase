@@ -1,5 +1,7 @@
 server:
   port: 8082
+  tomcat:
+    max-http-form-post-size: 2147483647
 
 spring:
   application:
@@ -36,9 +38,9 @@ spring:
   servlet:
     multipart:
       enabled: true
-      file-size-threshold: 2KB
-      max-file-size: 200MB
-      max-request-size: 215MB
+      file-size-threshold: 2MB
+      max-file-size: 500MB
+      max-request-size: 550MB
 
   liquibase:
     enabled: true
@@ -73,6 +75,16 @@ mybatis-plus:
 springdoc:
   swagger-ui:
     operations-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env  # Customize this as needed
+        exclude: shutdown  # Exclude sensitive endpoints
+  endpoint:
+    health:
+      show-details: always  # To show details in the health check
 
 logging:
   level:

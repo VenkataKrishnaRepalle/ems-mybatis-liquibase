@@ -2,6 +2,7 @@ package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.dto.EmployeeResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
+import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -28,12 +29,12 @@ public interface EmployeeDao {
 
     List<Employee> getActiveEmployeesWithPastLeavingDate();
 
-    List<UUID> getAllActiveEmployeeIds();
+    List<UUID> getAllActiveEmployeeIds(@Param("profileStatuses") List<ProfileStatus> profileStatuses);
 
     EmployeeResponseDto getMe(@Param("employeeUuid") UUID employeeUuid);
 
     List<Employee> findAll(@Param("size") int size, @Param("offSet") int offSet,
                            @Param("sortBy") String sortBy, @Param("sortOrder") String sortOrder);
 
-    Long activeEmployeesCount();
+    Long employeesCount(@Param("status") ProfileStatus status);
 }

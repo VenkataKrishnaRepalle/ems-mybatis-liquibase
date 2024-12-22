@@ -286,7 +286,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public PaginatedResponse<Employee> getAllByPagination(int page, int size, String sortBy, String sortOrder) {
         int offSet = (page - 1) * size;
         var employees = employeeDao.findAll(size, offSet, sortBy, sortOrder);
-        var totalItems = employeeDao.activeEmployeesCount();
+        var totalItems = employeeDao.employeesCount(ProfileStatus.ACTIVE);
         return PaginatedResponse.<Employee>builder()
                 .data(employees)
                 .totalItems(totalItems)

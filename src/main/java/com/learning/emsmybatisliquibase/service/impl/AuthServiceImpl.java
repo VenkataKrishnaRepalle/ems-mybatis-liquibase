@@ -1,8 +1,7 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
-import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
-import com.learning.emsmybatisliquibase.dto.LoginDto;
+import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.PasswordStatus;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import com.learning.emsmybatisliquibase.entity.RoleType;
@@ -75,9 +74,9 @@ public class AuthServiceImpl implements AuthService {
         }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                String.valueOf(employee.getUuid()),
-                loginDto.getPassword()
-        ));
+                        String.valueOf(employee.getUuid()),
+                        loginDto.getPassword()
+                ));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtTokenProvider.generateToken(authentication);
@@ -94,9 +93,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UUID verifyEmail(String email) {
+    public SuccessResponseDto verifyEmail(String email) {
         var employee = employeeService.getByEmail(email);
-        return employee.getUuid();
+        return SuccessResponseDto.builder()
+                .data(employee == null ? null : employee.getUuid().toString())
+                .success(employee != null)
+                .build();
     }
 
     public boolean isCurrentUser(final UUID userId) {

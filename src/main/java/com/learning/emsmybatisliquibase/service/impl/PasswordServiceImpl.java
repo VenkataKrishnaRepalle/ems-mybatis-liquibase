@@ -1,7 +1,12 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
+import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
+import com.learning.emsmybatisliquibase.dto.ForgotPasswordDto;
 import com.learning.emsmybatisliquibase.dto.PasswordDto;
+import com.learning.emsmybatisliquibase.dto.ResetPasswordDto;
+import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.Password;
 import com.learning.emsmybatisliquibase.entity.PasswordStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
@@ -13,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -25,6 +31,8 @@ public class PasswordServiceImpl implements PasswordService {
 
     private final PasswordDao passwordDao;
 
+    private final EmployeeDao employeeDao;
+
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Password getById(UUID uuid) {
@@ -36,13 +44,13 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     @Override
-    public Password create(UUID employeeUuid, PasswordDto passwordDto) {
+    public void create(UUID employeeUuid, PasswordDto passwordDto) {
         validatePassword(passwordDto.getPassword(), passwordDto.getConfirmPassword());
 
-        return insert(employeeUuid, passwordDto.getPassword());
+        insert(employeeUuid, passwordDto.getPassword());
     }
 
-    private Password insert(UUID employeeUuid, String passwordInput) {
+    private void insert(UUID employeeUuid, String passwordInput) {
         var password = Password.builder()
                 .uuid(UUID.randomUUID())
                 .employeeUuid(employeeUuid)
@@ -59,7 +67,6 @@ public class PasswordServiceImpl implements PasswordService {
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException("PASSWORD_NOT_INSERTED", "Password failed to create");
         }
-        return password;
     }
 
     private void validatePassword(String password, String confirmPassword) {
@@ -89,5 +96,58 @@ public class PasswordServiceImpl implements PasswordService {
         return password;
     }
 
+    @Transactional
+    @Override
+    public SuccessResponseDto forgotPassword(UUID uuid, ForgotPasswordDto forgotPasswordDto) {
+        var employee = getByEmail(forgotPasswordDto.getEmail());
+        if (!employee.getUuid().equals(uuid)) {
+            throw new InvalidInputException("INVALID_USER", "Invalid User");
+        }
+        var passwords = passwordDao.getByEmployeeUuidAndStatus(uuid, PasswordStatus.ACTIVE);
+        passwords.forEach(password -> {
+            password.setStatus(PasswordStatus.EXPIRED);
+            update(password);
+        });
+        create(employee.getUuid(), PasswordDto.builder()
+                .password(forgotPasswordDto.getPassword())
+                .confirmPassword(forgotPasswordDto.getConfirmPassword())
+                .build());
+        return SuccessResponseDto.builder()
+                .success(Boolean.TRUE)
+                .data(employee.getUuid().toString())
+                .build();
+    }
+
+    @Override
+    public SuccessResponseDto resetPassword(UUID uuid, ResetPasswordDto resetPasswordDto) {
+        var employee = getByEmail(resetPasswordDto.getEmail());
+        if (!employee.getUuid().equals(uuid)) {
+            throw new InvalidInputException("INVALID_USER", "Invalid User");
+        }
+        var passwords = passwordDao.getByEmployeeUuidAndStatus(uuid, PasswordStatus.ACTIVE);
+        if(!passwordEncoder.matches(resetPasswordDto.getOldPassword(), passwords.getFirst().getPassword())) {
+            throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
+        }
+        passwords.forEach(password -> {
+            password.setStatus(PasswordStatus.EXPIRED);
+            update(password);
+        });
+        create(employee.getUuid(), PasswordDto.builder()
+                .password(resetPasswordDto.getNewPassword())
+                .confirmPassword(resetPasswordDto.getConfirmNewPassword())
+                .build());
+        return SuccessResponseDto.builder()
+                .success(Boolean.TRUE)
+                .data(employee.getUuid().toString())
+                .build();
+    }
+
+    private Employee getByEmail(String email) {
+        var employee = employeeDao.getByEmail(email);
+        if (employee == null) {
+            throw new IntegrityException("EMPLOYEE_NOT_FOUND", "Employee not found with email: " + email);
+        }
+        return employee;
+    }
 
 }

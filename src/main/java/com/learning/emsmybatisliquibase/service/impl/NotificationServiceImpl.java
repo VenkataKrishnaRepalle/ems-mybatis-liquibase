@@ -4,9 +4,7 @@ import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.dto.NotificationDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
-import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.service.NotificationService;
-import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +16,18 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     private final JavaMailSender mailSender;
+
     private final TemplateEngine templateEngine;
+
     private final ReviewTimelineDao reviewTimelineDao;
-    private final ReviewTimelineService reviewTimelineService;
 
     @Value("${default.send.email}")
     String defaultEmail;
@@ -77,16 +78,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendNotificationBeforeStart(ReviewType reviewType) {
-        var notifications = reviewTimelineDao.getTimelineIdsByReviewType(reviewType);
-
-        var employeeUuids = notifications.stream()
-                .map(NotificationDto::getUuid)
-                .toList();
-        reviewTimelineService.updateTimelineStatus(employeeUuids, reviewType,
-                ReviewTimelineStatus.STARTED);
-
-        Thread thread = new Thread(() -> notifications.forEach(employee -> {
+    public void sendNotificationBeforeStart(List<NotificationDto> notifications, ReviewType reviewType) {
+        var thread = new Thread(() -> notifications.forEach(employee -> {
             log.info("Sending notification before start email to colleague {}", employee.getUuid());
             try {
                 MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(),
@@ -109,7 +102,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendStartNotification(ReviewType reviewType) {
         var notifications = reviewTimelineDao.getTimelineIdsByReviewType(reviewType);
-        Thread thread = new Thread(() -> notifications.forEach(employee -> {
+        var thread = new Thread(() -> notifications.forEach(employee -> {
             log.info("Sending notification before start email to colleague {}", employee.getUuid());
             try {
                 MimeMessageHelper helper = createMimeMessageHelper(defaultEmail, employee.getEmail(),
