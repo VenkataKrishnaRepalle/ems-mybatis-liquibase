@@ -118,7 +118,7 @@ class AuthServiceImplTest {
         when(employeeService.getByEmail(anyString())).thenReturn(employee);
         when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
         when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
-        assertDoesNotThrow(() -> passwordService.update(passwords.getFirst()));
+        assertDoesNotThrow(() -> passwordService.update(passwords.get(0)));
 
         assertThrows(InvalidInputException.class, () ->
                 authService.login(new LoginDto(email, password)));
