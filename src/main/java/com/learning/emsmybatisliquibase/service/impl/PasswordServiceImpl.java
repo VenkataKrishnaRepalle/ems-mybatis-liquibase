@@ -125,7 +125,7 @@ public class PasswordServiceImpl implements PasswordService {
             throw new InvalidInputException("INVALID_USER", "Invalid User");
         }
         var passwords = passwordDao.getByEmployeeUuidAndStatus(uuid, PasswordStatus.ACTIVE);
-        if(!passwordEncoder.matches(resetPasswordDto.getOldPassword(), passwords.getFirst().getPassword())) {
+        if(!passwordEncoder.matches(resetPasswordDto.getOldPassword(), passwords.get(0).getPassword())) {
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
         passwords.forEach(password -> {

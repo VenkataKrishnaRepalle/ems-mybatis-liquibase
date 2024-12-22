@@ -195,11 +195,11 @@ public class FilesServiceImpl implements FilesService {
         var rowValues = fileProcess(file, FileType.DEPARTMENT_PERMISSION);
 
         for (List<String> value : rowValues) {
-            var department = departmentDao.getByName(value.getFirst().trim());
+            var department = departmentDao.getByName(value.get(0).trim());
 
             var employee = employeeService.getByEmail(value.get(1));
             if (department == null) {
-                department = departmentService.add(new AddDepartmentDto(value.getFirst().trim()));
+                department = departmentService.add(new AddDepartmentDto(value.get(0).trim()));
             }
 
             var action = value.get(2);

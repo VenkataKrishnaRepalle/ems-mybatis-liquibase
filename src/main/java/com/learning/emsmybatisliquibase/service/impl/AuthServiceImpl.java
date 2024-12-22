@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidInputException("INVALID_LOGIN", "Account Locked, Please reset password");
         }
 
-        var password = passwords.getFirst();
+        var password = passwords.get(0);
 
         if (!passwordEncoder.matches(loginDto.getPassword(), password.getPassword())) {
             password.setNoOfIncorrectEntries(password.getNoOfIncorrectEntries() + 1);
