@@ -1,4 +1,4 @@
-FROM openjdk:21
+FROM openjdk:17-alpine
 LABEL authors="rvenkata"
 
 # Copy the application jar file
