@@ -295,6 +295,11 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
     }
 
+    @Override
+    public List<EmployeeDetailsDto> getAllActiveManagers() {
+        return employeeDao.getAllActiveManagers();
+    }
+
     private String generateRandomPassword() {
         var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         var sb = new StringBuilder(10);

@@ -24,6 +24,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class FilesServiceImpl implements FilesService {
     private static final String PARSE_DATE = "dd/MM/yyyy";
 
     @Override
+    @Transactional
     public SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, MessagingException {
         var rowDatas = fileProcess(file, FileType.COLLEAGUE_ONBOARD);
         List<UUID> employeeUuids = new ArrayList<>();
@@ -195,7 +197,7 @@ public class FilesServiceImpl implements FilesService {
         var rowValues = fileProcess(file, FileType.DEPARTMENT_PERMISSION);
 
         for (List<String> value : rowValues) {
-            var department = departmentDao.getByName(value.get(0).trim());
+            var department = departmentDao.getByName(value.get(0).trim().toLowerCase());
 
             var employee = employeeService.getByEmail(value.get(1));
             if (department == null) {

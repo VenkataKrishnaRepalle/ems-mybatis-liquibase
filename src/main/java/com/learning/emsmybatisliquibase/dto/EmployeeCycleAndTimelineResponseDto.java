@@ -19,9 +19,13 @@ public class EmployeeCycleAndTimelineResponseDto {
 
     private UUID employeeCycleId;
 
-    private PeriodStatus employeePeriodStatus;
-
     private Period period;
 
-    private ReviewTimeline reviewTimeline;
+    private ReviewTimeline Q1;
+
+    private ReviewTimeline Q2;
+
+    private ReviewTimeline Q3;
+
+    private ReviewTimeline Q4;
 }

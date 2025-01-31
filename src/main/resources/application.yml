@@ -97,7 +97,7 @@ logging:
 app:
   jwt:
     secret: 8ae2a6ebc0cd16aecb0e94e85c1eed0a1b1d8a668f65c3838b341a99197ff370
-  jwt-expiration-milliseconds: 1800000
+  jwt-expiration-milliseconds: 18000000
 
 default:
   send:

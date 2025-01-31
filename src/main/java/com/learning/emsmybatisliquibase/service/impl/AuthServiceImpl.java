@@ -1,13 +1,19 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
-import com.learning.emsmybatisliquibase.dto.*;
+import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
+import com.learning.emsmybatisliquibase.dto.LoginDto;
+import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.PasswordStatus;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
 import com.learning.emsmybatisliquibase.entity.RoleType;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.security.JwtTokenProvider;
-import com.learning.emsmybatisliquibase.service.*;
+import com.learning.emsmybatisliquibase.service.EmployeeService;
+import com.learning.emsmybatisliquibase.service.PasswordService;
+import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
+import com.learning.emsmybatisliquibase.service.ProfileService;
+import com.learning.emsmybatisliquibase.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
         var passwords = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(),
                 PasswordStatus.ACTIVE);
         if (passwords.size() != 1) {
-            throw new InvalidInputException("INVALID_LOGIN", "Account Locked, Please reset password");
+            throw new InvalidInputException("ACCOUNT_LOCKED", "Account Locked, Please reset password");
         }
 
         var password = passwords.get(0);
@@ -86,6 +92,7 @@ public class AuthServiceImpl implements AuthService {
                 .toList();
         return JwtAuthResponseDto.builder()
                 .employeeId(employee.getUuid())
+                .email(employee.getEmail())
                 .accessToken(token)
                 .tokenType("Bearer")
                 .roles(roles)

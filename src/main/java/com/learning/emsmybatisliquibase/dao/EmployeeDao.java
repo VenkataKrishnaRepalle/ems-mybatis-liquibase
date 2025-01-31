@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.dao;
 
+import com.learning.emsmybatisliquibase.dto.EmployeeDetailsDto;
 import com.learning.emsmybatisliquibase.dto.EmployeeResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
@@ -37,4 +38,6 @@ public interface EmployeeDao {
                            @Param("sortBy") String sortBy, @Param("sortOrder") String sortOrder);
 
     Long employeesCount(@Param("status") ProfileStatus status);
+
+    List<EmployeeDetailsDto> getAllActiveManagers();
 }

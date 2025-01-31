@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.controller;
 
+import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequestMapping("api/employeePeriod")
@@ -49,6 +51,11 @@ public class EmployeePeriodController {
                                                               @PathVariable UUID periodId) {
         return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndPeriodId(employeeId, periodId),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("getAll/{employeeId}")
+    public ResponseEntity<Map<String, EmployeeCycleAndTimelineResponseDto>> getAll(@PathVariable UUID employeeId) {
+        return new ResponseEntity<>(employeePeriodService.getAll(employeeId), HttpStatus.OK);
     }
 
 }

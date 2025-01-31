@@ -150,8 +150,24 @@
     <select id="employeesCount" resultType="long">
         SELECT count(p.*)
         FROM employee e
-        JOIN profile p ON e.uuid = p.employee_uuid
+                 JOIN profile p ON e.uuid = p.employee_uuid
         WHERE p.profile_status = #{status}
         GROUP BY p.profile_status
+    </select>
+    <resultMap id="employeeDetailsMap" type="com.learning.emsmybatisliquibase.dto.EmployeeDetailsDto">
+        <id property="uuid" column="uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+            typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
+        <result property="firstName" column="first_name"/>
+        <result property="lastName" column="last_name"/>
+        <result property="email" column="email"/>
+    </resultMap>
+    <select id="getAllActiveManagers" resultMap="employeeDetailsMap">
+        select e.uuid,
+               e.first_name,
+               e.last_name,
+               e.email
+        FROM employee e
+        WHERE e.is_manager = true
+          AND (e.leaving_date IS NULL or e.leaving_date > current_date)
     </select>
 </mapper>

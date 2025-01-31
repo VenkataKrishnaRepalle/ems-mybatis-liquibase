@@ -4,7 +4,7 @@
     <resultMap id="reviewTimelineStructure" type="com.learning.emsmybatisliquibase.entity.ReviewTimeline">
         <id property="uuid" column="uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
             typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
-        <result property="employeePeriodUuid" column="employee_cycle_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
+        <result property="employeePeriodUuid" column="employee_period_uuid" jdbcType="VARCHAR" javaType="java.util.UUID"
                 typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
         <result property="type" column="type"/>
         <result property="startTime" column="start_time"/>
@@ -64,8 +64,8 @@
         select t.*
         from employee e
         join profile p on e.uuid = p.employee_uuid and profile_status = 'ACTIVE'
-        join employee_cycle ec on e.uuid = ec.employee_uuid and ec.status = 'STARTED'
-        join reviewTimeline t on ec.uuid = t.employee_cycle_uuid and t.type = #{reviewType}
+        join employee_period ec on e.uuid = ec.employee_uuid and ec.status = 'STARTED'
+        join review_timeline t on ec.uuid = t.employee_period_uuid and t.type = #{reviewType}
         where e.uuid in
         <foreach item="employeeUuid" collection="employeeUuids" open="(" separator="," close=")">
             #{employeeUuid, jdbcType=VARCHAR, typeHandler=com.learning.emsmybatisliquibase.handler.UuidTypeHandler}
@@ -94,5 +94,12 @@
                  join profile p on e.uuid = p.employee_uuid and p.profile_status = 'ACTIVE'
                  join employee_period ec on e.uuid = ec.employee_uuid and ec.status = 'STARTED'
                  join review_timeline t on ec.uuid = t.employee_period_uuid and t.type = #{reviewType};
+    </select>
+    <select id="getByEmployeePeriodIdAndReviewType" resultMap="reviewTimelineStructure">
+        select rt.*
+        from employee_period ep
+                 join review_timeline rt on ep.uuid = rt.employee_period_uuid
+        where ep.uuid = #{employeePeriodId}
+          and rt.type = #{reviewType}
     </select>
 </mapper>

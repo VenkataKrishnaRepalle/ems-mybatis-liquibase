@@ -14,19 +14,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.Year;
 import java.time.ZoneId;
 import java.util.UUID;
 
-import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.PERIOD_NOT_CREATED;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.PERIOD_ALREADY_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.PERIOD_NOT_EXISTS;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.PERIOD_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PeriodServiceImpl implements PeriodService {
 
     private final PeriodDao periodDao;
@@ -57,6 +56,11 @@ public class PeriodServiceImpl implements PeriodService {
                     && period.getEndTime().atZone(ZoneId.systemDefault()).getYear() == year) {
                 throw new FoundException(PERIOD_ALREADY_EXISTS.code(),
                         "Period already created with scheduled Status " + period.getUuid());
+            } else if (period.getStatus().equals(PeriodStatus.COMPLETED)
+                    && period.getStartTime().atZone(ZoneId.systemDefault()).getYear() == year
+                    && period.getEndTime().atZone(ZoneId.systemDefault()).getYear() == year) {
+                throw new FoundException(PERIOD_COMPLETED.code(),
+                        "Period already completed " + period.getUuid());
             }
         }
 
@@ -90,13 +94,18 @@ public class PeriodServiceImpl implements PeriodService {
         if (!period.getStatus().equals(PeriodStatus.SCHEDULED)) {
             throw new InvalidInputException("INVALID_PERIOD_STATUS", "Provided period is not in scheduled status");
         }
-        var periodStartTime = period.getStartTime().atZone(ZoneId.systemDefault()).getYear();
-        var periodEndTime = period.getEndTime().atZone(ZoneId.systemDefault()).getYear();
+        var periodStartTime = period.getStartTime()
+                .atZone(ZoneId.systemDefault())
+                .getYear();
+        var periodEndTime = period.getEndTime()
+                .atZone(ZoneId.systemDefault())
+                .getYear();
 
         var activePeriod = periodDao.getByStatus(PeriodStatus.STARTED);
 
-        if (activePeriod != null && activePeriod.getStartTime().atZone(ZoneId.systemDefault()).getYear() ==
-                periodStartTime && activePeriod.getEndTime().atZone(ZoneId.systemDefault()).getYear() == periodEndTime) {
+        if (activePeriod != null &&
+                activePeriod.getStartTime().atZone(ZoneId.systemDefault()).getYear() == periodStartTime &&
+                activePeriod.getEndTime().atZone(ZoneId.systemDefault()).getYear() == periodEndTime) {
             activePeriod.setStatus(PeriodStatus.INACTIVE);
             activePeriod.setUpdatedTime(Instant.now());
             update(activePeriod);
@@ -142,6 +151,10 @@ public class PeriodServiceImpl implements PeriodService {
         period.setStatus(status);
         period.setUpdatedTime(Instant.now());
         update(period);
+
+        if (PeriodStatus.COMPLETED.equals(status) || PeriodStatus.INACTIVE.equals(status)) {
+            employeePeriodService.updateEmployeePeriodsByPeriodId(periodId, status);
+        }
 
         return successResponse();
     }

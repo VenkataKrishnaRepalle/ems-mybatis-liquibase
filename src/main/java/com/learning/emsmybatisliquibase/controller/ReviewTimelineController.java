@@ -2,6 +2,7 @@ package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
@@ -40,5 +41,11 @@ public class ReviewTimelineController {
         return new ResponseEntity<>(reviewTimelineService.startTimelinesForQuarter(completedReviewType,
                 startReviewType),
                 HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/getByEmployeePeriodId/{employeePeriodId}/type/{reviewType}")
+    public ResponseEntity<ReviewTimeline> getByEmployeePeriodIdAndReviewType(@PathVariable UUID employeePeriodId, @PathVariable ReviewType reviewType) {
+        return new ResponseEntity<>(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriodId, reviewType),
+                HttpStatus.OK);
     }
 }

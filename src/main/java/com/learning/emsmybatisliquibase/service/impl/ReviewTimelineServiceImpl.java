@@ -102,6 +102,15 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
                 .build();
     }
 
+    @Override
+    public ReviewTimeline getByEmployeePeriodIdAndReviewType(UUID employeePeriodId, ReviewType reviewType) {
+        var reviewTimeline = reviewTimelineDao.getByEmployeePeriodIdAndReviewType(employeePeriodId, reviewType);
+        if (reviewTimeline == null) {
+            throw new NotFoundException(TIMELINE_NOT_FOUND.code(), "Timeline not found with id: " + employeePeriodId);
+        }
+        return reviewTimeline;
+    }
+
     private void update(ReviewTimeline reviewTimeline) {
         try {
             if (0 == reviewTimelineDao.update(reviewTimeline)) {

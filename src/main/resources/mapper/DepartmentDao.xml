@@ -16,7 +16,7 @@
     <select id="getByName" resultMap="departmentResult">
         select *
         from department
-        where name = #{name}
+        where lower(name) = #{name}
     </select>
     <insert id="insert" flushCache="true">
         insert into department(uuid, name)

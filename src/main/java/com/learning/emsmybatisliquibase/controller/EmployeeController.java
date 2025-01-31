@@ -37,10 +37,12 @@ public class EmployeeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/add")
-    public ResponseEntity<AddEmployeeResponseDto> addEmployee(@Valid @RequestBody AddEmployeeDto employeeDto) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<AddEmployeeResponseDto> addEmployee(@Valid @RequestBody AddEmployeeDto employeeDto)
+            throws MessagingException, UnsupportedEncodingException {
         return new ResponseEntity<>(employeeService.add(employeeDto), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/getById/{id}")
     public ResponseEntity<Employee> getById(@PathVariable UUID id) {
         return new ResponseEntity<>(employeeService.getById(id), HttpStatus.OK);
@@ -52,6 +54,7 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeService.getAll(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/getAll/pagination")
     public ResponseEntity<PaginatedResponse<Employee>> viewAllEmployees(
             @RequestParam(name = "page", defaultValue = "1") int page,
@@ -62,6 +65,7 @@ public class EmployeeController {
                 HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PostMapping("/updateLeavingDate/{id}")
     public ResponseEntity<HttpStatus> updateLeavingStatus(@PathVariable UUID id,
                                                           @RequestBody UpdateLeavingDateDto updateLeavingDate) {
@@ -69,20 +73,28 @@ public class EmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping(value = "/getByManagerId/{managerId}")
     public ResponseEntity<List<Employee>> getByManagerId(@PathVariable UUID managerId) {
         return new ResponseEntity<>(employeeService.getByManagerUuid(managerId), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping(value = "/getFullTeam/{employeeId}")
     public ResponseEntity<List<EmployeeAndManagerDto>> getFullTeam(@PathVariable UUID employeeId) {
         return new ResponseEntity<>(employeeService.getFullTeam(employeeId), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping(value = "getEmployeeFullReportingChain/{employeeId}")
     public ResponseEntity<EmployeeFullReportingChainDto> getEmployeeFullReportingChain(@PathVariable UUID employeeId) {
         return new ResponseEntity<>(employeeService.getEmployeeFullReportingChain(employeeId),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/get-active-managers")
+    public ResponseEntity<List<EmployeeDetailsDto>> getActiveManagers() {
+        return ResponseEntity.ok(employeeService.getAllActiveManagers());
     }
 
 }

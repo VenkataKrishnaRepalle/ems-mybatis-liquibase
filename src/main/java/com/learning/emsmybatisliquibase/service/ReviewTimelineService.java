@@ -19,4 +19,6 @@ public interface ReviewTimelineService {
     void updateTimelineStatus(List<UUID> employeeUuids, ReviewType reviewType, ReviewTimelineStatus reviewTimelineStatus);
 
     SuccessResponseDto startTimelinesForQuarter(ReviewType completedReviewType, ReviewType startedReviewType);
+
+    ReviewTimeline getByEmployeePeriodIdAndReviewType(UUID employeeId, ReviewType reviewType);
 }

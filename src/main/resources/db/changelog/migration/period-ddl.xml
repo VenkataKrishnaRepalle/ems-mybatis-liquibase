@@ -4,7 +4,7 @@
     <changeSet id="1" author="rvenkata">
         <createTable tableName="period">
             <column name="uuid" type="${uuid_type}">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="cycle_uuid_pk"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="period_uuid_pk"/>
             </column>
             <column name="name" type="VARCHAR">
                 <constraints nullable="false"/>

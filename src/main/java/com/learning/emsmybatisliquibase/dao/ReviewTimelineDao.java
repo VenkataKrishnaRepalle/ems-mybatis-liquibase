@@ -24,4 +24,6 @@ public interface ReviewTimelineDao {
     List<ReviewTimeline> getByEmployeeUuidsAndReviewType(@Param("employeeUuids") List<UUID> employeeUuids, @Param("reviewType") ReviewType reviewType);
 
     List<NotificationDto> getTimelineIdsByReviewType(@Param("reviewType") ReviewType reviewType);
+
+    ReviewTimeline getByEmployeePeriodIdAndReviewType(@Param("employeePeriodId") UUID employeePeriodId, @Param("reviewType") ReviewType reviewType);
 }

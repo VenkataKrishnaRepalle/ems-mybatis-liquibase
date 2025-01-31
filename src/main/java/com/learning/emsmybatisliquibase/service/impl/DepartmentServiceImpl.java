@@ -51,7 +51,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department add(AddDepartmentDto departmentDto) {
-        var department = departmentDao.getByName(departmentDto.getName());
+        var department = departmentDao.getByName(departmentDto.getName().toLowerCase());
         if (department != null) {
             return department;
         }

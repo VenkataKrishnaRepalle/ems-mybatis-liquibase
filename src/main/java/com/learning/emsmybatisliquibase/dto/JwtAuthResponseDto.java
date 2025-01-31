@@ -16,6 +16,8 @@ public class JwtAuthResponseDto {
 
     private UUID employeeId;
 
+    private String email;
+
     private String accessToken;
 
     private String tokenType = "Bearer";
