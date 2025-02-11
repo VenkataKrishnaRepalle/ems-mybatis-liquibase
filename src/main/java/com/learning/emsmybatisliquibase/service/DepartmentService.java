@@ -16,5 +16,7 @@ public interface DepartmentService {
 
     List<Department> getAll();
 
+    Department getById(UUID departmentUuid);
+
     void downloadDepartmentReport() throws IOException;
 }

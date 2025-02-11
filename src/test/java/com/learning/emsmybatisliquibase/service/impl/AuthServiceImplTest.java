@@ -45,56 +45,6 @@ class AuthServiceImplTest {
     @Mock
     private PasswordDao passwordDao;
 
-//    @Test
-//    void testLogin_ValidCredentials_ReturnsTokenAndRoles() {
-//        UUID employeeUuid = UUID.randomUUID();
-//        String email = "test@example.com";
-//        String password = "password123";
-//        String expectedRole = "EMPLOYEE";
-//        String expectedToken = "testToken";
-//
-//        Employee employee = new Employee();
-//        employee.setUuid(employeeUuid);
-//        employee.setEmail(email);
-//        employee.setIsManager(Boolean.TRUE);
-//
-//        Profile profile = new Profile();
-//        profile.setEmployeeUuid(employeeUuid);
-//        profile.setProfileStatus(ProfileStatus.ACTIVE);
-//
-//        List<Password> passwords = List.of(
-//                Password.builder()
-//                        .employeeUuid(employeeUuid)
-//                        .password(passwordEncoder.encode(password))
-//                        .status(PasswordStatus.ACTIVE)
-//                        .build()
-//        );
-//
-//        when(passwordEncoder.encode(password)).thenReturn(any());
-//        when(employeeService.getByEmail(email)).thenReturn(employee);
-//        when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
-//        when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
-//        when(passwordEncoder.matches(password, passwords.get(0).getPassword())).thenReturn(true);
-//        when(jwtTokenProvider.generateToken(any())).thenReturn(expectedToken);
-//        when(employeeRoleService.getRolesByEmployeeUuid(employee.getUuid())).thenReturn(List.of(RoleType.EMPLOYEE, RoleType.MANAGER));
-//
-//        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-//                .thenReturn(mock(Authentication.class));
-//
-//        JwtAuthResponseDto result = authService.login(new LoginDto(email, password));
-//
-//        assertEquals(expectedToken, result.getAccessToken());
-//        assertEquals(expectedRole, result.getRoles().get(0));
-//        assertTrue(result.getRoles().contains("MANAGER"));
-//
-//        verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
-//        verify(employeeService, times(1)).getByEmail(email);
-//        verify(profileService, times(1)).getByEmployeeUuid(employeeUuid);
-//        verify(passwordDao, times(1)).getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE);
-//        verify(jwtTokenProvider, times(1)).generateToken(any());
-//        verify(employeeRoleService, times(1)).getRolesByEmployeeUuid(employee.getUuid());
-//    }
-
     @Test
     void testLogin_InvalidCredentials_ThrowsInvalidInputException() {
         UUID employeeUuid = UUID.randomUUID();

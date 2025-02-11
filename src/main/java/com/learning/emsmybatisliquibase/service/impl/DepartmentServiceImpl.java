@@ -72,7 +72,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department update(UUID departmentUuid, AddDepartmentDto departmentDto) {
-        var department = isDepartmentExists(departmentUuid);
+        var department = getById(departmentUuid);
         department.setName(departmentDto.getName());
         try {
             if (0 == departmentDao.update(department)) {
@@ -86,7 +86,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public void delete(UUID departmentUuid) {
-        isDepartmentExists(departmentUuid);
+        getById(departmentUuid);
         try {
             if (0 == departmentDao.delete(departmentUuid)) {
                 throw new IntegrityException(DEPARTMENT_NOT_DELETED.code(), "Department not deleted");
@@ -99,6 +99,16 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> getAll() {
         return departmentDao.getAll();
+    }
+
+    @Override
+    public Department getById(UUID departmentUuid) {
+        var department = departmentDao.get(departmentUuid);
+        if (department == null) {
+            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(),
+                    "Department not exists with Id: " + departmentUuid);
+        }
+        return department;
     }
 
     @Override
@@ -134,15 +144,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         } finally {
             workbook.close();
         }
-    }
-
-    private Department isDepartmentExists(UUID departmentUuid) {
-        var department = departmentDao.get(departmentUuid);
-        if (department == null) {
-            throw new NotFoundException(DEPARTMENT_NOT_FOUND.code(),
-                    "Department not exists with Id: " + departmentUuid);
-        }
-        return department;
     }
 
     private String formatDate(Date date) {

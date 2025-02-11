@@ -9,6 +9,7 @@ import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.SkillsMapper;
 import com.learning.emsmybatisliquibase.service.SkillsService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -104,7 +105,7 @@ public class SkillsServiceImpl implements SkillsService {
 
 
     private void inputValidation(SkillsDto skillsDto) {
-        if (skillsDto.getName().isEmpty() || skillsDto.getName().isBlank()) {
+        if (StringUtils.isBlank(skillsDto.getName())) {
             throw new InvalidInputException(INVALID_RATINGS_INPUT.code(),
                     "Name cannot be empty or null");
         }

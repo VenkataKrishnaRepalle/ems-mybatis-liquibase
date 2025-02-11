@@ -7,6 +7,7 @@ import com.learning.emsmybatisliquibase.dto.ViewEmployeeAttendanceDto;
 import com.learning.emsmybatisliquibase.entity.Attendance;
 import com.learning.emsmybatisliquibase.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,6 @@ public class AttendanceController {
         return new ResponseEntity<>(attendanceService.update(employeeUuid, attendanceUuid, attendanceDto),
                 HttpStatus.ACCEPTED);
     }
-
     @GetMapping("/get/{employeeUuid}/attendance/{attendanceUuid}")
     public ResponseEntity<Attendance> get(@PathVariable UUID employeeUuid, @PathVariable UUID attendanceUuid) {
         return new ResponseEntity<>(attendanceService.getByUuid(employeeUuid, attendanceUuid),

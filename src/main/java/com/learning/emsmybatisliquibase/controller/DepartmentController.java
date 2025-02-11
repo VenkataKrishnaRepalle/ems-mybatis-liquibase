@@ -6,6 +6,7 @@ import com.learning.emsmybatisliquibase.service.DepartmentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,11 +29,25 @@ public class DepartmentController {
 
     private final DepartmentService departmentService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Department>> getAll() {
+        return new ResponseEntity<>(departmentService.getAll(), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
+    @GetMapping("/getById/{departmentUuid}")
+    public ResponseEntity<Department> getById(@PathVariable UUID departmentUuid) {
+        return new ResponseEntity<>(departmentService.getById(departmentUuid), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/addDepartment")
     public ResponseEntity<Department> add(@RequestBody AddDepartmentDto department) {
         return new ResponseEntity<>(departmentService.add(department), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/updateDepartment/{departmentUuid}")
     public ResponseEntity<Department> update(@PathVariable UUID departmentUuid,
                                              @RequestBody AddDepartmentDto department) {
@@ -40,17 +55,14 @@ public class DepartmentController {
                 HttpStatus.ACCEPTED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/deleteDepartment/{departmentUuid}")
     public ResponseEntity<HttpStatus> delete(@PathVariable UUID departmentUuid) {
         departmentService.delete(departmentUuid);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Department>> getAll() {
-        return new ResponseEntity<>(departmentService.getAll(), HttpStatus.OK);
-    }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/download-department-report")
     public ResponseEntity<HttpStatus> downloadDepartmentReport() throws IOException {
         departmentService.downloadDepartmentReport();

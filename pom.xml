@@ -27,7 +27,9 @@
         <postgresql.version>42.7.3</postgresql.version>
         <jacoco.version>0.8.11</jacoco.version>
         <mybatis.version>3.0.3</mybatis.version>
+        <mybatis.plus.version>3.5.5</mybatis.plus.version>
         <jwt.version>0.12.5</jwt.version>
+        <redisson.version>3.33.0</redisson.version>
     </properties>
     <dependencies>
         <dependency>
@@ -42,7 +44,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.5</version>
+            <version>${mybatis.plus.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,11 +77,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web-services</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-            <version>${spring-security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -126,7 +123,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>6.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -154,6 +150,22 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-cache</artifactId>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.redisson</groupId>-->
+<!--            <artifactId>redisson-spring-boot-starter</artifactId>-->
+<!--            <version>${redisson.version}</version>-->
+<!--        </dependency>-->
+
     </dependencies>
     <build>
         <plugins>

@@ -43,7 +43,6 @@ class AttendanceServiceImplTest {
 
     private static final UUID EMPLOYEE_UUID = UUID.randomUUID();
 
-
     @Test
     void testApply_AttendanceAlreadyExists() {
         var attendanceDto = new ApplyAttendanceDto();
