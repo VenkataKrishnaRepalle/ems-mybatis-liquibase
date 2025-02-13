@@ -13,13 +13,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -112,7 +117,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public void downloadDepartmentReport() throws IOException {
+    public byte[] downloadDepartmentReport() throws IOException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Department Report");
         Row headerRow = sheet.createRow(0);
@@ -128,7 +133,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         int rowNum = 1;
         var departmentDetails = departmentDao.departmentReport();
         for (var department : departmentDetails) {
-
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(String.valueOf(department.getColleagueUuid()));
             row.createCell(1).setCellValue(department.getColleagueFullName());
@@ -139,8 +143,9 @@ public class DepartmentServiceImpl implements DepartmentService {
             row.createCell(6).setCellValue(department.getManagerFullName());
             row.createCell(7).setCellValue(department.getDepartmentName());
         }
-        try (FileOutputStream fileOutputStream = new FileOutputStream("employee_data.xlsx")) {
-            workbook.write(fileOutputStream);
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
         } finally {
             workbook.close();
         }

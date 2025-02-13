@@ -4,6 +4,7 @@ import com.learning.emsmybatisliquibase.dto.AddDepartmentDto;
 import com.learning.emsmybatisliquibase.entity.Department;
 import com.learning.emsmybatisliquibase.service.DepartmentService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,9 +65,12 @@ public class DepartmentController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/download-department-report")
-    public ResponseEntity<HttpStatus> downloadDepartmentReport() throws IOException {
-        departmentService.downloadDepartmentReport();
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<byte[]> downloadDepartmentReport() throws IOException {
+        var report = departmentService.downloadDepartmentReport();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Employee_Report.xlsx");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        return new ResponseEntity<>(report, headers, HttpStatus.OK);
     }
 }
 

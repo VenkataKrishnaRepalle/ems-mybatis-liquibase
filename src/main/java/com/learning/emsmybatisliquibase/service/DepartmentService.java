@@ -18,5 +18,5 @@ public interface DepartmentService {
 
     Department getById(UUID departmentUuid);
 
-    void downloadDepartmentReport() throws IOException;
+    byte[] downloadDepartmentReport() throws IOException;
 }
