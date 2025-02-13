@@ -16,6 +16,7 @@ import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -80,10 +82,10 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
             return;
         }
 
-        var employeePeriod = saveEmployeePeriod(employeeId, period);
-
         var currentMonth = LocalDateTime.now().getMonth();
         var year = period.getStartTime().atZone(ZoneId.systemDefault()).getYear();
+
+        var employeePeriod = saveEmployeePeriod(employeeId, period, year);
         var timelines = generateTimelines(employeePeriod, currentMonth, year);
         timelines.forEach(timeline -> {
             try {
@@ -96,12 +98,21 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         });
     }
 
-    private EmployeePeriod saveEmployeePeriod(UUID employeeId, Period period) {
+    private EmployeePeriod saveEmployeePeriod(UUID employeeId, Period period, int year) {
+        PeriodStatus periodStatus;
+        int currentYear = LocalDateTime.now().getYear();
+        if (year == currentYear) {
+            periodStatus = PeriodStatus.STARTED;
+        } else if (year < currentYear) {
+            periodStatus = PeriodStatus.COMPLETED;
+        } else {
+            periodStatus = PeriodStatus.SCHEDULED;
+        }
         var employeePeriod = EmployeePeriod.builder()
                 .uuid(UUID.randomUUID())
                 .employeeUuid(employeeId)
                 .periodUuid(period.getUuid())
-                .status(period.getStatus())
+                .status(periodStatus)
                 .createdTime(Instant.now())
                 .updatedTime(Instant.now())
                 .build();
@@ -118,13 +129,13 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
     private List<ReviewTimeline> generateTimelines(EmployeePeriod employeePeriod, Month currentMonth, int year) {
         var timelines = new ArrayList<ReviewTimeline>();
+        int currentYear = LocalDateTime.now().getYear();
         for (int quarter = 1; quarter <= 4; quarter++) {
             var status = ReviewTimelineStatus.SCHEDULED;
-
-            if (quarter == currentMonth.getValue() / 3 + 1) {
-                status = ReviewTimelineStatus.STARTED;
-            } else if (quarter < currentMonth.getValue() / 3 + 1) {
+            if (year < currentYear || (year == currentYear && quarter < currentMonth.getValue() / 3 + 1)) {
                 status = ReviewTimelineStatus.LOCKED;
+            } else if (year == currentYear && quarter == currentMonth.getValue() / 3 + 1) {
+                status = ReviewTimelineStatus.STARTED;
             }
 
             var startTime = LocalDateTime.of(year, quarter * 3 - 2, 1, 0, 0, 0)
@@ -160,13 +171,19 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
     }
 
     @Override
-    public SuccessResponseDto updateEmployeePeriodsByPeriodId(UUID periodId, PeriodStatus status) {
-        var employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED,
-                periodId);
-        employeePeriods.forEach(employeePeriod ->
-                updateEmployeePeriodStatus(employeePeriod.getUuid(), status));
+    @Async
+    public void updateEmployeePeriodsByPeriodId(UUID periodId, PeriodStatus status) {
+        List<EmployeePeriod> employeePeriods = employeePeriodDao.getByStatusAndPeriodId(PeriodStatus.STARTED, periodId);
 
-        return successResponse();
+        List<CompletableFuture<Void>> futures = employeePeriods.stream()
+                .map(employeePeriod -> CompletableFuture.runAsync(() ->
+                        updateEmployeePeriodStatus(employeePeriod.getUuid(), status)))
+                .toList();
+
+        // Wait for all tasks to complete before returning the response
+        CompletableFuture<Void> allTasks = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+        allTasks.thenApply(v -> successResponse());
     }
 
 

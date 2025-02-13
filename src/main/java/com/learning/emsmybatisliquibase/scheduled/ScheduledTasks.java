@@ -73,8 +73,13 @@ public class ScheduledTasks {
         periodService.createPeriod(year);
     }
 
+    @Scheduled(cron = "0 14 19 13 2 *")
+    public void stopOldPeriod() {
+        var oldPeriod = periodDao.getByStatus(PeriodStatus.STARTED);
+        periodService.updateStatus(oldPeriod.getUuid(), PeriodStatus.COMPLETED);
+    }
     @Scheduled(cron = "0 0 0 1 1 *")
-    public void startPeriod() {
+    public void startPeriod1() {
         var oldPeriod = periodDao.getByStatus(PeriodStatus.STARTED);
         oldPeriod.setStatus(PeriodStatus.INACTIVE);
         oldPeriod.setUpdatedTime(Instant.now());

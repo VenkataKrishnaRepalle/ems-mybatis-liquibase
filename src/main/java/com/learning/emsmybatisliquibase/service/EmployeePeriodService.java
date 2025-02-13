@@ -15,7 +15,7 @@ public interface EmployeePeriodService {
 
     SuccessResponseDto updateEmployeePeriodStatus(UUID employeePeriodId, PeriodStatus status);
 
-    SuccessResponseDto updateEmployeePeriodsByPeriodId(UUID periodId, PeriodStatus status);
+    void updateEmployeePeriodsByPeriodId(UUID periodId, PeriodStatus status);
 
     FullEmployeePeriodDto getEmployeePeriodById(UUID employeePeriodId);
 

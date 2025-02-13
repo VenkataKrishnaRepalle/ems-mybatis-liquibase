@@ -64,8 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new FoundException(EMPLOYEE_ALREADY_EXISTS.code(), "Employee with given email already exists");
         }
 
-        var isManager = employeeDto.getIsManager().trim()
-                .equalsIgnoreCase("T".trim()) ? Boolean.TRUE : Boolean.FALSE;
+        boolean isManager = "T".equalsIgnoreCase(employeeDto.getIsManager());
         var employee = employeeMapper.addEmployeeDtoToEmployee(employeeDto);
         employee.setUuid(UUID.randomUUID());
         employee.setIsManager(isManager);
