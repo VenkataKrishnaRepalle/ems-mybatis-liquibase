@@ -18,4 +18,6 @@ public interface PeriodDao {
     int insert(@Param("period") Period period);
 
     int update(@Param("period") Period period);
+
+    Period getByYear(@Param("year") long year);
 }

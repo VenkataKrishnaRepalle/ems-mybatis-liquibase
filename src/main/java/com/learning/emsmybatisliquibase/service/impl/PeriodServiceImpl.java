@@ -51,11 +51,11 @@ public class PeriodServiceImpl implements PeriodService {
 
         var periods = periodDao.getAll();
         for (var period : periods) {
-            if (period.getStatus().equals(PeriodStatus.SCHEDULED)
+            if ((period.getStatus().equals(PeriodStatus.SCHEDULED) || period.getStatus().equals(PeriodStatus.STARTED))
                     && period.getStartTime().atZone(ZoneId.systemDefault()).getYear() == year
                     && period.getEndTime().atZone(ZoneId.systemDefault()).getYear() == year) {
                 throw new FoundException(PERIOD_ALREADY_EXISTS.code(),
-                        "Period already created with scheduled Status " + period.getUuid());
+                        "Period already created with " + period.getStatus().toString() + " Status : " + period.getUuid());
             } else if (period.getStatus().equals(PeriodStatus.COMPLETED)
                     && period.getStartTime().atZone(ZoneId.systemDefault()).getYear() == year
                     && period.getEndTime().atZone(ZoneId.systemDefault()).getYear() == year) {

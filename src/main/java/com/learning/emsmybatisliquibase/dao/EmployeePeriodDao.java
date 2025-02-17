@@ -15,7 +15,7 @@ public interface EmployeePeriodDao {
 
     int update(@Param("employeePeriod") EmployeePeriod employeePeriod);
 
-    List<EmployeePeriod> getByEmployeeIdAndPeriodId(@Param("employeeUuid") UUID employeeUuid, @Param("periodUuid") UUID cycleUuid);
+    EmployeePeriod getByEmployeeIdAndPeriodId(@Param("employeeUuid") UUID employeeUuid, @Param("periodUuid") UUID cycleUuid);
 
     List<EmployeePeriod> getByStatusAndPeriodId(@Param("status") PeriodStatus status, @Param("periodUuid") UUID cycleUuid);
 

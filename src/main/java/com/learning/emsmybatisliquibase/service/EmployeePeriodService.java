@@ -8,6 +8,7 @@ import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface EmployeePeriodService {
@@ -19,7 +20,9 @@ public interface EmployeePeriodService {
 
     FullEmployeePeriodDto getEmployeePeriodById(UUID employeePeriodId);
 
-    List<EmployeePeriod> getByEmployeeIdAndPeriodId(UUID employeeId, UUID periodId);
+    EmployeeCycleAndTimelineResponseDto getByEmployeeIdAndPeriodId(UUID employeeId, UUID periodId);
 
     Map<String, EmployeeCycleAndTimelineResponseDto> getAll(UUID employeeId);
+
+    EmployeeCycleAndTimelineResponseDto getByYear(UUID employeeId, Optional<Long> year);
 }

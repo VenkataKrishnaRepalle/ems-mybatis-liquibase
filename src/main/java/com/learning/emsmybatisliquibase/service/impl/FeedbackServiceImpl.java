@@ -119,4 +119,12 @@ public class FeedbackServiceImpl implements FeedbackService {
         /* Save Feedback*/
         return send(feedback);
     }
+
+    @Override
+    public List<FeedbackResponseDto> getAll(UUID employeeUuid) {
+        var feedbacks = feedbackDao.getAll(employeeUuid);
+        return feedbacks.stream()
+                .map(this::toFeedbackResponse)
+                .toList();
+    }
 }

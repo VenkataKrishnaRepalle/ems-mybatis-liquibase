@@ -16,19 +16,29 @@
     </resultMap>
 
     <select id="getById" resultMap="periodStructure">
-        select * from period where uuid = #{uuid}
+        SELECT *
+        FROM period
+        WHERE uuid = #{uuid}
     </select>
 
     <select id="getByStatus" resultMap="periodStructure">
-        select *
-        from period
-        where status = #{status}
+        SELECT *
+        FROM period
+        WHERE status = #{status}
     </select>
 
     <select id="getAll" resultMap="periodStructure">
-        select *
-        from period
+        SELECT *
+        FROM period
     </select>
+
+    <select id="getByYear" resultMap="periodStructure">
+        SELECT *
+        FROM period
+        WHERE EXTRACT(YEAR FROM start_time) = #{year}
+          AND EXTRACT(YEAR FROM end_time) = #{year}
+    </select>
+
 
     <insert id="insert" flushCache="true">
         INSERT INTO period (uuid, name, description, start_time, end_time, status, created_by, created_time,

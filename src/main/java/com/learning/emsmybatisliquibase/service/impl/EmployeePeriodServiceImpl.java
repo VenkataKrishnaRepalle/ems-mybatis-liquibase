@@ -6,7 +6,11 @@ import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
+import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
+import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.entity.Period;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
@@ -23,14 +27,21 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.PeriodErrorCodes.PERIOD_NOT_EXISTS;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_PERIOD_NOT_CREATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeePeriodErrorCodes.EMPLOYEE_PERIOD_NOT_UPDATED;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.*;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_ASSIGNED;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -48,19 +59,6 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
 
     private final EmployeePeriodMapper employeePeriodMapper;
 
-
-    @Override
-    @Transactional
-    public SuccessResponseDto periodAssignment(List<UUID> employeeIds) {
-        var period = getCurrentActivePeriod();
-
-        for (var employeeId : employeeIds) {
-            handleEmployeePeriodAssignment(employeeId, period);
-        }
-
-        return successResponse();
-    }
-
     private Period getCurrentActivePeriod() {
         var period = periodDao.getByStatus(PeriodStatus.STARTED);
 
@@ -71,14 +69,25 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         return period;
     }
 
+    @Override
+    @Transactional
+    public SuccessResponseDto periodAssignment(List<UUID> employeeIds) {
+        var period = getCurrentActivePeriod();
+        if (employeeIds.isEmpty()) {
+            throw new NotFoundException("INPUT_REQUIRED", "Provide uuids input for assignment");
+        }
+        for (var employeeId : employeeIds) {
+            handleEmployeePeriodAssignment(employeeId, period);
+        }
+
+        return successResponse();
+    }
+
     private void handleEmployeePeriodAssignment(UUID employeeId, Period period) {
         System.out.println("Assign Employee Period");
-        var employeePeriods = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, period.getUuid());
-        if (!employeePeriods.isEmpty()) {
-            employeePeriods.stream()
-                    .sorted(Comparator.comparing(EmployeePeriod::getCreatedTime))
-                    .forEach(employeePeriod ->
-                            updateEmployeePeriodStatus(employeePeriod.getUuid(), PeriodStatus.STARTED));
+        var isEmployeePeriodExists = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, period.getUuid());
+        if (isEmployeePeriodExists != null) {
+            updateEmployeePeriodStatus(isEmployeePeriodExists.getUuid(), PeriodStatus.STARTED);
             return;
         }
 
@@ -128,7 +137,7 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
     }
 
     private List<ReviewTimeline> generateTimelines(EmployeePeriod employeePeriod, Month currentMonth, int year) {
-        var timelines = new ArrayList<ReviewTimeline>();
+        List<ReviewTimeline> timelines = new ArrayList<>();
         int currentYear = LocalDateTime.now().getYear();
         for (int quarter = 1; quarter <= 4; quarter++) {
             var status = ReviewTimelineStatus.SCHEDULED;
@@ -203,15 +212,18 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         }
 
         var timelines = reviewTimelineDao.getByEmployeePeriodId(employeePeriodId);
-        ReviewTimelineStatus reviewTimelineStatus;
-        switch (status) {
-            case STARTED -> reviewTimelineStatus = ReviewTimelineStatus.STARTED;
-            case COMPLETED -> reviewTimelineStatus = ReviewTimelineStatus.COMPLETED;
-            case INACTIVE -> reviewTimelineStatus = ReviewTimelineStatus.LOCKED;
-            default -> reviewTimelineStatus = ReviewTimelineStatus.NOT_STARTED;
-        }
         timelines.forEach(timeline -> {
-            timeline.setStatus(reviewTimelineStatus);
+            if (timeline.getStartTime().isAfter(Instant.now())) {
+                timeline.setStatus(ReviewTimelineStatus.SCHEDULED);
+            } else if (timeline.getStartTime().isBefore(Instant.now()) && timeline.getOverdueTime().isAfter(Instant.now())) {
+                timeline.setStatus(ReviewTimelineStatus.STARTED);
+            } else if (timeline.getOverdueTime().isBefore(Instant.now()) && timeline.getLockTime().isAfter(Instant.now())) {
+                timeline.setStatus(ReviewTimelineStatus.OVERDUE);
+            } else if (timeline.getLockTime().isBefore(Instant.now()) && timeline.getEndTime().isAfter(Instant.now())) {
+                timeline.setStatus(ReviewTimelineStatus.LOCKED);
+            } else {
+                timeline.setStatus(ReviewTimelineStatus.COMPLETED);
+            }
             timeline.setUpdatedTime(Instant.now());
             try {
                 if (0 == reviewTimelineDao.update(timeline)) {
@@ -238,15 +250,15 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
     }
 
     @Override
-    public List<EmployeePeriod> getByEmployeeIdAndPeriodId(UUID employeeId, UUID periodId) {
-        var employeePeriods = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId,
+    public EmployeeCycleAndTimelineResponseDto getByEmployeeIdAndPeriodId(UUID employeeId, UUID periodId) {
+        var period = getPeriod(periodId);
+        var employeePeriod = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId,
                 periodId);
+        if (employeePeriod == null) {
+            throw new NotFoundException("EMPLOYEE_PERIOD_NOT_FOUND", "Employee period not found for employee");
+        }
 
-        var latestEmployeePeriod = employeePeriods.stream()
-                .filter(employeePeriod -> employeePeriod.getUpdatedTime() != null)
-                .max(Comparator.comparing(EmployeePeriod::getUpdatedTime));
-
-        return latestEmployeePeriod.map(List::of).orElseGet(List::of);
+        return toEmployeeCycleAndTimelineResponseDtoMap(employeeId, employeePeriod, period);
     }
 
     @Override
@@ -260,19 +272,36 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
                 .toList();
         Map<String, EmployeeCycleAndTimelineResponseDto> responseDtoMap = new HashMap<>();
         for (var employeePeriod : employeePeriods) {
-            var period = periodDao.getById(employeePeriod.getPeriodUuid());
-            var employeeCycleAndTimelineResponseDto = EmployeeCycleAndTimelineResponseDto.builder()
-                    .employeeId(employeeId)
-                    .employeeCycleId(employeePeriod.getUuid())
-                    .period(periodDao.getById(employeePeriod.getPeriodUuid()))
-                    .Q1(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q1))
-                    .Q2(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q2))
-                    .Q3(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q3))
-                    .Q4(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q4))
-                    .build();
+            var period = getPeriod(employeePeriod.getPeriodUuid());
+            var employeeCycleAndTimelineResponseDto =
+                    toEmployeeCycleAndTimelineResponseDtoMap(employeeId, employeePeriod, period);
             responseDtoMap.put(period.getName(), employeeCycleAndTimelineResponseDto);
         }
         return responseDtoMap;
+    }
+
+    private EmployeeCycleAndTimelineResponseDto toEmployeeCycleAndTimelineResponseDtoMap(UUID employeeId, EmployeePeriod employeePeriod, Period period) {
+        return EmployeeCycleAndTimelineResponseDto.builder()
+                .employeeId(employeeId)
+                .employeeCycleId(employeePeriod.getUuid())
+                .period(period)
+                .Q1(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q1))
+                .Q2(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q2))
+                .Q3(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q3))
+                .Q4(reviewTimelineService.getByEmployeePeriodIdAndReviewType(employeePeriod.getUuid(), ReviewType.Q4))
+                .build();
+    }
+
+    @Override
+    public EmployeeCycleAndTimelineResponseDto getByYear(UUID employeeId, Optional<Long> optionalYear) {
+        var year = optionalYear.isEmpty() ? LocalDateTime.now().getYear() : optionalYear.get();
+        var period = getPeriodByYear(year);
+        var employeePeriod = employeePeriodDao.getByEmployeeIdAndPeriodId(employeeId, period.getUuid());
+        if (employeePeriod == null) {
+            throw new NotFoundException("EMPLOYEE_PERIOD_NOT_FOUND", "Employee period not found for employee: " + employeeId);
+        }
+
+        return toEmployeeCycleAndTimelineResponseDtoMap(employeeId, employeePeriod, period);
     }
 
 
@@ -289,5 +318,21 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
                 .success(Boolean.TRUE)
                 .data(String.valueOf(UUID.randomUUID()))
                 .build();
+    }
+
+    private Period getPeriod(UUID periodId) {
+        var period = periodDao.getById(periodId);
+        if (period == null) {
+            throw new NotFoundException(PERIOD_NOT_EXISTS.code(), "Period not found");
+        }
+        return period;
+    }
+
+    private Period getPeriodByYear(long year) {
+        var period = periodDao.getByYear(year);
+        if (period == null) {
+            throw new NotFoundException(PERIOD_NOT_EXISTS.code(), "Period not exists");
+        }
+        return period;
     }
 }

@@ -55,6 +55,11 @@
         FROM feedback
         WHERE uuid = #{uuid}
     </select>
+    <select id="getAll" resultMap="feedbackResult">
+        SELECT *
+        FROM feedback
+        WHERE employee_uuid = #{employeeUuid}
+    </select>
 
     <delete id="delete" flushCache="true">
         DELETE

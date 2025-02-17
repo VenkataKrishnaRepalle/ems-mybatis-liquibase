@@ -17,6 +17,8 @@ public interface FeedbackDao {
 
     List<Feedback> findReceivedFeedback(@Param("targetEmployeeUuid") UUID targetEmployeeUuid, @Param("type") FeedbackType type);
 
+    List<Feedback> getAll(@Param("employeeUuid") UUID employeeUuid);
+
     Feedback getById(@Param("uuid") UUID uuid);
 
     int delete(@Param("uuid") UUID uuid);

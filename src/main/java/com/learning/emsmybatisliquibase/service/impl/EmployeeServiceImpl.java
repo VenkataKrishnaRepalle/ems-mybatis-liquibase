@@ -174,15 +174,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (updateLeavingDate.getLeavingDate() == null && profile.getProfileStatus().equals(ProfileStatus.INACTIVE)) {
             var currentActiveCycle = periodService.getCurrentActivePeriod();
-            var employeeCycles = employeePeriodDao.getByEmployeeIdAndPeriodId(employee.getUuid(),
+            var employeeCycle = employeePeriodDao.getByEmployeeIdAndPeriodId(employee.getUuid(),
                     currentActiveCycle.getUuid());
-            if (employeeCycles == null) {
-                return;
-            } else {
-                for (var employeeCycle : employeeCycles) {
-                    employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
-                            PeriodStatus.STARTED);
-                }
+            if (employeeCycle != null) {
+                employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
+                        PeriodStatus.STARTED);
             }
             profile.setProfileStatus(ProfileStatus.ACTIVE);
         } else if (updateLeavingDate.getLeavingDate() != null &&

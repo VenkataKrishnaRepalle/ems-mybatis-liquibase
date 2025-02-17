@@ -7,18 +7,15 @@ import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
 import com.learning.emsmybatisliquibase.entity.PeriodStatus;
 import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequestMapping("api/employeePeriod")
@@ -40,6 +37,12 @@ public class EmployeePeriodController {
                 HttpStatus.ACCEPTED);
     }
 
+    @GetMapping("getByYear/{employeeId}")
+    public ResponseEntity<EmployeeCycleAndTimelineResponseDto> getByYear(@PathVariable UUID employeeId,
+                                                                         @RequestParam(name = "year", required = false) Optional<Long> year) {
+        return new ResponseEntity<>(employeePeriodService.getByYear(employeeId, year), HttpStatus.OK);
+    }
+
     @GetMapping("getById/{employeePeriodId}")
     public ResponseEntity<FullEmployeePeriodDto> getById(@PathVariable UUID employeePeriodId) {
         return new ResponseEntity<>(employeePeriodService.getEmployeePeriodById(employeePeriodId),
@@ -47,8 +50,8 @@ public class EmployeePeriodController {
     }
 
     @GetMapping("getByPeriodId/{employeeId}/cycle/{periodId}")
-    public ResponseEntity<List<EmployeePeriod>> getByPeriodId(@PathVariable UUID employeeId,
-                                                              @PathVariable UUID periodId) {
+    public ResponseEntity<EmployeeCycleAndTimelineResponseDto> getByPeriodId(@PathVariable UUID employeeId,
+                                                                             @PathVariable UUID periodId) {
         return new ResponseEntity<>(employeePeriodService.getByEmployeeIdAndPeriodId(employeeId, periodId),
                 HttpStatus.OK);
     }

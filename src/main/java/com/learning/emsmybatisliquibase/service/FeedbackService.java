@@ -20,4 +20,6 @@ public interface FeedbackService {
     void delete(UUID feedbackId);
 
     Feedback requestFeedback(RequestFeedbackDto requestFeedbackDto);
+
+    List<FeedbackResponseDto> getAll(UUID employeeUuid);
 }
