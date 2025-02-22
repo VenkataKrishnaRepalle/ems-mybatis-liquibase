@@ -25,4 +25,6 @@ public interface EmployeePeriodService {
     Map<String, EmployeeCycleAndTimelineResponseDto> getAll(UUID employeeId);
 
     EmployeeCycleAndTimelineResponseDto getByYear(UUID employeeId, Optional<Long> year);
+
+    List<Integer> getAllEligibleYears(UUID employeeId);
 }

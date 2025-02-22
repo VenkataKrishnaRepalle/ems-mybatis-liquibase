@@ -19,7 +19,7 @@ public interface EmployeePeriodDao {
 
     List<EmployeePeriod> getByStatusAndPeriodId(@Param("status") PeriodStatus status, @Param("periodUuid") UUID cycleUuid);
 
-    List<EmployeePeriod> getByEmployeeIdAndStatus(@Param("employeeUuid") UUID employeeUuid, @Param("status") PeriodStatus status);
+    List<EmployeePeriod> getByEmployeeIdAndStatus(@Param("employeeUuid") UUID employeeUuid, @Param("statuses") List<PeriodStatus> status);
 
     List<EmployeePeriod> getByEmployeeId(@Param("employeeUuid") UUID employeeUuid);
 

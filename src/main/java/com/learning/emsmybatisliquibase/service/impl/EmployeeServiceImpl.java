@@ -185,7 +185,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 updateLeavingDate.getLeavingDate().before(new Date())) {
             profile.setProfileStatus(ProfileStatus.INACTIVE);
             var empStartedCycles = employeePeriodDao.getByEmployeeIdAndStatus(employee.getUuid(),
-                    PeriodStatus.STARTED);
+                    List.of(PeriodStatus.STARTED));
             empStartedCycles.forEach(employeeCycle ->
                     employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
                             PeriodStatus.INACTIVE));
@@ -280,8 +280,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public PaginatedResponse<Employee> getAllByPagination(int page, int size, String sortBy, String sortOrder) {
         int offSet = (page - 1) * size;
-        var employees = employeeDao.findAll(size, offSet, sortBy, sortOrder);
-        var totalItems = employeeDao.employeesCount(ProfileStatus.ACTIVE);
+        var profileStatuses = List.of(ProfileStatus.ACTIVE, ProfileStatus.PENDING);
+        var employees = employeeDao.findAll(size, offSet, sortBy, sortOrder, profileStatuses);
+        var totalItems = employeeDao.employeesCount(profileStatuses);
         return PaginatedResponse.<Employee>builder()
                 .data(employees)
                 .totalItems(totalItems)

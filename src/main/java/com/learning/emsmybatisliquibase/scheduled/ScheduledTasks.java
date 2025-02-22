@@ -59,7 +59,7 @@ public class ScheduledTasks {
                 }
 
                 var employeeCycles = employeePeriodDao.getByEmployeeIdAndStatus(
-                        employee.getUuid(), PeriodStatus.STARTED);
+                        employee.getUuid(), List.of(PeriodStatus.STARTED));
                 employeeCycles.forEach(employeeCycle ->
                         employeePeriodService.updateEmployeePeriodStatus(employeeCycle.getUuid(),
                                 PeriodStatus.INACTIVE));
@@ -91,15 +91,16 @@ public class ScheduledTasks {
                         PeriodStatus.COMPLETED));
 
         var period = periodDao.getByStatus(PeriodStatus.SCHEDULED);
-
-        period.setStatus(PeriodStatus.STARTED);
-        period.setUpdatedTime(Instant.now());
-        try {
-            if (0 == periodDao.update(period)) {
-                throw new IntegrityException("PERIOD_NOT_UPDATED", "Period not updated");
+        if(period != null) {
+            period.setStatus(PeriodStatus.STARTED);
+            period.setUpdatedTime(Instant.now());
+            try {
+                if (0 == periodDao.update(period)) {
+                    throw new IntegrityException("PERIOD_NOT_UPDATED", "Period not updated");
+                }
+            } catch (DataIntegrityViolationException exception) {
+                throw new IntegrityException("PERIOD_NOT_UPDATED", exception.getCause().getMessage());
             }
-        } catch (DataIntegrityViolationException exception) {
-            throw new IntegrityException("PERIOD_NOT_UPDATED", exception.getCause().getMessage());
         }
 
         employeePeriodService.periodAssignment(employeeDao.getAllActiveEmployeeIds(

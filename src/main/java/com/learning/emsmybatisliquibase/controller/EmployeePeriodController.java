@@ -37,6 +37,11 @@ public class EmployeePeriodController {
                 HttpStatus.ACCEPTED);
     }
 
+    @GetMapping("getAllEligibleYears/{employeeId}")
+    public ResponseEntity<List<Integer>> getAllEligibleYears(@PathVariable UUID employeeId) {
+        return new ResponseEntity<>(employeePeriodService.getAllEligibleYears(employeeId), HttpStatus.OK);
+    }
+
     @GetMapping("getByYear/{employeeId}")
     public ResponseEntity<EmployeeCycleAndTimelineResponseDto> getByYear(@PathVariable UUID employeeId,
                                                                          @RequestParam(name = "year", required = false) Optional<Long> year) {

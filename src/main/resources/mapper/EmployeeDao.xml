@@ -141,18 +141,41 @@
     <select id="findAll" resultMap="employeeResult">
         select e.*
         from employee e
-                 join profile p on e.uuid = p.employee_uuid
-        where p.profile_status = 'ACTIVE'
-        ORDER BY ${sortBy} ${sortOrder}
-        LIMIT #{size} OFFSET #{offSet}
+        join profile p on e.uuid = p.employee_uuid
+        where
+        <if test="profileStatuses != null">
+            <include refid="profileStatus"/>
+        </if>
+        <if test="size != null">
+            <include refid="pagination"/>
+        </if>
     </select>
+
+    <sql id="pagination">
+         ORDER BY
+        ${sortBy}
+        ${sortOrder}
+        LIMIT
+        #{size}
+        OFFSET
+        #{offSet}
+    </sql>
+
+    <sql id="profileStatus">
+        p.profile_status in
+        <foreach collection="profileStatuses" item="status" open="(" separator="," close=")" nullable="false">
+            #{status}
+        </foreach>
+    </sql>
 
     <select id="employeesCount" resultType="long">
         SELECT count(p.*)
         FROM employee e
-                 JOIN profile p ON e.uuid = p.employee_uuid
-        WHERE p.profile_status = #{status}
-        GROUP BY p.profile_status
+        JOIN profile p ON e.uuid = p.employee_uuid
+        WHERE
+        <if test="profileStatuses != null">
+            <include refid="profileStatus"></include>
+        </if>
     </select>
     <resultMap id="employeeDetailsMap" type="com.learning.emsmybatisliquibase.dto.EmployeeDetailsDto">
         <id property="uuid" column="uuid" jdbcType="VARCHAR" javaType="java.util.UUID"

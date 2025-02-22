@@ -35,12 +35,7 @@ import java.time.ZoneId;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -302,6 +297,21 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         }
 
         return toEmployeeCycleAndTimelineResponseDtoMap(employeeId, employeePeriod, period);
+    }
+
+    @Override
+    public List<Integer> getAllEligibleYears(UUID employeeId) {
+        var employeePeriods = employeePeriodDao.getByEmployeeIdAndStatus(employeeId, List.of(PeriodStatus.STARTED, PeriodStatus.COMPLETED));
+
+        return employeePeriods.stream()
+                .map(EmployeePeriod::getPeriodUuid)
+                .distinct()
+                .map(periodDao::getById)
+                .filter(Objects::nonNull)
+                .map(Period::getName)
+                .map(Integer::parseInt)
+                .sorted(Collections.reverseOrder())
+                .toList();
     }
 
 

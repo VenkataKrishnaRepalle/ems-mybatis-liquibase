@@ -52,7 +52,10 @@
         select *
         from employee_period
         where employee_uuid = #{employeeUuid}
-          and status = #{status}
+        and status in
+        <foreach collection="statuses" open="(" separator="," close=")" item="status">
+            #{status}
+        </foreach>
     </select>
 
     <select id="getByEmployeeId" resultMap="employeePeriodStructure">

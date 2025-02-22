@@ -35,9 +35,10 @@ public interface EmployeeDao {
     EmployeeResponseDto getMe(@Param("employeeUuid") UUID employeeUuid);
 
     List<Employee> findAll(@Param("size") int size, @Param("offSet") int offSet,
-                           @Param("sortBy") String sortBy, @Param("sortOrder") String sortOrder);
+                           @Param("sortBy") String sortBy, @Param("sortOrder") String sortOrder,
+                           @Param("profileStatuses") List<ProfileStatus> statuses);
 
-    Long employeesCount(@Param("status") ProfileStatus status);
+    Long employeesCount(@Param("profileStatuses") List<ProfileStatus> statuses);
 
     List<EmployeeDetailsDto> getAllActiveManagers();
 }
