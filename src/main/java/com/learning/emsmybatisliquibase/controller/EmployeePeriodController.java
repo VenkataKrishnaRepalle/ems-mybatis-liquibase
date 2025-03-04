@@ -3,16 +3,13 @@ package com.learning.emsmybatisliquibase.controller;
 import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
 import com.learning.emsmybatisliquibase.entity.PeriodStatus;
 import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

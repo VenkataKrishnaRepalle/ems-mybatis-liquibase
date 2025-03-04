@@ -28,12 +28,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.DepartmentErrorCodes.PROFILE_NOT_UPDATED;
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
@@ -52,6 +54,8 @@ public class FilesServiceImpl implements FilesService {
 
     private final ProfileDao profileDao;
 
+    private final ReentrantLock lock = new ReentrantLock();
+
     private static final String ACTION = "action";
 
     private static final String ADD = "add";
@@ -61,7 +65,6 @@ public class FilesServiceImpl implements FilesService {
     private static final String PARSE_DATE = "dd/MM/yyyy";
 
     @Override
-    @Transactional
     public SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, MessagingException {
         var rowDatas = fileProcess(file, FileType.COLLEAGUE_ONBOARD);
         List<UUID> employeeUuids = new ArrayList<>();
@@ -88,7 +91,12 @@ public class FilesServiceImpl implements FilesService {
                     .password(rowData.get(12))
                     .confirmPassword(rowData.get(13))
                     .build();
-            employeeUuids.add(employeeService.add(employee).getUuid());
+            lock.lock();
+            try {
+                employeeUuids.add(employeeService.add(employee).getUuid());
+            } finally {
+                lock.unlock();
+            }
         }
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
