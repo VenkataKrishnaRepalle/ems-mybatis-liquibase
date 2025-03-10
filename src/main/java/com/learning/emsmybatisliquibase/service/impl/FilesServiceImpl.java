@@ -18,6 +18,8 @@ import com.learning.emsmybatisliquibase.service.FilesService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -28,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -65,6 +66,7 @@ public class FilesServiceImpl implements FilesService {
     private static final String PARSE_DATE = "dd/MM/yyyy";
 
     @Override
+    @Transactional
     public SuccessResponseDto colleagueOnboard(MultipartFile file) throws IOException, MessagingException {
         var rowDatas = fileProcess(file, FileType.COLLEAGUE_ONBOARD);
         List<UUID> employeeUuids = new ArrayList<>();
@@ -255,8 +257,11 @@ public class FilesServiceImpl implements FilesService {
             List<List<String>> rowValues = new ArrayList<>();
 
             var headerRow = sheet.getRow(0);
-            List<String> columnHeadings = new ArrayList<>();
+            if (headerRow == null || headerRow.getLastCellNum() == 0) {
+                throw new InvalidInputException(INVALID_COLUMN_HEADINGS.code(), "Header row is missing or empty");
+            }
 
+            List<String> columnHeadings = new ArrayList<>();
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 var cell = headerRow.getCell(i);
                 if (cell == null) {
@@ -268,24 +273,39 @@ public class FilesServiceImpl implements FilesService {
 
             validateColumnHeadings(columnHeadings, fileType);
 
-            var rows = sheet.rowIterator();
-            if (rows.hasNext()) {
-                rows.next();
-            }
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) { // Start from index 1 to skip header
+                XSSFRow row = sheet.getRow(i);
+                if (isRowEmpty(row)) continue; // Skip empty rows
 
-            while (rows.hasNext()) {
                 List<String> rowValue = new ArrayList<>();
-                var row = (XSSFRow) rows.next();
-
-                for (int i = 0; i < row.getLastCellNum(); i++) {
-                    var cell = row.getCell(i);
-                    var value = cell == null ? "" : cell.toString();
-                    rowValue.add(value);
+                for (int j = 0; j < row.getLastCellNum(); j++) {
+                    rowValue.add(getCellValue(row.getCell(j)));
                 }
                 rowValues.add(rowValue);
             }
             return rowValues;
         }
+    }
+
+    private boolean isRowEmpty(XSSFRow row) {
+        if (row == null) return true;
+        for (int i = 0; i < row.getLastCellNum(); i++) {
+            if (row.getCell(i) != null && row.getCell(i).getCellType() != CellType.BLANK) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String getCellValue(Cell cell) {
+        if (cell == null) return "";
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cell.getCellFormula();
+            default -> "";
+        };
     }
 
     private void validateColumnHeadings(List<String> columnHeadings, FileType fileType) {

@@ -136,7 +136,9 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
         int currentYear = LocalDateTime.now().getYear();
         for (int quarter = 1; quarter <= 4; quarter++) {
             var status = ReviewTimelineStatus.SCHEDULED;
-            if (year < currentYear || (year == currentYear && quarter < currentMonth.getValue() / 3 + 1)) {
+            if (year < currentYear) {
+                status = ReviewTimelineStatus.COMPLETED;
+            } else if (year == currentYear && quarter < currentMonth.getValue() / 3 + 1) {
                 status = ReviewTimelineStatus.LOCKED;
             } else if (year == currentYear && quarter == currentMonth.getValue() / 3 + 1) {
                 status = ReviewTimelineStatus.STARTED;
