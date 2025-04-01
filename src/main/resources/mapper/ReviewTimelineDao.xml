@@ -12,6 +12,7 @@
         <result property="lockTime" column="lock_time"/>
         <result property="endTime" column="end_time"/>
         <result property="status" column="status"/>
+        <result property="summaryStatus" column="summary_status"/>
         <result property="createdTime" column="created_time"/>
         <result property="updatedTime" column="updated_time"/>
     </resultMap>
@@ -23,23 +24,27 @@
     </select>
 
     <insert id="insert" flushCache="true">
-        INSERT INTO review_timeline (uuid, employee_period_uuid, type, start_time, overdue_time, lock_time, end_time, status,
-                              created_time, updated_time)
-        VALUES (#{reviewTimeline.uuid}, #{reviewTimeline.employeePeriodUuid}, #{reviewTimeline.type}, #{reviewTimeline.startTime},
-                #{reviewTimeline.overdueTime}, #{reviewTimeline.lockTime}, #{reviewTimeline.endTime}, #{reviewTimeline.status},
+        INSERT INTO review_timeline (uuid, employee_period_uuid, type, start_time, overdue_time, lock_time, end_time,
+                                     status, summary_status,
+                                     created_time, updated_time)
+        VALUES (#{reviewTimeline.uuid}, #{reviewTimeline.employeePeriodUuid}, #{reviewTimeline.type},
+                #{reviewTimeline.startTime},
+                #{reviewTimeline.overdueTime}, #{reviewTimeline.lockTime}, #{reviewTimeline.endTime},
+                #{reviewTimeline.status}, #{reviewTimeline.summaryStatus},
                 current_timestamp, current_timestamp)
     </insert>
 
     <update id="update" flushCache="true">
         UPDATE review_timeline
         SET employee_period_uuid = #{reviewTimeline.employeePeriodUuid},
-            type                = #{reviewTimeline.type},
-            start_time          = #{reviewTimeline.startTime},
-            overdue_time        = #{reviewTimeline.overdueTime},
-            lock_time           = #{reviewTimeline.lockTime},
-            end_time            = #{reviewTimeline.endTime},
-            status              = #{reviewTimeline.status},
-            updated_time        = current_timestamp
+            type                 = #{reviewTimeline.type},
+            start_time           = #{reviewTimeline.startTime},
+            overdue_time         = #{reviewTimeline.overdueTime},
+            lock_time            = #{reviewTimeline.lockTime},
+            end_time             = #{reviewTimeline.endTime},
+            status               = #{reviewTimeline.status},
+            summary_status       = #{reviewTimeline.summaryStatus},
+            updated_time         = current_timestamp
         where uuid = #{reviewTimeline.uuid}
     </update>
 

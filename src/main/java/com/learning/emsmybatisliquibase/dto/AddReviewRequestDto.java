@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
+import com.learning.emsmybatisliquibase.entity.ReviewStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,6 +24,9 @@ public class AddReviewRequestDto {
 
     @Enumerated(EnumType.STRING)
     private ReviewType type;
+
+    @Enumerated(EnumType.STRING)
+    private ReviewStatus status;
 
     private String whatWentWell;
 

@@ -6,12 +6,7 @@ import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
-import com.learning.emsmybatisliquibase.entity.EmployeePeriod;
-import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
-import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
-import com.learning.emsmybatisliquibase.entity.Period;
+import com.learning.emsmybatisliquibase.entity.*;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeePeriodMapper;
@@ -134,16 +129,18 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
     private List<ReviewTimeline> generateTimelines(EmployeePeriod employeePeriod, Month currentMonth, int year) {
         List<ReviewTimeline> timelines = new ArrayList<>();
         int currentYear = LocalDateTime.now().getYear();
+        int currentQuarter = (currentMonth.getValue() - 1) / 3 + 1;
         for (int quarter = 1; quarter <= 4; quarter++) {
-            var status = ReviewTimelineStatus.SCHEDULED;
+            ReviewTimelineStatus status;
             if (year < currentYear) {
                 status = ReviewTimelineStatus.COMPLETED;
-            } else if (year == currentYear && quarter < currentMonth.getValue() / 3 + 1) {
+            } else if (year > currentYear || quarter > currentQuarter) {
+                status = ReviewTimelineStatus.SCHEDULED;
+            } else if (quarter < currentQuarter) {
                 status = ReviewTimelineStatus.LOCKED;
-            } else if (year == currentYear && quarter == currentMonth.getValue() / 3 + 1) {
+            } else {
                 status = ReviewTimelineStatus.STARTED;
             }
-
             var startTime = LocalDateTime.of(year, quarter * 3 - 2, 1, 0, 0, 0)
                     .atZone(ZoneId.systemDefault())
                     .toInstant();
@@ -163,6 +160,7 @@ public class EmployeePeriodServiceImpl implements EmployeePeriodService {
                     .employeePeriodUuid(employeePeriod.getUuid())
                     .type(ReviewType.valueOf("Q" + quarter))
                     .status(status)
+                    .summaryStatus(ReviewStatus.NOT_SUBMITTED)
                     .startTime(startTime)
                     .overdueTime(overdueTime)
                     .lockTime(lockTime)

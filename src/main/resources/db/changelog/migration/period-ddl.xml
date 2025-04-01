@@ -111,6 +111,9 @@
             <column name="status" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
+            <column name="summary_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_time" type="timestamptz">
                 <constraints nullable="false"/>
             </column>
@@ -140,6 +143,16 @@
                                                     status = 'OVERDUE' or
                                                     status = 'LOCKED' or
                                                     status = 'COMPLETED')
+        </sql>
+
+        <sql>
+            ALTER TABLE review_timeline
+                ADD CONSTRAINT summary_status_check CHECK ( summary_status = 'DRAFT' or
+                                                            summary_status = 'WAITING_FOR_APPROVAL' or
+                                                            summary_status = 'DECLINED' or
+                                                            summary_status = 'APPROVED' or
+                                                            summary_status = 'NOT_SUBMITTED' or
+                                                            summary_status = 'COMPLETED')
         </sql>
     </changeSet>
 
@@ -213,7 +226,7 @@
                                                     status = 'WAITING_FOR_APPROVAL' or
                                                     status = 'DECLINED' or
                                                     status = 'APPROVED' or
-                                                    status = 'REQUESTED_TO_AMEND' or
+                                                    status = 'NOT_SUBMITTED' or
                                                     status = 'COMPLETED')
         </sql>
     </changeSet>

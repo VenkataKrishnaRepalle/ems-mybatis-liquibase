@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -32,19 +33,23 @@ public class EmployeeResponseDto {
 
     private String email;
 
+    private String department;
+
     private UUID managerUuid;
 
     private String managerFirstName;
 
     private String managerLastName;
 
+    private ProfileStatus managerAccountStatus;
+
     private Boolean isManager;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date joiningDate;
+    private LocalDate joiningDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date leavingDate;
+    private LocalDate leavingDate;
 
     private ProfileStatus status;
 }

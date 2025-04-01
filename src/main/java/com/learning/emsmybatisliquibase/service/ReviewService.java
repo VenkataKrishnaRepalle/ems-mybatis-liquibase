@@ -1,13 +1,11 @@
 package com.learning.emsmybatisliquibase.service;
 
-
-import com.learning.emsmybatisliquibase.dto.AddReviewRequestDto;
 import com.learning.emsmybatisliquibase.entity.Review;
 
 import java.util.UUID;
 
 public interface ReviewService {
-    Review add(UUID employeeUuid, AddReviewRequestDto employeeReviewDto);
+    Review add(UUID employeeUuid, Review reviewDto);
 
     Review update(UUID employeeUuid, UUID reviewUuid, Review review);
 

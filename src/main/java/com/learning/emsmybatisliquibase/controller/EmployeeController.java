@@ -97,4 +97,9 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllActiveManagers());
     }
 
+    @GetMapping("/getByNameOrEmail")
+    public ResponseEntity<List<EmployeeDetailsDto>> getByNameOrEmail(@RequestParam(name = "name") String name) {
+        return ResponseEntity.ok(employeeService.getByNameOrEmail(name));
+    }
+
 }

@@ -7,6 +7,7 @@ import jakarta.mail.MessagingException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface EmployeeService {
@@ -36,4 +37,6 @@ public interface EmployeeService {
     PaginatedResponse<Employee> getAllByPagination(int page, int size, String sortBy, String sortOrder);
 
     List<EmployeeDetailsDto> getAllActiveManagers();
+
+    List<EmployeeDetailsDto> getByNameOrEmail(String name);
 }

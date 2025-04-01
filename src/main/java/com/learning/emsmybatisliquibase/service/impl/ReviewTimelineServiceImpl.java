@@ -1,9 +1,11 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeePeriodDao;
+import com.learning.emsmybatisliquibase.dao.ReviewDao;
 import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.dto.TimelineAndReviewResponseDto;
 import com.learning.emsmybatisliquibase.entity.PeriodStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
@@ -11,6 +13,7 @@ import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeePeriodMapper;
+import com.learning.emsmybatisliquibase.mapper.ReviewTimelineMapper;
 import com.learning.emsmybatisliquibase.service.NotificationService;
 import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +38,11 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
 
     private final EmployeePeriodMapper employeePeriodMapper;
 
+    private final ReviewTimelineMapper reviewTimelineMapper;
+
     private final NotificationService notificationService;
+
+    private final ReviewDao reviewDao;
 
     public ReviewTimeline getById(UUID uuid) {
         var timeline = reviewTimelineDao.getById(uuid);
@@ -100,6 +107,16 @@ public class ReviewTimelineServiceImpl implements ReviewTimelineService {
                 .data(UUID.randomUUID().toString())
                 .success(Boolean.TRUE)
                 .build();
+    }
+
+    @Override
+    public TimelineAndReviewResponseDto getByEmployeePeriodAndReviewType(UUID employeePeriodUuid, ReviewType reviewType) {
+        var timeline = getByEmployeePeriodIdAndReviewType(employeePeriodUuid, reviewType);
+        var review = reviewDao.getByTimelineId(timeline.getUuid());
+
+        var response = reviewTimelineMapper.timelineToTimelineAndReviewResponseDto(timeline);
+        response.setReview(review);
+        return response;
     }
 
     @Override

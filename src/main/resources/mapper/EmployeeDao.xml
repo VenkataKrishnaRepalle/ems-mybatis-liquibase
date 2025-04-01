@@ -106,10 +106,12 @@
         <result property="dateOfBirth" column="date_of_birth"/>
         <result property="phoneNumber" column="phone_number"/>
         <result property="email" column="email"/>
+        <result property="department" column="department_name"/>
         <result property="managerUuid" column="manager_uuid" javaType="java.util.UUID" jdbcType="VARCHAR"
                 typeHandler="com.learning.emsmybatisliquibase.handler.UuidTypeHandler"/>
         <result property="managerFirstName" column="manager_first_name"/>
         <result property="managerLastName" column="manager_last_name"/>
+        <result property="managerAccountStatus" column="manager_account_status"/>
         <result property="isManager" column="is_manager"/>
         <result property="joiningDate" column="joining_date"/>
         <result property="leavingDate" column="leaving_date"/>
@@ -117,23 +119,27 @@
     </resultMap>
 
     <select id="getMe" resultMap="employeeResponseDtoStructure">
-        select e.uuid           as "uuid",
-               e.first_name     as "first_name",
-               e.last_name      as "last_name",
-               e.gender         as "gender",
-               e.date_of_birth  as "date_of_birth",
-               e.phone_number   as "phone_number",
-               e.email          as "email",
-               m.uuid           as "manager_uuid",
-               m.first_name     as "manager_first_name",
-               m.last_name      as "manager_last_name",
-               e.is_manager     as is_manager,
-               e.joining_date   as joining_date,
-               e.leaving_date   as leaving_date,
-               p.profile_status as status
+        select e.uuid            as "uuid",
+               e.first_name      as "first_name",
+               e.last_name       as "last_name",
+               e.gender          as "gender",
+               e.date_of_birth   as "date_of_birth",
+               e.phone_number    as "phone_number",
+               e.email           as "email",
+               d.name            as "department_name",
+               m.uuid            as "manager_uuid",
+               m.first_name      as "manager_first_name",
+               m.last_name       as "manager_last_name",
+               pm.profile_status as "manager_account_status",
+               e.is_manager      as is_manager,
+               e.joining_date    as joining_date,
+               e.leaving_date    as leaving_date,
+               p.profile_status  as status
         from employee e
                  left join employee m on e.manager_uuid = m.uuid
                  left join profile p on e.uuid = p.employee_uuid
+                 left join department d on d.uuid = p.department_uuid
+                 left join profile pm on m.uuid = pm.employee_uuid
         where e.uuid = #{employeeUuid}
     </select>
 
@@ -191,6 +197,17 @@
                e.email
         FROM employee e
         WHERE e.is_manager = true
-          AND (e.leaving_date IS NULL or e.leaving_date > current_date)
+          AND (e.leaving_date IS NULL OR e.leaving_date > current_date)
+    </select>
+    <select id="getByNameOrEmail" resultMap="employeeDetailsMap">
+        SELECT e.uuid,
+               e.first_name,
+               e.last_name,
+               e.email
+        FROM employee e
+                 JOIN profile p ON e.uuid = p.employee_uuid AND profile_status in ('ACTIVE', 'PENDING')
+        WHERE e.first_name LIKE CONCAT('%', #{name}, '%')
+           OR e.last_name LIKE CONCAT('%', #{name}, '%')
+           OR e.email LIKE CONCAT('%', #{name}, '%')
     </select>
 </mapper>

@@ -1,20 +1,20 @@
-package com.learning.emsmybatisliquibase.entity;
+package com.learning.emsmybatisliquibase.dto;
 
+import com.learning.emsmybatisliquibase.entity.Review;
+import com.learning.emsmybatisliquibase.entity.ReviewStatus;
+import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
+import com.learning.emsmybatisliquibase.entity.ReviewType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ReviewTimeline implements Serializable {
-
+public class TimelineAndReviewResponseDto {
     private UUID uuid;
 
     private UUID employeePeriodUuid;
@@ -32,6 +32,8 @@ public class ReviewTimeline implements Serializable {
     private ReviewTimelineStatus status;
 
     private ReviewStatus summaryStatus;
+
+    private Review review;
 
     private Instant createdTime;
 

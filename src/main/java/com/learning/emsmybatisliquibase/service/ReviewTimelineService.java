@@ -3,6 +3,8 @@ package com.learning.emsmybatisliquibase.service;
 
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.dto.TimelineAndReviewResponseDto;
+import com.learning.emsmybatisliquibase.entity.Review;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import com.learning.emsmybatisliquibase.entity.ReviewType;
 import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
@@ -20,5 +22,7 @@ public interface ReviewTimelineService {
 
     SuccessResponseDto startTimelinesForQuarter(ReviewType completedReviewType, ReviewType startedReviewType);
 
-    ReviewTimeline getByEmployeePeriodIdAndReviewType(UUID employeeId, ReviewType reviewType);
+    ReviewTimeline getByEmployeePeriodIdAndReviewType(UUID employeePeriodUuid, ReviewType reviewType);
+
+    TimelineAndReviewResponseDto getByEmployeePeriodAndReviewType(UUID employeePeriodUuid, ReviewType reviewType);
 }

@@ -41,4 +41,6 @@ public interface EmployeeDao {
     Long employeesCount(@Param("profileStatuses") List<ProfileStatus> statuses);
 
     List<EmployeeDetailsDto> getAllActiveManagers();
+
+    List<EmployeeDetailsDto> getByNameOrEmail(@Param("name") String name);
 }

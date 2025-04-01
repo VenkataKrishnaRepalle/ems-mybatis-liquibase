@@ -1,6 +1,5 @@
 package com.learning.emsmybatisliquibase.controller;
 
-import com.learning.emsmybatisliquibase.dto.AddReviewRequestDto;
 import com.learning.emsmybatisliquibase.entity.Review;
 import com.learning.emsmybatisliquibase.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +26,8 @@ public class ReviewController {
 
     @PostMapping("/add/{employeeUuid}")
     public ResponseEntity<Review> add(@PathVariable UUID employeeUuid,
-                                      @RequestBody AddReviewRequestDto employeeReviewDto) {
-        return new ResponseEntity<>(reviewService.add(employeeUuid, employeeReviewDto),
+                                      @RequestBody Review reviewDto) {
+        return new ResponseEntity<>(reviewService.add(employeeUuid, reviewDto),
                 HttpStatus.CREATED);
     }
 

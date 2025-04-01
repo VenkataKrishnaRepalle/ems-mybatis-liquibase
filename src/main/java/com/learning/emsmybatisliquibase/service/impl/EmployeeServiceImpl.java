@@ -156,7 +156,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employee;
     }
 
-
     @Override
     public void updateLeavingDate(UUID id, UpdateLeavingDateDto updateLeavingDate) {
         var employee = getById(id);
@@ -294,6 +293,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<EmployeeDetailsDto> getAllActiveManagers() {
         return employeeDao.getAllActiveManagers();
+    }
+
+    @Override
+    public List<EmployeeDetailsDto> getByNameOrEmail(String name) {
+        return employeeDao.getByNameOrEmail(name);
     }
 
     private String generateRandomPassword() {

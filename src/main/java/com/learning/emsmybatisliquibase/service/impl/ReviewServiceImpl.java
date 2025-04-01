@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.ReviewDao;
-import com.learning.emsmybatisliquibase.dto.AddReviewRequestDto;
+import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.entity.Review;
 import com.learning.emsmybatisliquibase.entity.ReviewStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
@@ -16,12 +16,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
 
-import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.*;
-import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.*;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.REVIEW_NOT_EXISTS;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.REVIEW_NOT_DELETED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.REVIEW_NOT_CREATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.REVIEW_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.ReviewErrorCodes.REVIEW_ALREADY_EXISTS;
+
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_UPDATED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_NOT_STARTED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_COMPLETED;
+import static com.learning.emsmybatisliquibase.exception.errorcodes.TimelineErrorCodes.TIMELINE_LOCKED;
 
 @Service
 @RequiredArgsConstructor
@@ -29,22 +38,30 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewTimelineService reviewTimelineService;
 
+    private final ReviewTimelineDao reviewTimelineDao;
+
     private final ReviewDao reviewDao;
 
     private final EmployeeService employeeService;
 
     @Override
-    public Review add(UUID employeeUuid, AddReviewRequestDto employeeReviewDto) {
-        var timeline = reviewTimelineService.getById(employeeReviewDto.getTimelineUuid());
+    @Transactional
+    public Review add(UUID employeeUuid, Review reviewDto) {
+        var timeline = reviewTimelineService.getById(reviewDto.getTimelineUuid());
+        if (timeline == null) {
+            throw new NotFoundException("TIMELINE_NOT_FOUND", "Timeline not found with id: " + reviewDto.getTimelineUuid());
+        }
 
-        var reviewTimeline = reviewDao.getByTimelineId(employeeReviewDto.getTimelineUuid());
-        if (reviewTimeline != null) {
+        var isReviewExists = reviewDao.getByTimelineId(reviewDto.getTimelineUuid());
+        if (isReviewExists != null) {
             throw new FoundException(REVIEW_ALREADY_EXISTS.code(), "Review already exists");
         }
 
         validateTimeline(employeeUuid, timeline);
 
-        var review = buildReview(employeeReviewDto);
+        var review = new Review();
+        review.setUuid(UUID.randomUUID());
+        setReview(review, reviewDto, employeeUuid);
 
         try {
             if (0 == reviewDao.insert(review)) {
@@ -55,42 +72,41 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IntegrityException(REVIEW_NOT_CREATED.code(),
                     exception.getCause().getMessage());
         }
+        timeline.setSummaryStatus(review.getStatus());
+        updateTimeline(timeline);
 
         return review;
     }
 
-    private Review buildReview(AddReviewRequestDto dto) {
-        return Review.builder()
-                .uuid(UUID.randomUUID())
-                .timelineUuid(dto.getTimelineUuid())
-                .type(dto.getType())
-                .whatWentWell(dto.getWhatWentWell())
-                .whatDoneBetter(dto.getWhatDoneBetter())
-                .wayForward(dto.getWayForward())
-                .overallComments(dto.getOverallComments())
-                .status(ReviewStatus.WAITING_FOR_APPROVAL)
-                .createdTime(Instant.now())
-                .updatedTime(Instant.now())
-                .build();
+    private void updateTimeline(ReviewTimeline timeline) {
+        try {
+            if (0 == reviewTimelineDao.update(timeline)) {
+                throw new IntegrityException(TIMELINE_NOT_UPDATED.code(),
+                        "Timeline not updated for uuid: " + timeline.getUuid());
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException(TIMELINE_NOT_UPDATED.code(),
+                    exception.getCause().getMessage());
+        }
     }
 
     @Override
-    public Review update(UUID employeeUuid, UUID reviewUuid, Review review) {
-        var timeline = reviewTimelineService.getById(review.getTimelineUuid());
+    public Review update(UUID employeeUuid, UUID reviewUuid, Review reviewDto) {
+        var timeline = reviewTimelineService.getById(reviewDto.getTimelineUuid());
 
-        var reviewTimeline = reviewDao.getByTimelineId(review.getTimelineUuid());
+        var review = reviewDao.getByTimelineId(reviewDto.getTimelineUuid());
 
-        if (reviewTimeline == null) {
+        if (review == null) {
             throw new NotFoundException(REVIEW_NOT_EXISTS.code(),
                     "Review not found with Id: " + reviewUuid);
         }
 
         validateTimeline(employeeUuid, timeline);
 
-        updateReview(reviewTimeline, review, employeeUuid);
+        setReview(review, reviewDto, employeeUuid);
 
         try {
-            if (0 == reviewDao.update(reviewTimeline)) {
+            if (0 == reviewDao.update(review)) {
                 throw new IntegrityException(REVIEW_NOT_UPDATED.code(),
                         "Review not updated for Id: " + reviewUuid);
             }
@@ -98,7 +114,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IntegrityException(REVIEW_NOT_UPDATED.code(),
                     exception.getCause().getMessage());
         }
-        return reviewTimeline;
+        return review;
     }
 
     @Override
@@ -130,33 +146,35 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
-    private void updateReview(Review existingReview, Review updatedReview, UUID employeeUuid) {
+    private void setReview(Review existingReview, Review updatedReview, UUID employeeUuid) {
         var currentUser = getCurrentUser();
         var employee = employeeService.getById(employeeUuid);
 
         if (currentUser.equals(employeeUuid)) {
-            updateEmployeeReview(existingReview, updatedReview);
+            existingReview.setStatus(ReviewStatus.WAITING_FOR_APPROVAL);
+            setEmployeeReview(existingReview, updatedReview);
         } else if (currentUser.equals(employee.getManagerUuid())) {
-            updateManagerReview(existingReview, updatedReview);
+            setManagerReview(existingReview, updatedReview);
+            existingReview.setStatus(ReviewStatus.APPROVED);
         }
     }
 
-    private void updateEmployeeReview(Review existingReview, Review updatedReview) {
+    private void setEmployeeReview(Review existingReview, Review updatedReview) {
+        existingReview.setTimelineUuid(updatedReview.getTimelineUuid());
         existingReview.setWhatWentWell(updatedReview.getWhatWentWell());
         existingReview.setWhatDoneBetter(updatedReview.getWhatDoneBetter());
         existingReview.setWayForward(updatedReview.getWayForward());
         existingReview.setOverallComments(updatedReview.getOverallComments());
-        existingReview.setStatus(ReviewStatus.WAITING_FOR_APPROVAL);
         existingReview.setType(updatedReview.getType());
         existingReview.setUpdatedTime(Instant.now());
     }
 
-    private void updateManagerReview(Review existingReview, Review updatedReview) {
+    private void setManagerReview(Review existingReview, Review updatedReview) {
+        existingReview.setTimelineUuid(updatedReview.getTimelineUuid());
         existingReview.setWhatWentWell(updatedReview.getWhatWentWell());
         existingReview.setWhatDoneBetter(updatedReview.getWhatDoneBetter());
         existingReview.setWayForward(updatedReview.getWayForward());
         existingReview.setOverallComments(updatedReview.getOverallComments());
-        existingReview.setStatus(updatedReview.getStatus());
         existingReview.setType(updatedReview.getType());
         existingReview.setManagerWhatWentWell(updatedReview.getManagerWhatWentWell());
         existingReview.setManagerWhatDoneBetter(updatedReview.getManagerWhatDoneBetter());
