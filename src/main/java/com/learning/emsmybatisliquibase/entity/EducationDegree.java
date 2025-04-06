@@ -8,5 +8,4 @@ public enum EducationDegree {
     MTECH,
     BCA,
     BSC
-
 }

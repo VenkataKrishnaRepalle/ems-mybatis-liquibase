@@ -13,7 +13,6 @@ import com.learning.emsmybatisliquibase.mapper.AttendanceMapper;
 import com.learning.emsmybatisliquibase.service.AttendanceService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -107,7 +106,6 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    @Cacheable(value = "attendanceCache", key = "#employeeUuid")
     public ViewEmployeeAttendanceDto getEmployeeAttendance(UUID employeeUuid) {
         var employee = employeeService.getById(employeeUuid);
 

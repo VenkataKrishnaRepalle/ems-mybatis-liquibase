@@ -26,31 +26,31 @@ public class EducationController {
     private final EducationService educationService;
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
-    @PostMapping("/addEducation")
+    @PostMapping("/add")
     public ResponseEntity<Education> add(@RequestBody Education educationDto) {
         return new ResponseEntity<>(educationService.save(educationDto), HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
-    @PutMapping("/updateEducation/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Education> update(@RequestBody Education educationDto, @PathVariable UUID id) {
         return new ResponseEntity<>(educationService.update(educationDto, id), HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
-    @GetMapping("/getEducationDetails/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Education> get(@PathVariable UUID id) {
         return new ResponseEntity<>(educationService.getById(id), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
-    @GetMapping("/getAllEducationDetails/{employeeId}")
+    @GetMapping("/getAll/{employeeId}")
     public ResponseEntity<List<Education>> getAll(@PathVariable UUID employeeId) {
         return new ResponseEntity<>(educationService.getAll(employeeId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
-    @DeleteMapping("deleteEducationDetails/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable UUID id) {
         educationService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

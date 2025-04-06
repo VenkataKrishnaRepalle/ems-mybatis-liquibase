@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -99,7 +100,9 @@ public class EducationServiceImpl implements EducationService {
             throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(),
                     "Education details not found");
         }
-        return educations;
+        return educations.stream()
+                .sorted(Comparator.comparing(Education::getStartDate))
+                .toList();
     }
 
     @Override

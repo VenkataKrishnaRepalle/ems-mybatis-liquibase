@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("experience")
+@RequestMapping("api/experience")
 public class ExperienceController {
 
     private final ExperienceService experienceService;
