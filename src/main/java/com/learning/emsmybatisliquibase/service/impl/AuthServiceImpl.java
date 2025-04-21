@@ -15,6 +15,7 @@ import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import com.learning.emsmybatisliquibase.service.ProfileService;
 import com.learning.emsmybatisliquibase.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,13 +23,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.PASSWORD_NOT_MATCHED;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final EmployeeService employeeService;
@@ -106,6 +110,19 @@ public class AuthServiceImpl implements AuthService {
                 .data(employee == null ? null : employee.getUuid().toString())
                 .success(employee != null)
                 .build();
+    }
+
+    @Override
+    public Map<String, Boolean> validateToken(UUID employeeId, String token) {
+        if (!StringUtils.hasText(token) && !token.startsWith("Bearer ")) {
+            return Map.of("TOKEN_NOT_PROVIDED", true);
+        }
+        token = token.substring(7);
+        var isValid = jwtTokenProvider.validateToken(token);
+        if (isValid && !employeeId.toString().equals(jwtTokenProvider.getUsername(token))) {
+            isValid = false;
+        }
+        return Map.of("expired", !isValid);
     }
 
     public boolean isCurrentUser(final UUID userId) {

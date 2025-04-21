@@ -38,6 +38,8 @@ class ExperienceControllerTest {
 
     private Experience experience;
 
+    private final String EXPERIENCE_PATH = "/api/experience";
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(experienceController).build();
@@ -53,7 +55,7 @@ class ExperienceControllerTest {
     void testGetById() throws Exception {
         when(experienceService.getById(any(UUID.class))).thenReturn(experience);
 
-        mockMvc.perform(get("/experience/getById/{expeienceId}", experience.getUuid())
+        mockMvc.perform(get(EXPERIENCE_PATH + "/getById/{experienceId}", experience.getUuid())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -66,7 +68,7 @@ class ExperienceControllerTest {
         List<Experience> experiences = List.of(experience);
         when(experienceService.getAllByEmployeeUuid(any(UUID.class))).thenReturn(experiences);
 
-        mockMvc.perform(get("/experience/getAll/employee/{employeeId}", experience.getEmployeeUuid())
+        mockMvc.perform(get(EXPERIENCE_PATH + "/getAll/employee/{employeeId}", experience.getEmployeeUuid())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -79,7 +81,7 @@ class ExperienceControllerTest {
         List<Experience> experiences = List.of(experience);
         when(experienceService.add(any(UUID.class), any())).thenReturn(experiences);
 
-        mockMvc.perform(post("/experience/add/employee/{employeeId}", experience.getEmployeeUuid())
+        mockMvc.perform(post(EXPERIENCE_PATH + "/add/employee/{employeeId}", experience.getEmployeeUuid())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experiences))
                         .accept(MediaType.APPLICATION_JSON))
@@ -92,7 +94,7 @@ class ExperienceControllerTest {
         List<Experience> experiences = List.of(experience);
         when(experienceService.update(any(UUID.class), any())).thenReturn(experiences);
 
-        mockMvc.perform(put("/experience/update/employee/{employeeId}", experience.getEmployeeUuid())
+        mockMvc.perform(put(EXPERIENCE_PATH + "/update/employee/{employeeId}", experience.getEmployeeUuid())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(experiences))
                         .accept(MediaType.APPLICATION_JSON))
@@ -104,7 +106,7 @@ class ExperienceControllerTest {
     void testDelete() throws Exception {
         doNothing().when(experienceService).deleteById(any(UUID.class));
 
-        mockMvc.perform(delete("/experience/deleteById/{experienceId}", experience.getUuid()))
+        mockMvc.perform(delete(EXPERIENCE_PATH + "/deleteById/{experienceId}", experience.getUuid()))
                 .andExpect(status().isNoContent());
     }
 }

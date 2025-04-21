@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.UUID;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/auth")
@@ -18,6 +21,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginDto loginDto) {
         return new ResponseEntity<>(authService.login(loginDto), HttpStatus.OK);
+    }
+
+    @PostMapping("/validate-token")
+    public ResponseEntity<Map<String, Boolean>> validateToken(@RequestParam("employeeId") UUID employeeId,
+                                                              @RequestHeader("authorization") String token) {
+        return new ResponseEntity<>(authService.validateToken(employeeId, token), HttpStatus.OK);
     }
 
     @PostMapping("/verifyEmail")

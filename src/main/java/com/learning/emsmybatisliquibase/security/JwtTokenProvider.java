@@ -71,4 +71,16 @@ public class JwtTokenProvider {
         }
     }
 
+    public boolean validateToken(String token) {
+        try {
+            var claims = Jwts.parser()
+                    .setSigningKey(key())
+                    .build()
+                    .parse(token);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
 }
