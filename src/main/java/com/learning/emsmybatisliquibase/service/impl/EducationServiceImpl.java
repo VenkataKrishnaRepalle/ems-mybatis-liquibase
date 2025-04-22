@@ -5,6 +5,7 @@ import com.learning.emsmybatisliquibase.entity.Education;
 import com.learning.emsmybatisliquibase.entity.EducationDegree;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
+import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.service.EducationService;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
@@ -29,13 +30,14 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     public Education save(Education educationDto) {
+        validateEducation(educationDto);
         employeeService.getById(educationDto.getEmployeeUuid());
 
         var educations = educationDao.getAllByEmployeeUuid(educationDto.getEmployeeUuid());
         var degree = educationDto.getDegree();
 
-        if (educations == null) {
-            if (degree != EducationDegree.SSC_10TH) {
+        if (educations.isEmpty()) {
+            if (!degree.equals(EducationDegree.SSC_10TH)) {
                 throw new NotFoundException(EDUCATION_DETAILS_NOT_FOUND.code(),
                         "Education Details of " + EducationDegree.SSC_10TH + " not found");
             }
@@ -65,9 +67,20 @@ public class EducationServiceImpl implements EducationService {
         return educationDto;
     }
 
+    private void validateEducation(Education educationDto) {
+        if (educationDto.getStartDate().isEqual(educationDto.getEndDate())) {
+            throw new InvalidInputException(INVALID_EDUCATION_START_END_DATE.code(),
+                    "Provided input start and end time are same");
+        } else if (educationDto.getEndDate().isBefore(educationDto.getStartDate())) {
+            throw new InvalidInputException(INVALID_EDUCATION_START_END_DATE.code(),
+                    "Provided input start and end time is not valid");
+        }
+    }
+
     @Override
     public Education update(Education educationDto, UUID id) {
         getById(educationDto.getUuid());
+        validateEducation(educationDto);
         educationDto.setUpdatedTime(Instant.now());
 
         try {
