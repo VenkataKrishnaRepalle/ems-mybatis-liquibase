@@ -278,14 +278,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public PaginatedResponse<Employee> getAllByPagination(int page, int size, String sortBy, String sortOrder) {
+        page = Math.max(page, 1);
+        size = Math.max(size, 1);
         int offSet = (page - 1) * size;
         var profileStatuses = List.of(ProfileStatus.ACTIVE, ProfileStatus.PENDING);
         var employees = employeeDao.findAll(size, offSet, sortBy, sortOrder, profileStatuses);
-        var totalItems = employeeDao.employeesCount(profileStatuses);
+        var totalItems = employees.getCount();
         return PaginatedResponse.<Employee>builder()
-                .data(employees)
+                .data(employees.getEmployees())
                 .totalItems(totalItems)
-                .totalPages((int) Math.ceil((double) totalItems / size))
+                .totalPages((long) Math.ceil((double) totalItems / size))
                 .currentPage(page)
                 .build();
     }

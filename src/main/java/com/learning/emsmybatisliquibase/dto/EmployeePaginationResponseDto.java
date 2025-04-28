@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
+import com.learning.emsmybatisliquibase.entity.Employee;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,13 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PaginatedResponse<T> {
+public class EmployeePaginationResponseDto {
 
-    private List<T> data;
+    private List<Employee> employees;
 
-    private int currentPage;
-
-    private Long totalItems;
-
-    private Long totalPages;
+    private Long count;
 }

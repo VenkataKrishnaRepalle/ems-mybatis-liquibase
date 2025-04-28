@@ -1,6 +1,7 @@
 package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.dto.EmployeeDetailsDto;
+import com.learning.emsmybatisliquibase.dto.EmployeePaginationResponseDto;
 import com.learning.emsmybatisliquibase.dto.EmployeeResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import com.learning.emsmybatisliquibase.entity.ProfileStatus;
@@ -34,9 +35,9 @@ public interface EmployeeDao {
 
     EmployeeResponseDto getMe(@Param("employeeUuid") UUID employeeUuid);
 
-    List<Employee> findAll(@Param("size") int size, @Param("offSet") int offSet,
-                           @Param("sortBy") String sortBy, @Param("sortOrder") String sortOrder,
-                           @Param("profileStatuses") List<ProfileStatus> statuses);
+    EmployeePaginationResponseDto findAll(@Param("size") int size, @Param("offSet") int offSet,
+                                          @Param("sortBy") String sortBy, @Param("sortOrder") String sortOrder,
+                                          @Param("profileStatuses") List<ProfileStatus> statuses);
 
     Long employeesCount(@Param("profileStatuses") List<ProfileStatus> statuses);
 
