@@ -5,7 +5,7 @@ import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface FeedbackMapper {
     FeedbackResponseDto feedbackToFeedbackResponseDto(Feedback feedback);
 

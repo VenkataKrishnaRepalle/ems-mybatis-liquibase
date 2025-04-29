@@ -4,7 +4,7 @@ import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.Employee;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 
     Employee addEmployeeDtoToEmployee(AddEmployeeDto addEmployeeDto);
