@@ -1,0 +1,31 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+    <changeSet id="1" author="rvenkata">
+        <createTable tableName="employee_session">
+            <column name="uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_uuid" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="browser_name" type="VARCHAR"/>
+            <column name="os_name" type="VARCHAR"/>
+            <column name="platform" type="VARCHAR"/>
+            <column name="location" type="VARCHAR"/>
+            <column name="is_active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="login_timestamp" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="employee_session" baseColumnNames="employee_uuid"
+                                 constraintName="employee_fk" initiallyDeferred="false"
+                                 deferrable="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedTableName="employee" referencedColumnNames="uuid"/>
+    </changeSet>
+</databaseChangeLog>

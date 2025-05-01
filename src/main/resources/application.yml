@@ -97,6 +97,10 @@ logging:
         data:
           redis: DEBUG
 
+maximum:
+  login:
+    count: 5
+
 app:
   jwt:
     secret: 8ae2a6ebc0cd16aecb0e94e85c1eed0a1b1d8a668f65c3838b341a99197ff370

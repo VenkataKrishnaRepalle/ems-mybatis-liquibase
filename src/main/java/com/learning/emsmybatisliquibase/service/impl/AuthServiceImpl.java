@@ -1,12 +1,15 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.learning.emsmybatisliquibase.dao.EmployeeSessionDao;
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
 import com.learning.emsmybatisliquibase.dto.LoginDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.entity.PasswordStatus;
-import com.learning.emsmybatisliquibase.entity.ProfileStatus;
-import com.learning.emsmybatisliquibase.entity.RoleType;
+import com.learning.emsmybatisliquibase.dto.pagination.RequestQuery;
+import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.exception.FoundException;
+import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.security.JwtTokenProvider;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
@@ -14,8 +17,13 @@ import com.learning.emsmybatisliquibase.service.PasswordService;
 import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import com.learning.emsmybatisliquibase.service.ProfileService;
 import com.learning.emsmybatisliquibase.service.AuthService;
+import com.learning.emsmybatisliquibase.utils.UtilityService;
+import eu.bitwalker.useragentutils.UserAgent;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,9 +32,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.PASSWORD_NOT_MATCHED;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -51,10 +61,16 @@ public class AuthServiceImpl implements AuthService {
 
     private final ProfileService profileService;
 
-    @Override
-    public JwtAuthResponseDto login(LoginDto loginDto) {
-        var employee = employeeService.getByEmail(loginDto.getEmail());
+    private final EmployeeSessionDao employeeSessionDao;
 
+    private final WebClient webClient;
+
+    @Value("${maximum.login.count}")
+    Integer MAX_LOGIN_COUNT;
+
+    @Override
+    public JwtAuthResponseDto login(LoginDto loginDto, HttpServletRequest request) throws JsonProcessingException {
+        var employee = employeeService.getByEmail(loginDto.getEmail());
         var profile = profileService.getByEmployeeUuid(employee.getUuid());
         if (profile.getProfileStatus() == ProfileStatus.PENDING) {
             throw new InvalidInputException("ACCOUNT_NOT_ACTIVATED", "Account not activated, Please set new password");
@@ -67,7 +83,6 @@ public class AuthServiceImpl implements AuthService {
         if (passwords.size() != 1) {
             throw new InvalidInputException("ACCOUNT_LOCKED", "Account Locked, Please reset password");
         }
-
         var password = passwords.get(0);
 
         if (!passwordEncoder.matches(loginDto.getPassword(), password.getPassword())) {
@@ -82,6 +97,11 @@ public class AuthServiceImpl implements AuthService {
             }
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
+
+        var sessions = employeeSessionDao.getByEmployeeUuid(employee.getUuid());
+        if (sessions.size() >= MAX_LOGIN_COUNT) {
+            throw new FoundException("MAX_LOGIN_ATTEMPT_REACHED", "Max login attempts of " + MAX_LOGIN_COUNT + " reached to your account");
+        }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         String.valueOf(employee.getUuid()),
@@ -90,6 +110,8 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtTokenProvider.generateToken(authentication);
+
+        saveSession(request, employee, loginDto.getRequestQuery(), token);
         var roles = employeeRoleService.getRolesByEmployeeUuid(employee.getUuid())
                 .stream()
                 .map(RoleType::toString)
@@ -101,6 +123,34 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .roles(roles)
                 .build();
+    }
+
+    private void saveSession(HttpServletRequest request, Employee employee, RequestQuery requestQuery, String token) throws JsonProcessingException {
+        var userAgentString = request.getHeader("User-Agent");
+        var userAgent = UserAgent.parseUserAgentString(userAgentString);
+        var browser = userAgent.getBrowser();
+        var os = userAgent.getOperatingSystem();
+        var geoLocations = UtilityService.getLocationInfo(requestQuery);
+        var location = getLocation(geoLocations.get("longitude"), geoLocations.get("latitude"));
+        var platform = UtilityService.getPlatform(requestQuery);
+        EmployeeSession session = EmployeeSession.builder()
+                .uuid(UUID.randomUUID())
+                .employeeUuid(employee.getUuid())
+                .token(token)
+                .browserName(browser.getName())
+                .platform(platform)
+                .osName(os.getName())
+                .isActive(true)
+                .location(location.isEmpty() ? null : location.get("display_name"))
+                .loginTime(Instant.now())
+                .build();
+        try {
+            if (0 == employeeSessionDao.insert(session)) {
+                throw new IntegrityException("EMPLOYEE_SESSION_NOT_INSERTED", "Employee Session not created for employee : " + employee.getUuid());
+            }
+        } catch (DataIntegrityViolationException exception) {
+            throw new IntegrityException("EMPLOYEE_SESSION_NOT_INSERTED", exception.getCause().getMessage());
+        }
     }
 
     @Override
@@ -146,4 +196,19 @@ public class AuthServiceImpl implements AuthService {
         var employee = employeeService.getById(userId);
         return employee.getManagerUuid().equals(currentUserId);
     }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getLocation(String longitude, String latitude) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("")
+                        .queryParam("lat", latitude)
+                        .queryParam("lon", longitude)
+                        .queryParam("format", "json")
+                        .build())
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+    }
+
 }

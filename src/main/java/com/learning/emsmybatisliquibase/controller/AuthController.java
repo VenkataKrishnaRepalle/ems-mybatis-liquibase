@@ -1,7 +1,9 @@
 package com.learning.emsmybatisliquibase.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginDto loginDto) {
-        return new ResponseEntity<>(authService.login(loginDto), HttpStatus.OK);
+    public ResponseEntity<JwtAuthResponseDto> login(@RequestBody LoginDto loginDto,
+                                                    HttpServletRequest request) throws JsonProcessingException {
+        return new ResponseEntity<>(authService.login(loginDto, request), HttpStatus.OK);
     }
 
     @PostMapping("/validate-token")
