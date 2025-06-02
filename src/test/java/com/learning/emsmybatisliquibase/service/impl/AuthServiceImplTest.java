@@ -65,9 +65,9 @@ class AuthServiceImplTest {
                 .password(passwordEncoder.encode(password))
                 .status(PasswordStatus.ACTIVE)
                 .build());
-        when(employeeService.getByEmail(anyString())).thenReturn(employee);
-        when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
-        when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
+//        when(employeeService.getByEmail(anyString())).thenReturn(employee);
+//        when(profileService.getByEmployeeUuid(employeeUuid)).thenReturn(profile);
+//        when(passwordDao.getByEmployeeUuidAndStatus(employeeUuid, PasswordStatus.ACTIVE)).thenReturn(passwords);
         assertDoesNotThrow(() -> passwordService.update(passwords.get(0)));
 
 //        assertThrows(InvalidInputException.class, () ->
