@@ -3,6 +3,11 @@ server:
   tomcat:
     max-http-form-post-size: 2147483647
 
+api:
+  location:
+    baseUrl: https://api.opencagedata.com/geocode/v1/json
+    key: 934ec857525e46cebdd892ef0df233f7
+
 spring:
   application:
     name: ems-mybatis-liquibase
@@ -64,6 +69,7 @@ spring:
           auth: true
           starttls:
             enable: true
+
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml

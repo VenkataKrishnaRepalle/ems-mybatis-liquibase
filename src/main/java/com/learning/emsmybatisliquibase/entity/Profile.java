@@ -1,6 +1,8 @@
 package com.learning.emsmybatisliquibase.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.learning.emsmybatisliquibase.entity.enums.JobTitleType;
+import com.learning.emsmybatisliquibase.entity.enums.ProfileStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

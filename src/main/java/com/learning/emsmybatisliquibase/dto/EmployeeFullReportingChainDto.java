@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.Gender;
+import com.learning.emsmybatisliquibase.entity.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

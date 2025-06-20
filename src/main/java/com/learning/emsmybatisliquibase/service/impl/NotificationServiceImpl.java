@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.dto.NotificationDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
 import com.learning.emsmybatisliquibase.service.NotificationService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

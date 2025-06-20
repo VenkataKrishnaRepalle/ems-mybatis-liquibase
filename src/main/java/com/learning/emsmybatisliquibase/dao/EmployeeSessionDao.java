@@ -9,7 +9,12 @@ import java.util.UUID;
 public interface EmployeeSessionDao {
     int insert(@Param("session") EmployeeSession employeeSession);
 
+    EmployeeSession getById(@Param("uuid") UUID uuid);
+
     List<EmployeeSession> getByEmployeeUuid(@Param("employeeUuid") UUID employeeUuid);
+
+    List<EmployeeSession> getByEmployeeUuidAndStatus(@Param("employeeUuid") UUID employeeUuid,
+                                                     @Param("isActive") Boolean isActive);
 
     int update(@Param("session") EmployeeSession employeeSession);
 

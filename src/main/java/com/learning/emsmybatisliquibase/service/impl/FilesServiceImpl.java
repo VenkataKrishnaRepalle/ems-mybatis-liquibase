@@ -7,7 +7,7 @@ import com.learning.emsmybatisliquibase.dto.AddEmployeeDto;
 import com.learning.emsmybatisliquibase.dto.FileType;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.Gender;
+import com.learning.emsmybatisliquibase.entity.enums.Gender;
 import com.learning.emsmybatisliquibase.entity.Profile;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;

@@ -20,6 +20,10 @@ public class EmployeeSession {
 
     private String token;
 
+    private String latitude;
+
+    private String longitude;
+
     private String browserName;
 
     private String osName;

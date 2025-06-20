@@ -4,7 +4,7 @@ import com.learning.emsmybatisliquibase.dao.FeedbackDao;
 import com.learning.emsmybatisliquibase.dto.FeedbackResponseDto;
 import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
-import com.learning.emsmybatisliquibase.entity.FeedbackType;
+import com.learning.emsmybatisliquibase.entity.enums.FeedbackType;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.NotFoundException;
 import com.learning.emsmybatisliquibase.mapper.EmployeeMapper;

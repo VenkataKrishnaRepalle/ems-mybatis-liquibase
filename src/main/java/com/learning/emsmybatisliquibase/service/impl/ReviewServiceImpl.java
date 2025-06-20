@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.ReviewDao;
 import com.learning.emsmybatisliquibase.dao.ReviewTimelineDao;
 import com.learning.emsmybatisliquibase.entity.Review;
-import com.learning.emsmybatisliquibase.entity.ReviewStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;

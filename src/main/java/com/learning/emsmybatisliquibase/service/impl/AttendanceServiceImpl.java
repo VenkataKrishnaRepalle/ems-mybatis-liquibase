@@ -5,7 +5,7 @@ import com.learning.emsmybatisliquibase.dto.ApplyAttendanceDto;
 import com.learning.emsmybatisliquibase.dto.UpdateAttendanceDto;
 import com.learning.emsmybatisliquibase.dto.ViewEmployeeAttendanceDto;
 import com.learning.emsmybatisliquibase.entity.Attendance;
-import com.learning.emsmybatisliquibase.entity.AttendanceStatus;
+import com.learning.emsmybatisliquibase.entity.enums.AttendanceStatus;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;

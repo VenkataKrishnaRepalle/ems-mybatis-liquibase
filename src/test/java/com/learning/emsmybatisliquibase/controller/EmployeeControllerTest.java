@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.Gender;
+import com.learning.emsmybatisliquibase.entity.enums.Gender;
 import com.learning.emsmybatisliquibase.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

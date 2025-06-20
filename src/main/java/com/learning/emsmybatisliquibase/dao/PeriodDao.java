@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.entity.Period;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PeriodStatus;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.CertificationLevel;
+import com.learning.emsmybatisliquibase.entity.enums.CertificationLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

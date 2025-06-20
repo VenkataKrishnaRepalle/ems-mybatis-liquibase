@@ -1,7 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
 import com.learning.emsmybatisliquibase.entity.Period;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

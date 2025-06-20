@@ -1,9 +1,9 @@
 package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.dto.NotificationDto;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PeriodStatus;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

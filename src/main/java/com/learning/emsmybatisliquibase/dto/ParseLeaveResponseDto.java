@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.LeaveType;
+import com.learning.emsmybatisliquibase.entity.enums.LeaveType;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;

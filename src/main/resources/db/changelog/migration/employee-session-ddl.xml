@@ -12,6 +12,12 @@
             <column name="token" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
+            <column name="latitude" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="longitude" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
             <column name="browser_name" type="VARCHAR"/>
             <column name="os_name" type="VARCHAR"/>
             <column name="platform" type="VARCHAR"/>

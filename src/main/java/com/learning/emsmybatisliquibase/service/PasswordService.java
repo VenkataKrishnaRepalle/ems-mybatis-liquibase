@@ -14,7 +14,7 @@ public interface PasswordService {
 
     Password update(Password password);
 
-    SuccessResponseDto forgotPassword(UUID uuid, ForgotPasswordDto forgotPasswordDto);
+    SuccessResponseDto forgotPassword(ForgotPasswordDto forgotPasswordDto);
 
-    SuccessResponseDto resetPassword(UUID uuid, ResetPasswordDto resetPasswordDto);
+    SuccessResponseDto resetPassword(ResetPasswordDto resetPasswordDto);
 }

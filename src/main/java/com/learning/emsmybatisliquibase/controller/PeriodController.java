@@ -2,7 +2,7 @@ package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.Period;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PeriodStatus;
 import com.learning.emsmybatisliquibase.service.PeriodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

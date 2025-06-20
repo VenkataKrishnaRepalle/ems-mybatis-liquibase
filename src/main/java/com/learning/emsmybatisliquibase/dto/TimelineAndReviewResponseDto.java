@@ -1,9 +1,9 @@
 package com.learning.emsmybatisliquibase.dto;
 
 import com.learning.emsmybatisliquibase.entity.Review;
-import com.learning.emsmybatisliquibase.entity.ReviewStatus;
-import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewTimelineStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

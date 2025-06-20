@@ -20,14 +20,12 @@ public class PasswordController {
     private final PasswordService passwordService;
 
     @PostMapping("/forgotPassword")
-    public ResponseEntity<SuccessResponseDto> forgotPassword(@RequestParam(name = "employee_uuid") UUID uuid,
-                                                             @RequestBody @Valid ForgotPasswordDto forgotPasswordDto) {
-        return new ResponseEntity<>(passwordService.forgotPassword(uuid, forgotPasswordDto), HttpStatus.OK);
+    public ResponseEntity<SuccessResponseDto> forgotPassword(@RequestBody @Valid ForgotPasswordDto forgotPasswordDto) {
+        return new ResponseEntity<>(passwordService.forgotPassword(forgotPasswordDto), HttpStatus.OK);
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<SuccessResponseDto> resetPassword(@RequestParam(name = "employee_uuid") UUID uuid,
-                                                            @RequestBody @Valid ResetPasswordDto resetPasswordDto) {
-        return new ResponseEntity<>(passwordService.resetPassword(uuid, resetPasswordDto), HttpStatus.OK);
+    public ResponseEntity<SuccessResponseDto> resetPassword(@RequestBody @Valid ResetPasswordDto resetPasswordDto) {
+        return new ResponseEntity<>(passwordService.resetPassword(resetPasswordDto), HttpStatus.OK);
     }
 }

@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.controller;
 import com.learning.emsmybatisliquibase.dto.EmployeeCycleAndTimelineResponseDto;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PeriodStatus;
 import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

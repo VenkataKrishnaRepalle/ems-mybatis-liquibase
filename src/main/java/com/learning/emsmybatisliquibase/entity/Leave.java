@@ -1,5 +1,7 @@
 package com.learning.emsmybatisliquibase.entity;
 
+import com.learning.emsmybatisliquibase.entity.enums.LeaveStatus;
+import com.learning.emsmybatisliquibase.entity.enums.LeaveType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

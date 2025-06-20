@@ -1,10 +1,13 @@
 package com.learning.emsmybatisliquibase.entity;
 
+import com.learning.emsmybatisliquibase.entity.enums.OtpAuthStatus;
+import com.learning.emsmybatisliquibase.entity.enums.OtpAuthType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
@@ -15,11 +18,20 @@ import java.util.UUID;
 @Builder
 public class OtpAuth implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private UUID uuid;
 
     private UUID employeeUuid;
 
     private Long otp;
+
+    private OtpAuthStatus status;
+
+    private OtpAuthType type;
+
+    private Instant createdTime;
 
     private Instant updatedTime;
 }

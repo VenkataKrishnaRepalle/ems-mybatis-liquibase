@@ -1,5 +1,8 @@
 package com.learning.emsmybatisliquibase.entity;
 
+import com.learning.emsmybatisliquibase.entity.enums.ReviewRating;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.entity;
 
+import com.learning.emsmybatisliquibase.entity.enums.EducationDegree;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
 @Data

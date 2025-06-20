@@ -1,4 +1,4 @@
-package com.learning.emsmybatisliquibase.entity;
+package com.learning.emsmybatisliquibase.entity.enums;
 
 public enum WorkMode {
     WORK_FROM_HOME,

@@ -1,16 +1,22 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
+import com.learning.emsmybatisliquibase.dao.OtpDao;
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
 import com.learning.emsmybatisliquibase.dto.ForgotPasswordDto;
 import com.learning.emsmybatisliquibase.dto.PasswordDto;
 import com.learning.emsmybatisliquibase.dto.ResetPasswordDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
+import com.learning.emsmybatisliquibase.dto.pagination.RequestQuery;
 import com.learning.emsmybatisliquibase.entity.Employee;
+import com.learning.emsmybatisliquibase.entity.OtpAuth;
 import com.learning.emsmybatisliquibase.entity.Password;
-import com.learning.emsmybatisliquibase.entity.PasswordStatus;
+import com.learning.emsmybatisliquibase.entity.enums.OtpAuthStatus;
+import com.learning.emsmybatisliquibase.entity.enums.OtpAuthType;
+import com.learning.emsmybatisliquibase.entity.enums.PasswordStatus;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
+import com.learning.emsmybatisliquibase.service.OtpService;
 import com.learning.emsmybatisliquibase.service.PasswordService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static com.learning.emsmybatisliquibase.exception.errorcodes.EmployeeErrorCodes.*;
@@ -34,6 +41,8 @@ public class PasswordServiceImpl implements PasswordService {
     private final EmployeeDao employeeDao;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private final OtpService otpService;
 
     public Password getById(UUID uuid) {
         var password = passwordDao.getById(uuid);
@@ -98,12 +107,12 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Transactional
     @Override
-    public SuccessResponseDto forgotPassword(UUID uuid, ForgotPasswordDto forgotPasswordDto) {
+    public SuccessResponseDto forgotPassword(ForgotPasswordDto forgotPasswordDto) {
         var employee = getByEmail(forgotPasswordDto.getEmail());
-        if (!employee.getUuid().equals(uuid)) {
-            throw new InvalidInputException("INVALID_USER", "Invalid User");
-        }
-        var passwords = passwordDao.getByEmployeeUuidAndStatus(uuid, PasswordStatus.ACTIVE);
+
+        otpService.verifyOtp(employee.getUuid(), forgotPasswordDto.getOtp().trim(), OtpAuthType.FORGOT_PASSWORD);
+
+        var passwords = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(), PasswordStatus.ACTIVE);
         passwords.forEach(password -> {
             password.setStatus(PasswordStatus.EXPIRED);
             update(password);
@@ -112,20 +121,19 @@ public class PasswordServiceImpl implements PasswordService {
                 .password(forgotPasswordDto.getPassword())
                 .confirmPassword(forgotPasswordDto.getConfirmPassword())
                 .build());
+
         return SuccessResponseDto.builder()
                 .success(Boolean.TRUE)
                 .data(employee.getUuid().toString())
                 .build();
     }
 
+    @Transactional
     @Override
-    public SuccessResponseDto resetPassword(UUID uuid, ResetPasswordDto resetPasswordDto) {
-        var employee = getByEmail(resetPasswordDto.getEmail());
-        if (!employee.getUuid().equals(uuid)) {
-            throw new InvalidInputException("INVALID_USER", "Invalid User");
-        }
-        var passwords = passwordDao.getByEmployeeUuidAndStatus(uuid, PasswordStatus.ACTIVE);
-        if(!passwordEncoder.matches(resetPasswordDto.getOldPassword(), passwords.get(0).getPassword())) {
+    public SuccessResponseDto resetPassword(ResetPasswordDto resetPasswordDto) {
+        var employee = getByEmail(resetPasswordDto.getEmail().trim());
+        var passwords = passwordDao.getByEmployeeUuidAndStatus(employee.getUuid(), PasswordStatus.ACTIVE);
+        if (!passwordEncoder.matches(resetPasswordDto.getOldPassword(), passwords.get(0).getPassword())) {
             throw new InvalidInputException(PASSWORD_NOT_MATCHED.code(), "Entered Password in Incorrect");
         }
         passwords.forEach(password -> {

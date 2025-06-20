@@ -2,7 +2,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
 import com.learning.emsmybatisliquibase.entity.EmployeeRole;
-import com.learning.emsmybatisliquibase.entity.RoleType;
+import com.learning.emsmybatisliquibase.entity.enums.RoleType;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
 import com.learning.emsmybatisliquibase.service.EmployeeRoleService;

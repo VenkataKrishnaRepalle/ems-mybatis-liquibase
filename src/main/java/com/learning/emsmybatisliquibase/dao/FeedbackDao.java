@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.entity.Feedback;
-import com.learning.emsmybatisliquibase.entity.FeedbackType;
+import com.learning.emsmybatisliquibase.entity.enums.FeedbackType;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

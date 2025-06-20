@@ -1,7 +1,6 @@
 package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.entity.Leave;
-import com.learning.emsmybatisliquibase.entity.LeaveType;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

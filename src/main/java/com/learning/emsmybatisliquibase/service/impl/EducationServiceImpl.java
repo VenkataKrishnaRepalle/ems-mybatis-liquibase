@@ -2,7 +2,7 @@ package com.learning.emsmybatisliquibase.service.impl;
 
 import com.learning.emsmybatisliquibase.dao.EducationDao;
 import com.learning.emsmybatisliquibase.entity.Education;
-import com.learning.emsmybatisliquibase.entity.EducationDegree;
+import com.learning.emsmybatisliquibase.entity.enums.EducationDegree;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;

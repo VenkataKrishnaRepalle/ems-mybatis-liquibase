@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.service;
 import com.learning.emsmybatisliquibase.dto.FeedbackResponseDto;
 import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
-import com.learning.emsmybatisliquibase.entity.FeedbackType;
+import com.learning.emsmybatisliquibase.entity.enums.FeedbackType;
 
 import java.util.List;
 import java.util.UUID;

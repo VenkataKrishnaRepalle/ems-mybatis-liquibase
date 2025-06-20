@@ -1,6 +1,5 @@
 package com.learning.emsmybatisliquibase.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.learning.emsmybatisliquibase.dao.EmployeeSessionDao;
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
 import com.learning.emsmybatisliquibase.dto.JwtAuthResponseDto;
@@ -8,6 +7,9 @@ import com.learning.emsmybatisliquibase.dto.LoginDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.dto.pagination.RequestQuery;
 import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.entity.enums.PasswordStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ProfileStatus;
+import com.learning.emsmybatisliquibase.entity.enums.RoleType;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
@@ -31,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -68,8 +71,12 @@ public class AuthServiceImpl implements AuthService {
     @Value("${maximum.login.count}")
     Integer MAX_LOGIN_COUNT;
 
+    @Value("${api.location.key}")
+    String key;
+
     @Override
-    public JwtAuthResponseDto login(LoginDto loginDto, HttpServletRequest request) throws JsonProcessingException {
+    @Transactional
+    public JwtAuthResponseDto login(LoginDto loginDto, HttpServletRequest request) {
         var employee = employeeService.getByEmail(loginDto.getEmail());
         var profile = profileService.getByEmployeeUuid(employee.getUuid());
         if (profile.getProfileStatus() == ProfileStatus.PENDING) {
@@ -100,7 +107,8 @@ public class AuthServiceImpl implements AuthService {
 
         var sessions = employeeSessionDao.getByEmployeeUuid(employee.getUuid());
         if (sessions.size() >= MAX_LOGIN_COUNT) {
-            throw new FoundException("MAX_LOGIN_ATTEMPT_REACHED", "Max login attempts of " + MAX_LOGIN_COUNT + " reached to your account");
+            throw new FoundException("MAX_LOGIN_ATTEMPT_REACHED", "Max login attempts of " + MAX_LOGIN_COUNT +
+                    " reached to your account");
         }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -112,6 +120,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtTokenProvider.generateToken(authentication);
 
         saveSession(request, employee, loginDto.getRequestQuery(), token);
+
         var roles = employeeRoleService.getRolesByEmployeeUuid(employee.getUuid())
                 .stream()
                 .map(RoleType::toString)
@@ -125,28 +134,33 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private void saveSession(HttpServletRequest request, Employee employee, RequestQuery requestQuery, String token) throws JsonProcessingException {
+    private void saveSession(HttpServletRequest request, Employee employee, RequestQuery requestQuery, String token) {
         var userAgentString = request.getHeader("User-Agent");
         var userAgent = UserAgent.parseUserAgentString(userAgentString);
         var browser = userAgent.getBrowser();
         var os = userAgent.getOperatingSystem();
         var geoLocations = UtilityService.getLocationInfo(requestQuery);
-        var location = getLocation(geoLocations.get("longitude"), geoLocations.get("latitude"));
+        var longitude = geoLocations.get("longitude");
+        var latitude = geoLocations.get("latitude");
+        var location = getLocation(longitude, latitude);
         var platform = UtilityService.getPlatform(requestQuery);
         EmployeeSession session = EmployeeSession.builder()
                 .uuid(UUID.randomUUID())
                 .employeeUuid(employee.getUuid())
                 .token(token)
+                .longitude(longitude)
+                .latitude(latitude)
                 .browserName(browser.getName())
                 .platform(platform)
                 .osName(os.getName())
                 .isActive(true)
-                .location(location.isEmpty() ? null : location.get("display_name"))
+                .location(UtilityService.extractAddressInfo(location))
                 .loginTime(Instant.now())
                 .build();
         try {
             if (0 == employeeSessionDao.insert(session)) {
-                throw new IntegrityException("EMPLOYEE_SESSION_NOT_INSERTED", "Employee Session not created for employee : " + employee.getUuid());
+                throw new IntegrityException("EMPLOYEE_SESSION_NOT_INSERTED",
+                        "Employee Session not created for employee : " + employee.getUuid());
             }
         } catch (DataIntegrityViolationException exception) {
             throw new IntegrityException("EMPLOYEE_SESSION_NOT_INSERTED", exception.getCause().getMessage());
@@ -197,17 +211,15 @@ public class AuthServiceImpl implements AuthService {
         return employee.getManagerUuid().equals(currentUserId);
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, String> getLocation(String longitude, String latitude) {
+    private RequestQuery getLocation(String longitude, String latitude) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("")
-                        .queryParam("lat", latitude)
-                        .queryParam("lon", longitude)
-                        .queryParam("format", "json")
+                        .queryParam("q", latitude + "+" + longitude)
+                        .queryParam("key", key)
                         .build())
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(RequestQuery.class)
                 .block();
     }
 

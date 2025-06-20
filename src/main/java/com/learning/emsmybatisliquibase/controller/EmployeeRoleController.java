@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.controller;
 
 import com.learning.emsmybatisliquibase.entity.EmployeeRole;
-import com.learning.emsmybatisliquibase.entity.RoleType;
+import com.learning.emsmybatisliquibase.entity.enums.RoleType;
 import com.learning.emsmybatisliquibase.service.EmployeeRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

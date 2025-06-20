@@ -2,7 +2,7 @@ package com.learning.emsmybatisliquibase.service;
 
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.entity.Period;
-import com.learning.emsmybatisliquibase.entity.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PeriodStatus;
 
 import java.util.UUID;
 

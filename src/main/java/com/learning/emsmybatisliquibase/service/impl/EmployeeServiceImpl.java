@@ -3,6 +3,9 @@ package com.learning.emsmybatisliquibase.service.impl;
 import com.learning.emsmybatisliquibase.dao.*;
 import com.learning.emsmybatisliquibase.dto.*;
 import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.entity.enums.JobTitleType;
+import com.learning.emsmybatisliquibase.entity.enums.PeriodStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ProfileStatus;
 import com.learning.emsmybatisliquibase.exception.FoundException;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
 import com.learning.emsmybatisliquibase.exception.InvalidInputException;
@@ -49,7 +52,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final NotificationService notificationService;
 
     private final Random random = new Random();
-
 
     @Override
     @Transactional

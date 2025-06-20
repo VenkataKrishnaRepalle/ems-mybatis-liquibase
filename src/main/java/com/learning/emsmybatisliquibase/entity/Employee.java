@@ -1,6 +1,7 @@
 package com.learning.emsmybatisliquibase.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.learning.emsmybatisliquibase.entity.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

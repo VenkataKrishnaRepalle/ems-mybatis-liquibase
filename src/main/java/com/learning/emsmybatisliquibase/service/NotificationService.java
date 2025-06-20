@@ -2,7 +2,7 @@ package com.learning.emsmybatisliquibase.service;
 
 import com.learning.emsmybatisliquibase.dto.NotificationDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
 
 import java.util.List;
 

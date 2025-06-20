@@ -1,6 +1,6 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.FeedbackType;
+import com.learning.emsmybatisliquibase.entity.enums.FeedbackType;
 import lombok.Data;
 
 import java.util.UUID;

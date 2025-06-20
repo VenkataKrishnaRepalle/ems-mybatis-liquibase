@@ -1,4 +1,4 @@
-package com.learning.emsmybatisliquibase.entity;
+package com.learning.emsmybatisliquibase.entity.enums;
 
 public enum PasswordStatus {
     ACTIVE,

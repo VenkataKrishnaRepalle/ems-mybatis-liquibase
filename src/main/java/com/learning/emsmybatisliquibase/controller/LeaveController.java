@@ -7,7 +7,7 @@ import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.dto.UpdateLeaveByManagerDto;
 import com.learning.emsmybatisliquibase.dto.ViewEmployeeLeavesDto;
 import com.learning.emsmybatisliquibase.entity.Leave;
-import com.learning.emsmybatisliquibase.entity.LeaveStatus;
+import com.learning.emsmybatisliquibase.entity.enums.LeaveStatus;
 import com.learning.emsmybatisliquibase.service.LeaveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

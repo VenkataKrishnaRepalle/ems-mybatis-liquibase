@@ -1,5 +1,6 @@
 package com.learning.emsmybatisliquibase.entity;
 
+import com.learning.emsmybatisliquibase.entity.enums.FeedbackType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

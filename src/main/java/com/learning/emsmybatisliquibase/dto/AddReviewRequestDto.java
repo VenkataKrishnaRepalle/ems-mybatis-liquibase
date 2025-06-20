@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.ReviewStatus;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;

@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.controller;
 import com.learning.emsmybatisliquibase.dto.FeedbackResponseDto;
 import com.learning.emsmybatisliquibase.dto.RequestFeedbackDto;
 import com.learning.emsmybatisliquibase.entity.Feedback;
-import com.learning.emsmybatisliquibase.entity.FeedbackType;
+import com.learning.emsmybatisliquibase.entity.enums.FeedbackType;
 import com.learning.emsmybatisliquibase.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

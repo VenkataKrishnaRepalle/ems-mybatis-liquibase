@@ -11,6 +11,8 @@ public class ForgotPasswordDto {
 
     private String email;
 
+    private String otp;
+
     private String password;
 
     private String confirmPassword;

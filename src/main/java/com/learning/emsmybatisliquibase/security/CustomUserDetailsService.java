@@ -3,7 +3,7 @@ package com.learning.emsmybatisliquibase.security;
 import com.learning.emsmybatisliquibase.dao.EmployeeDao;
 import com.learning.emsmybatisliquibase.dao.EmployeeRoleDao;
 import com.learning.emsmybatisliquibase.dao.PasswordDao;
-import com.learning.emsmybatisliquibase.entity.PasswordStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PasswordStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -4,7 +4,7 @@ import com.learning.emsmybatisliquibase.dto.EmployeeDetailsDto;
 import com.learning.emsmybatisliquibase.dto.EmployeePaginationResponseDto;
 import com.learning.emsmybatisliquibase.dto.EmployeeResponseDto;
 import com.learning.emsmybatisliquibase.entity.Employee;
-import com.learning.emsmybatisliquibase.entity.ProfileStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ProfileStatus;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;

@@ -71,3 +71,8 @@ podman volume create postgres_data
 ```bash
 podman run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=root -e POSTGRES_DB=ems -d -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres 
 ```
+
+4. Creating Multiple Databases
+```bash
+podman run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=root -e POSTGRES_MULTIPLE_DATABASES="ems,kyc" -d -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres 
+```

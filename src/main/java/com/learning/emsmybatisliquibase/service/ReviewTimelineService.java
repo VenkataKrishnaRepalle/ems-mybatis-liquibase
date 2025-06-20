@@ -4,10 +4,9 @@ package com.learning.emsmybatisliquibase.service;
 import com.learning.emsmybatisliquibase.dto.FullEmployeePeriodDto;
 import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.dto.TimelineAndReviewResponseDto;
-import com.learning.emsmybatisliquibase.entity.Review;
 import com.learning.emsmybatisliquibase.entity.ReviewTimeline;
-import com.learning.emsmybatisliquibase.entity.ReviewType;
-import com.learning.emsmybatisliquibase.entity.ReviewTimelineStatus;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewType;
+import com.learning.emsmybatisliquibase.entity.enums.ReviewTimelineStatus;
 
 import java.util.List;
 import java.util.UUID;

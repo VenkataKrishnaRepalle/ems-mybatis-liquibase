@@ -11,7 +11,7 @@ public class CorsConfig{
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/auth/**")
+                registry.addMapping("/api/auth/**, /api/otp/**")
                         .allowedOrigins();
 
                 registry.addMapping("/api/**")

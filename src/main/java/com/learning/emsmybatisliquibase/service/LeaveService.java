@@ -7,7 +7,7 @@ import com.learning.emsmybatisliquibase.dto.SuccessResponseDto;
 import com.learning.emsmybatisliquibase.dto.UpdateLeaveByManagerDto;
 import com.learning.emsmybatisliquibase.dto.ViewEmployeeLeavesDto;
 import com.learning.emsmybatisliquibase.entity.Leave;
-import com.learning.emsmybatisliquibase.entity.LeaveStatus;
+import com.learning.emsmybatisliquibase.entity.enums.LeaveStatus;
 
 import java.util.List;
 import java.util.UUID;

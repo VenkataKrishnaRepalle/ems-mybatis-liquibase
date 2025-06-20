@@ -1,12 +1,11 @@
 package com.learning.emsmybatisliquibase.scheduled;
 
 import com.learning.emsmybatisliquibase.dao.*;
+import com.learning.emsmybatisliquibase.dto.pagination.RequestQuery;
 import com.learning.emsmybatisliquibase.entity.*;
+import com.learning.emsmybatisliquibase.entity.enums.*;
 import com.learning.emsmybatisliquibase.exception.IntegrityException;
-import com.learning.emsmybatisliquibase.service.PeriodService;
-import com.learning.emsmybatisliquibase.service.EmployeePeriodService;
-import com.learning.emsmybatisliquibase.service.NotificationService;
-import com.learning.emsmybatisliquibase.service.ReviewTimelineService;
+import com.learning.emsmybatisliquibase.service.*;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,6 +37,10 @@ public class ScheduledTasks {
     private final NotificationService notificationService;
 
     private final ReviewTimelineDao reviewTimelineDao;
+
+    private final OtpDao otpDao;
+
+    private final OtpService otpService;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void updateProfileStatusLeavingDate() {
@@ -78,6 +81,7 @@ public class ScheduledTasks {
         var oldPeriod = periodDao.getByStatus(PeriodStatus.STARTED);
         periodService.updateStatus(oldPeriod.getUuid(), PeriodStatus.COMPLETED);
     }
+
     @Scheduled(cron = "0 0 0 1 1 *")
     public void startPeriod1() {
         var oldPeriod = periodDao.getByStatus(PeriodStatus.STARTED);
@@ -91,7 +95,7 @@ public class ScheduledTasks {
                         PeriodStatus.COMPLETED));
 
         var period = periodDao.getByStatus(PeriodStatus.SCHEDULED);
-        if(period != null) {
+        if (period != null) {
             period.setStatus(PeriodStatus.STARTED);
             period.setUpdatedTime(Instant.now());
             try {
@@ -159,6 +163,28 @@ public class ScheduledTasks {
         if (reviewType != null) {
             var notifications = reviewTimelineDao.getTimelineIdsByReviewType(reviewType);
             notificationService.sendNotificationBeforeStart(notifications, reviewType);
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void deleteOldOtp() {
+        var requestQuery = new RequestQuery();
+        requestQuery.setProperty("types", List.of(OtpAuthType.values()));
+        requestQuery.setProperty("statuses", List.of(OtpAuthStatus.values()));
+
+        var existingOtpList = otpDao.get(requestQuery);
+        int count = 0;
+        for (var otp : existingOtpList) {
+            otpService.delete(otp.getUuid());
+            count++;
+            if (count % 100 == 0) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
         }
     }
 }

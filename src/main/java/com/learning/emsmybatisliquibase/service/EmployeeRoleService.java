@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.service;
 
 import com.learning.emsmybatisliquibase.entity.EmployeeRole;
-import com.learning.emsmybatisliquibase.entity.RoleType;
+import com.learning.emsmybatisliquibase.entity.enums.RoleType;
 
 import java.util.List;
 import java.util.UUID;

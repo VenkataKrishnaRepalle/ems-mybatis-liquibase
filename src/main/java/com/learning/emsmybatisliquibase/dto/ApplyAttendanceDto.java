@@ -1,8 +1,8 @@
 package com.learning.emsmybatisliquibase.dto;
 
-import com.learning.emsmybatisliquibase.entity.AttendanceStatus;
-import com.learning.emsmybatisliquibase.entity.AttendanceType;
-import com.learning.emsmybatisliquibase.entity.WorkMode;
+import com.learning.emsmybatisliquibase.entity.enums.AttendanceStatus;
+import com.learning.emsmybatisliquibase.entity.enums.AttendanceType;
+import com.learning.emsmybatisliquibase.entity.enums.WorkMode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

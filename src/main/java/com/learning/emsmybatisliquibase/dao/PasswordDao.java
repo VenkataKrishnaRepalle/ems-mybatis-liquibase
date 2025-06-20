@@ -1,7 +1,7 @@
 package com.learning.emsmybatisliquibase.dao;
 
 import com.learning.emsmybatisliquibase.entity.Password;
-import com.learning.emsmybatisliquibase.entity.PasswordStatus;
+import com.learning.emsmybatisliquibase.entity.enums.PasswordStatus;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.UUID;
 
-@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final AuthService authService;
@@ -32,7 +32,7 @@ public class AuthController {
         return new ResponseEntity<>(authService.validateToken(employeeId, token), HttpStatus.OK);
     }
 
-    @PostMapping("/verifyEmail")
+    @PostMapping("/verify-email")
     public ResponseEntity<SuccessResponseDto> verifyEmail(@RequestParam(name = "email") String email) {
         return new ResponseEntity<>(authService.verifyEmail(email), HttpStatus.OK);
     }
